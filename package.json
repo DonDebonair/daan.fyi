@@ -1,0 +1,35 @@
+{
+    "name": "with-typescript",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "next",
+        "build": "next build",
+        "start": "next start",
+        "type-check": "tsc",
+        "lint": "eslint .",
+        "prettier": "prettier --write .",
+        "prettier:check": "prettier --check ."
+    },
+    "dependencies": {
+        "@chakra-ui/react": "^1.6.3",
+        "@emotion/react": "^11",
+        "@emotion/styled": "^11",
+        "framer-motion": "^4",
+        "next": "^11.0.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2"
+    },
+    "devDependencies": {
+        "@types/node": "^12.12.21",
+        "@types/react": "^17.0.11",
+        "@types/react-dom": "^17.0.8",
+        "@typescript-eslint/eslint-plugin": "^4.28.0",
+        "@typescript-eslint/parser": "^4.28.0",
+        "eslint": "^7.29.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-react": "^7.24.0",
+        "prettier": "2.3.2",
+        "typescript": "^4"
+    },
+    "license": "MIT"
+}
