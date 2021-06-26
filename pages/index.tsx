@@ -1,9 +1,12 @@
 import Link from 'next/link';
-import Layout from '../components/Layout';
 import { Heading } from '@chakra-ui/react';
+import Head from 'next/head';
 
 const IndexPage = () => (
-    <Layout title="Home | Next.js + TypeScript Example">
+    <>
+        <Head>
+            <title>Home | Next.js + TypeScript Example</title>
+        </Head>
         <Heading
             as="h1"
             size="xl"
@@ -18,7 +21,6 @@ const IndexPage = () => (
                 <a>About</a>
             </Link>
         </p>
-    </Layout>
+    </>
 );
-
 export default IndexPage;
