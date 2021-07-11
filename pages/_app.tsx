@@ -1,14 +1,22 @@
-import { ChakraProvider, theme } from '@chakra-ui/react';
-import Layout from '@/components/Layout';
+import { ChakraProvider } from '@chakra-ui/react';
+import BaseLayout from '../layouts/BaseLayout';
+import theme from '../styles/theme';
+import '@fontsource/merriweather/400.css';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/400-italic.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/raleway/700-italic.css';
+import React, { ReactNode } from 'react';
+import { AppProps } from 'next/app';
 
-function MyApp({ Component, pageProps }) {
+const MyApp = ({ Component, pageProps }: AppProps): ReactNode => {
     return (
-        <ChakraProvider theme={theme}>
-            <Layout>
+        <ChakraProvider resetCSS theme={theme}>
+            <BaseLayout>
                 <Component {...pageProps} />
-            </Layout>
+            </BaseLayout>
         </ChakraProvider>
     );
-}
+};
 
 export default MyApp;

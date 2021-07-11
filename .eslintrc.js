@@ -6,6 +6,7 @@ module.exports = {
     env: {
         browser: true,
         es2021: true,
+        node: true,
     },
     extends: [
         'eslint:recommended',
@@ -25,5 +26,11 @@ module.exports = {
     rules: {
         quotes: [ERROR, 'single', { avoidEscape: true, allowTemplateLiterals: true }],
         'jsx-quotes': [ERROR, 'prefer-double'],
+        'react/display-name': [0],
+    },
+    settings: {
+        react: {
+            version: 'detect',
+        },
     },
 };

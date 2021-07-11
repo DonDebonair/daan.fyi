@@ -1,11 +1,9 @@
 import Link from 'next/link';
-import Head from 'next/head';
+import DefaultLayout from '@/layouts/DefaultLayout';
+import React, { ReactNode } from 'react';
 
-const AboutPage = () => (
-    <>
-        <Head>
-            <title>About | Next.js + TypeScript Example</title>
-        </Head>
+const AboutPage = (): ReactNode => (
+    <DefaultLayout title="About | Daan Debie">
         <h1>About</h1>
         <p>This is the about page</p>
         <p>
@@ -13,7 +11,7 @@ const AboutPage = () => (
                 <a>Go home</a>
             </Link>
         </p>
-    </>
+    </DefaultLayout>
 );
 
 export default AboutPage;
