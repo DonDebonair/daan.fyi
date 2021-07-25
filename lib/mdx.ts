@@ -8,6 +8,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import remarkCodeTitles from 'remark-code-titles';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import readingTime from 'reading-time';
+import { parseISO } from 'date-fns';
 
 const CONTENT_DIR = 'content';
 
@@ -56,15 +57,22 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
 export const getPosts = (type: string): string[] =>
     fs.readdirSync(path.join(root, CONTENT_DIR, type));
 
-export const getAllPostsFrontMatter = (type: string): Partial<FrontMatter>[] => {
+export const getAllPostsFrontMatter = (type: string, limit?: number): Partial<FrontMatter>[] => {
     const posts = getPosts(type);
-    return posts.map((fileName) => {
-        const slug = fileName.replace('.mdx', '');
-        const { data } = getPost(type, slug);
-        return {
-            slug: slug,
-            title: data.title,
-            publishedAt: data.publishedAt,
-        };
-    });
+    const sortedFrontmatter = posts
+        .map((fileName) => {
+            const slug = fileName.replace('.mdx', '');
+            const { data } = getPost(type, slug);
+            return {
+                slug: slug,
+                title: data.title,
+                publishedAt: data.publishedAt,
+            };
+        })
+        .sort((a, b) => parseISO(b.publishedAt).getTime() - parseISO(a.publishedAt).getTime());
+    if (limit) {
+        return sortedFrontmatter.slice(0, limit);
+    } else {
+        return sortedFrontmatter;
+    }
 };

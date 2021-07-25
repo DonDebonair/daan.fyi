@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 import DefaultLayout from '@/layouts/DefaultLayout';
 import { GetStaticProps } from 'next';
 import { FrontMatter, getAllPostsFrontMatter } from '@/lib/mdx';
+import { format, parseISO } from 'date-fns';
 
 type BlogOverviewProps = {
     allPosts: Partial<FrontMatter>[];
@@ -23,7 +24,7 @@ const BlogOverviewPage = ({ allPosts }: BlogOverviewProps): ReactNode => (
                             {frontMatter.title}
                         </Heading>
                     </CustomLink>
-                    <Text>{frontMatter.publishedAt}</Text>
+                    <Text>{format(parseISO(frontMatter.publishedAt), 'MMMM dd, yyyy')}</Text>
                 </Flex>
             );
         })}

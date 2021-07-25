@@ -2,9 +2,10 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { getAndSerializePost, getPosts, PostData } from '@/lib/mdx';
 import { MDXComponents } from '@/components/MDXComponents';
 import { MDXRemote } from 'next-mdx-remote';
-import { Flex, Heading, Text } from '@chakra-ui/react';
+import { Avatar, Flex, Heading, Text } from '@chakra-ui/react';
 import DefaultLayout from '@/layouts/DefaultLayout';
 import React, { ReactNode } from 'react';
+import { format, parseISO } from 'date-fns';
 
 const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
     return (
@@ -25,10 +26,11 @@ const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
                 w="100%"
                 mb={4}
             >
-                <Flex align="center">
+                <Flex direction="row">
+                    <Avatar src="/images/daan.png" size="xs" name="Daan Debie" mr={2} />
                     <Text fontSize="md">
                         {'Daan Debie / '}
-                        {frontMatter.publishedAt}
+                        {format(parseISO(frontMatter.publishedAt), 'MMMM dd, yyyy')}
                     </Text>
                 </Flex>
                 <Text fontSize="md" color="gray.500" minWidth="100px" mt={[2, 0]}>

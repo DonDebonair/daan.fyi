@@ -27,6 +27,7 @@ module.exports = {
         quotes: [ERROR, 'single', { avoidEscape: true, allowTemplateLiterals: true }],
         'jsx-quotes': [ERROR, 'prefer-double'],
         'react/display-name': [0],
+        '@typescript-eslint/ban-ts-comment': [0],
     },
     settings: {
         react: {

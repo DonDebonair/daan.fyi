@@ -10,7 +10,7 @@ type LayoutProps = {
 const BaseLayout = ({ children }: LayoutProps): ReactElement => (
     <Flex direction="column" minH="100vh">
         <NavBar />
-        <Flex as="main" justifyContent="center" flexDirection="column">
+        <Flex as="main" justify="center" direction="column">
             {children}
         </Flex>
         <Spacer />
