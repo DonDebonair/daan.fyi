@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, Text, useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
-import React, { ElementType, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import CustomLink, { AccessibleLinkProps } from '@/components/CustomLink';
 
 type MenuItemProps = AccessibleLinkProps & {
@@ -19,7 +19,7 @@ const MenuItem = ({ isLast, href, children, ...rest }: MenuItemProps) => (
     </CustomLink>
 );
 
-const NavBar: ElementType = () => {
+const NavBar = (): ReactElement => {
     const [show, setShow] = useState(false);
     const toggleMenu = () => setShow(!show);
     const { colorMode, toggleColorMode } = useColorMode();

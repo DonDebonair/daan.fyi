@@ -1,10 +1,10 @@
 import { Link as ChakraLink, LinkProps as ChakraLinkProps } from '@chakra-ui/layout';
 import Link, { LinkProps } from 'next/link';
-import React, { ElementType } from 'react';
+import React, { ReactElement } from 'react';
 
 export type AccessibleLinkProps = LinkProps & ChakraLinkProps;
 
-const CustomLink: ElementType = ({ href, children, ...rest }: AccessibleLinkProps) => {
+const CustomLink = ({ href, children, ...rest }: AccessibleLinkProps): ReactElement => {
     const hrefInternal = href.startsWith('/') || href.startsWith('#');
     if (hrefInternal) {
         return (

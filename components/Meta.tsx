@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { baseUrl } from '@/lib/config';
-import React, { ElementType } from 'react';
+import React, { ReactElement } from 'react';
 
 export type MetaProps = {
     title?: string;
@@ -18,7 +18,7 @@ const defaultMeta: MetaProps = {
     type: 'website',
 };
 
-const Meta: ElementType = (metaProps: MetaProps) => {
+const Meta = (metaProps: MetaProps): ReactElement => {
     const router = useRouter();
     const meta = {
         ...defaultMeta,

@@ -1,5 +1,5 @@
 import Meta, { MetaProps } from '@/components/Meta';
-import React, { ElementType, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { As, Flex } from '@chakra-ui/react';
 
 type DefaultLayoutProps = MetaProps & {
@@ -7,7 +7,7 @@ type DefaultLayoutProps = MetaProps & {
     as?: As;
 };
 
-const DefaultLayout: ElementType = ({ children, as, ...meta }: DefaultLayoutProps) => {
+const DefaultLayout = ({ children, as, ...meta }: DefaultLayoutProps): ReactNode => {
     return (
         <>
             <Meta {...meta} />
