@@ -15,12 +15,12 @@ const BlogOverviewPage = ({ allPosts }: BlogOverviewProps): ReactNode => (
         <Heading as="h1" size="2xl">
             Blog
         </Heading>
-        <Text fontSize="md">These are some of my writings</Text>
+        <Text fontSize="lg">These are some of my writings</Text>
         {allPosts.map((frontMatter) => {
             return (
                 <Flex key={frontMatter.slug} direction="column">
                     <CustomLink href={`/blog/${frontMatter.slug}`}>
-                        <Heading as="h3" size="sm" mb={2}>
+                        <Heading as="h2" size="md" mb={2}>
                             {frontMatter.title}
                         </Heading>
                     </CustomLink>
