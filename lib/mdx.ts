@@ -6,9 +6,13 @@ import mdxPrism from 'mdx-prism';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import remarkCodeTitles from 'remark-code-titles';
+import remarkCapitalize from 'remark-capitalize';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import readingTime from 'reading-time';
 import { parseISO } from 'date-fns';
+import makeTitle from 'title';
+import remarkTextr from 'remark-textr';
+import typographicBase from 'typographic-base';
 
 const CONTENT_DIR = 'content';
 
@@ -35,9 +39,14 @@ const getPost = (type: string, slug: string): matter.GrayMatterFile<string> => {
 
 export const getAndSerializePost = async (type: string, slug: string): Promise<PostData> => {
     const { data, content } = getPost(type, slug);
+    const { title, publishedAt, ...rest } = data;
     const mdxSource = await serialize(content, {
         mdxOptions: {
-            remarkPlugins: [remarkCodeTitles],
+            remarkPlugins: [
+                remarkCodeTitles,
+                remarkCapitalize,
+                [remarkTextr, { plugins: ['typographic-base'] }],
+            ],
             rehypePlugins: [mdxPrism, rehypeSlug, rehypeAutolinkHeadings],
         },
     });
@@ -46,10 +55,10 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
         frontMatter: {
             wordCount: content.split(/\s+/gu).length,
             slug: slug,
-            title: data.title,
-            publishedAt: data.publishedAt,
+            title: makeTitle(title),
+            publishedAt: publishedAt,
             readingTime: readingTime(content).text,
-            ...data,
+            ...rest,
         },
     };
 };
@@ -65,7 +74,7 @@ export const getAllPostsFrontMatter = (type: string, limit?: number): Partial<Fr
             const { data } = getPost(type, slug);
             return {
                 slug: slug,
-                title: data.title,
+                title: makeTitle(data.title),
                 publishedAt: data.publishedAt,
             };
         })

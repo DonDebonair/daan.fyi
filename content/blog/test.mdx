@@ -29,9 +29,15 @@ Enable typographer option to see result.
 
 test.. test... test..... test?..... test!....
 
-!!!!!! ???? ,, -- ---
+!!!!!! ???? -- -
 
-"Smartypants, double quotes" and 'single quotes'
+"Beautiful double quotes"
+
+arrow -> right
+
+left <- arrow
+
+math: 3 x 4 = 12
 
 ## Emphasis
 
@@ -50,23 +56,26 @@ _This is italic text_
 > Blockquotes can also be nested...
 > ...by using additional greater-than signs right next to each other...
 > ...or with spaces between arrows.
+>
+> _-- Tony Stark_
 
 ## Lists
 
 Unordered
 
--   Create a list by starting a line with `+`, `-`, or `*`
--   Sub-lists are made by indenting 2 spaces:
+- Create a list by starting a line with `+`, `-`, or `*`
+- Sub-lists are made by indenting 2 spaces:
+  - sub-list item 1
+  - sub-list item 2
+* Marker character change forces new list start:
 
-*   Marker character change forces new list start:
+- Ac tristique libero volutpat at
 
--   Ac tristique libero volutpat at
+* Facilisis in pretium nisl aliquet
 
-*   Facilisis in pretium nisl aliquet
+- Nulla volutpat aliquam velit
 
--   Nulla volutpat aliquam velit
-
-*   Very easy!
+* Very easy!
 
 Ordered
 
@@ -81,6 +90,12 @@ Start numbering with offset:
 
 57. foo
 1. bar
+
+### Task lists
+
+- [x] Write the press release
+- [ ] Update the website
+- [ ] Contact the media
 
 ## Code
 
@@ -101,7 +116,7 @@ Sample text here...
 
 Syntax highlighting
 
-```js{5,6,7}:components/foo.js
+```js{5,6,9-13}:components/foo.js
 import React from 'react';
 
 export default (frontMatter) => {

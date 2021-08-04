@@ -1,6 +1,6 @@
 const fonts = {
-    heading: 'Merriweather',
-    body: 'Raleway',
+    heading: 'Raleway',
+    body: 'Quicksand',
 };
 
 export default fonts;

@@ -14,7 +14,7 @@ const AboutPage = (): ReactNode => (
             working on things that matter, that I love the most.
         </Text>
         <Text fontSize="lg">
-            I found an amazing challenge at{' '}
+            I found an amazing challenge at the exciting startup{' '}
             <Link href="https://source.ag" isExternal>
                 Source.ag
             </Link>{' '}
@@ -26,9 +26,9 @@ const AboutPage = (): ReactNode => (
             <Link href="https://www.instagram.com/p/BdYpuOCnX9f/" isExternal>
                 Maine Coon
             </Link>{' '}
-            and an energetic Golden Retriever pup. I really love long walks on the beach. But I‘m
-            also very happy staying indoors reading books, watching movies and tv-shows and playing
-            games.
+            and an adorable and slightly energetic Golden Retriever pup. I really do love long walks
+            on the beach. But I‘m also very happy staying indoors reading books, watching movies and
+            tv-shows and playing games.
         </Text>
 
         <Heading as="h2" size="xl">

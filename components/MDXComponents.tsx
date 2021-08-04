@@ -16,7 +16,9 @@ import {
     Tr,
     UnorderedList,
     useColorModeValue,
+    chakra,
 } from '@chakra-ui/react';
+import { HTMLChakraProps } from '@chakra-ui/system';
 import CustomLink from '@/components/CustomLink';
 import React, { ReactNode } from 'react';
 import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/types/table';
@@ -30,6 +32,28 @@ const InlineCode = (props) => {
     const colorScheme = useColorModeValue('gray', 'pink');
     return <Code colorScheme={colorScheme} fontSize="md" {...props} />;
 };
+
+const Blockquote = (props: HTMLChakraProps<'blockquote'>) => (
+    <chakra.blockquote
+        p={6}
+        position="relative"
+        _before={{
+            content: "'“'",
+            position: 'absolute',
+            left: 1,
+            top: 3,
+            fontSize: '4xl',
+        }}
+        _after={{
+            content: "'”'",
+            position: 'absolute',
+            right: 1,
+            bottom: 3,
+            fontSize: '4xl',
+        }}
+        {...props}
+    />
+);
 
 const H = (props: HeadingProps) => (
     <Heading
@@ -67,7 +91,7 @@ export const MDXComponents = {
     h2: (props: HeadingProps): ReactNode => <H as="h2" size="xl" {...props} />,
     h3: (props: HeadingProps): ReactNode => <H as="h3" size="lg" {...props} />,
     h4: (props: HeadingProps): ReactNode => <H as="h4" size="md" {...props} />,
-    p: (props): ReactNode => <Text as="p" {...props} />,
+    p: (props): ReactNode => <Text as="p" fontSize="lg" {...props} />,
     a: (props): ReactNode => <CustomLink {...props} />,
     ul: (props): ReactNode => <UnorderedList pl={4} {...props} />,
     ol: (props): ReactNode => <OrderedList pl={4} {...props} />,
@@ -86,4 +110,5 @@ export const MDXComponents = {
     caption: (props): ReactNode => <TableCaption {...props} />,
     hr: Hr,
     inlineCode: (props): ReactNode => <InlineCode {...props} />,
+    blockquote: Blockquote,
 };

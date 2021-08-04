@@ -16,7 +16,7 @@
         "@chakra-ui/react": "^1.6.3",
         "@emotion/react": "^11",
         "@emotion/styled": "^11",
-        "@fontsource/merriweather": "^4.5.0",
+        "@fontsource/quicksand": "^4.5.1",
         "@fontsource/raleway": "^4.5.0",
         "add": "^2.0.6",
         "date-fns": "^2.23.0",
@@ -33,7 +33,11 @@
         "rehype": "^11.0.0",
         "rehype-autolink-headings": "^5.1.0",
         "rehype-slug": "^4.0.1",
+        "remark-capitalize": "^1.1.0",
         "remark-code-titles": "^0.1.2",
+        "remark-textr": "4.0.0",
+        "title": "^3.4.3",
+        "typographic-base": "^1.0.4",
         "yarn": "^1.22.10"
     },
     "devDependencies": {
