@@ -95,7 +95,7 @@ export const MDXComponents = {
     a: (props): ReactNode => <CustomLink {...props} />,
     ul: (props): ReactNode => <UnorderedList pl={4} {...props} />,
     ol: (props): ReactNode => <OrderedList pl={4} {...props} />,
-    li: (props): ReactNode => <ListItem {...props} />,
+    li: (props): ReactNode => <ListItem fontSize="lg" {...props} />,
     table: (props): ReactNode => <Table {...props} />,
     thead: (props): ReactNode => <Thead {...props} />,
     tbody: (props): ReactNode => <Tbody {...props} />,

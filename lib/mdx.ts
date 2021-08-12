@@ -12,9 +12,21 @@ import readingTime from 'reading-time';
 import { parseISO } from 'date-fns';
 import makeTitle from 'title';
 import remarkTextr from 'remark-textr';
-import typographicBase from 'typographic-base';
+import apostrophes from 'typographic-apostrophes';
+import quotes from 'typographic-quotes';
+import apostrophesForPlurals from 'typographic-apostrophes-for-possessive-plurals';
+import arrows from 'typographic-arrows';
+import copyright from 'typographic-copyright';
+import ellipses from 'typographic-ellipses';
+import emDashes from 'typographic-em-dashes';
+import enDashes from 'typographic-en-dashes';
+import mathSymbols from 'typographic-math-symbols';
+import registeredTrademark from 'typographic-registered-trademark';
+import singleSpaces from 'typographic-single-spaces';
+import trademark from 'typographic-trademark';
 
 const CONTENT_DIR = 'content';
+const TITLE_OPTIONS = { special: ['PS', 'OCJP', 'VPS', 'VirtPHP'] };
 
 const root = process.cwd();
 
@@ -44,8 +56,26 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
         mdxOptions: {
             remarkPlugins: [
                 remarkCodeTitles,
-                remarkCapitalize,
-                [remarkTextr, { plugins: ['typographic-base'] }],
+                [remarkCapitalize, TITLE_OPTIONS],
+                [
+                    remarkTextr,
+                    {
+                        plugins: [
+                            apostrophes,
+                            quotes,
+                            apostrophesForPlurals,
+                            arrows,
+                            copyright,
+                            ellipses,
+                            emDashes,
+                            enDashes,
+                            mathSymbols,
+                            registeredTrademark,
+                            singleSpaces,
+                            trademark,
+                        ],
+                    },
+                ],
             ],
             rehypePlugins: [mdxPrism, rehypeSlug, rehypeAutolinkHeadings],
         },
@@ -55,7 +85,7 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
         frontMatter: {
             wordCount: content.split(/\s+/gu).length,
             slug: slug,
-            title: makeTitle(title),
+            title: makeTitle(title, TITLE_OPTIONS),
             publishedAt: publishedAt,
             readingTime: readingTime(content).text,
             ...rest,
@@ -74,7 +104,7 @@ export const getAllPostsFrontMatter = (type: string, limit?: number): Partial<Fr
             const { data } = getPost(type, slug);
             return {
                 slug: slug,
-                title: makeTitle(data.title),
+                title: makeTitle(data.title, TITLE_OPTIONS),
                 publishedAt: data.publishedAt,
             };
         })
