@@ -58,5 +58,8 @@
     "lint-staged": {
         "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
         "*.{js,jsx,ts,tsx,md,html,css}": "prettier --write"
+    },
+    "engines": {
+        "yarn": "YARN NO LONGER USED - use npm instead."
     }
 }
