@@ -1,6 +1,7 @@
 import DefaultLayout from '@/layouts/DefaultLayout';
 import React, { ReactNode } from 'react';
-import { Link, Heading, Text } from '@chakra-ui/react';
+import { Heading, Text } from '@chakra-ui/react';
+import { StylishLink } from '@/components/CustomLink';
 
 const AboutPage = (): ReactNode => (
     <DefaultLayout title="About | Daan Debie">
@@ -15,17 +16,15 @@ const AboutPage = (): ReactNode => (
         </Text>
         <Text fontSize="lg">
             I found an amazing challenge at the exciting startup{' '}
-            <Link href="https://source.ag" isExternal>
-                Source.ag
-            </Link>{' '}
-            where I currently work as VP of Engineering, helping to accelerate the global transition
-            to sustainable agriculture with A.I. powered greenhouses.
+            <StylishLink href="https://source.ag">Source.ag</StylishLink> where I currently work as
+            VP of Engineering, helping to accelerate the global transition to sustainable
+            agriculture with A.I. powered greenhouses.
         </Text>
         <Text fontSize="lg">
             I live in a small coastal town in The Netherlands with my lovely wife, our beautiful{' '}
-            <Link href="https://www.instagram.com/p/BdYpuOCnX9f/" isExternal>
+            <StylishLink href="https://www.instagram.com/p/BdYpuOCnX9f/" isExternal>
                 Maine Coon
-            </Link>{' '}
+            </StylishLink>{' '}
             and an adorable and slightly energetic Golden Retriever pup. I really do love long walks
             on the beach. But I‘m also very happy staying indoors reading books, watching movies and
             tv-shows and playing games.

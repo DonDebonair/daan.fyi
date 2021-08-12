@@ -1,6 +1,7 @@
 import { Divider, Flex, Text, HStack, IconButton, Link } from '@chakra-ui/react';
 import React, { ReactElement } from 'react';
 import { GrTwitter, GrGithub, GrLinkedin } from 'react-icons/gr';
+import { DefaultLink } from '@/components/CustomLink';
 
 const Footer = (): ReactElement => (
     <Flex direction="column" maxW="800px" w="100%" m="0 auto">
@@ -16,6 +17,9 @@ const Footer = (): ReactElement => (
                 <IconButton aria-label="LinkedIn" icon={<GrLinkedin />} size="lg" variant="ghost" />
             </Link>
         </HStack>
+        <Flex justify="center">
+            <DefaultLink href="/archive">Archive</DefaultLink>
+        </Flex>
         <Flex p={8} justify="center">
             <Text>Copyright 2021 - Daan Debie</Text>
         </Flex>

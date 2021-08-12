@@ -1,9 +1,9 @@
 import { Box, Flex, IconButton, Text, useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
 import React, { ReactElement, useState } from 'react';
-import CustomLink, { AccessibleLinkProps } from '@/components/CustomLink';
+import CustomLink, { CustomLinkProps } from '@/components/CustomLink';
 
-type MenuItemProps = AccessibleLinkProps & {
+type MenuItemProps = CustomLinkProps & {
     isLast?: boolean;
 };
 
@@ -12,6 +12,10 @@ const MenuItem = ({ isLast, href, children, ...rest }: MenuItemProps) => (
         mb={{ base: isLast ? 0 : 8, sm: 0 }}
         mr={{ base: 0, sm: isLast ? 0 : 8 }}
         display="block"
+        textDecoration="none"
+        _hover={{
+            textDecoration: 'none',
+        }}
         href={href}
         {...rest}
     >

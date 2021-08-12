@@ -1,4 +1,4 @@
-import CustomLink from '@/components/CustomLink';
+import { DefaultLink } from '@/components/CustomLink';
 import { Flex, Heading, Text } from '@chakra-ui/react';
 import React, { ReactNode } from 'react';
 import DefaultLayout from '@/layouts/DefaultLayout';
@@ -19,11 +19,11 @@ const BlogOverviewPage = ({ allPosts }: BlogOverviewProps): ReactNode => (
         {allPosts.map((frontMatter) => {
             return (
                 <Flex key={frontMatter.slug} direction="column">
-                    <CustomLink href={`/blog/${frontMatter.slug}`}>
+                    <DefaultLink href={`/blog/${frontMatter.slug}`}>
                         <Heading as="h2" size="md" mb={2}>
                             {frontMatter.title}
                         </Heading>
-                    </CustomLink>
+                    </DefaultLink>
                     <Text>{format(parseISO(frontMatter.publishedAt), 'MMMM dd, yyyy')}</Text>
                 </Flex>
             );

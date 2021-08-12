@@ -19,7 +19,7 @@ import {
     chakra,
 } from '@chakra-ui/react';
 import { HTMLChakraProps } from '@chakra-ui/system';
-import CustomLink from '@/components/CustomLink';
+import { StylishLink } from '@/components/CustomLink';
 import React, { ReactNode } from 'react';
 import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/types/table';
 import Image from 'next/image';
@@ -93,7 +93,7 @@ export const MDXComponents = {
     h3: (props: HeadingProps): ReactNode => <H as="h3" size="lg" {...props} />,
     h4: (props: HeadingProps): ReactNode => <H as="h4" size="md" {...props} />,
     p: (props): ReactNode => <Text as="p" fontSize="lg" {...props} />,
-    a: (props): ReactNode => <CustomLink {...props} />,
+    a: (props): ReactNode => <StylishLink {...props} />,
     ul: (props): ReactNode => <UnorderedList pl={4} {...props} />,
     ol: (props): ReactNode => <OrderedList pl={4} {...props} />,
     li: (props): ReactNode => <ListItem fontSize="lg" {...props} />,

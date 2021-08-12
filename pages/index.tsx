@@ -1,9 +1,9 @@
-import { Flex, Heading, Link, Text } from '@chakra-ui/react';
+import { Flex, Heading, Text } from '@chakra-ui/react';
 import DefaultLayout from '@/layouts/DefaultLayout';
 import React, { ReactNode } from 'react';
 import { GetStaticProps } from 'next';
 import { FrontMatter, getAllPostsFrontMatter } from '@/lib/mdx';
-import CustomLink from '@/components/CustomLink';
+import { DefaultLink, StylishLink } from '@/components/CustomLink';
 import { format, parseISO } from 'date-fns';
 
 type HomePageProps = {
@@ -19,11 +19,8 @@ const HomePage = ({ lastPosts }: HomePageProps): ReactNode => (
         <Text fontSize="lg">
             I‘m a social code grower, firestarter, software smith, music maniac and general nice
             guy. I work as VP of Engineering at{' '}
-            <Link href="https://source.ag" isExternal>
-                Source.ag
-            </Link>{' '}
-            where I help accelerate the global transition to sustainable agriculture with A.I.
-            powered greenhouses.
+            <StylishLink href="https://source.ag">Source.ag</StylishLink> where I help accelerate
+            the global transition to sustainable agriculture with A.I. powered greenhouses.
         </Text>
         <Text fontSize="lg">
             This is my little oasis from where I shout into the digital desert.
@@ -35,11 +32,11 @@ const HomePage = ({ lastPosts }: HomePageProps): ReactNode => (
         {lastPosts.map((frontMatter) => {
             return (
                 <Flex key={frontMatter.slug} direction="column">
-                    <CustomLink href={`/blog/${frontMatter.slug}`}>
+                    <DefaultLink href={`/blog/${frontMatter.slug}`}>
                         <Heading as="h2" size="md" mb={2}>
                             {frontMatter.title}
                         </Heading>
-                    </CustomLink>
+                    </DefaultLink>
                     <Text>{format(parseISO(frontMatter.publishedAt), 'MMMM dd, yyyy')}</Text>
                 </Flex>
             );
