@@ -24,6 +24,8 @@ import mathSymbols from 'typographic-math-symbols';
 import registeredTrademark from 'typographic-registered-trademark';
 import singleSpaces from 'typographic-single-spaces';
 import trademark from 'typographic-trademark';
+import imageSize from 'rehype-img-size';
+import remarkUnwrapImages from 'remark-unwrap-images';
 
 const CONTENT_DIR = 'content';
 const TITLE_OPTIONS = { special: ['PS', 'OCJP', 'VPS', 'VirtPHP'] };
@@ -55,6 +57,7 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
     const mdxSource = await serialize(content, {
         mdxOptions: {
             remarkPlugins: [
+                remarkUnwrapImages,
                 remarkCodeTitles,
                 [remarkCapitalize, TITLE_OPTIONS],
                 [
@@ -77,7 +80,12 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
                     },
                 ],
             ],
-            rehypePlugins: [mdxPrism, rehypeSlug, rehypeAutolinkHeadings],
+            rehypePlugins: [
+                mdxPrism,
+                rehypeSlug,
+                rehypeAutolinkHeadings,
+                [imageSize, { dir: 'public' }],
+            ],
         },
     });
     return {

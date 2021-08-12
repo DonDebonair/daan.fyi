@@ -34,7 +34,7 @@ a2enmod expires
 ```
 
 Now, add a .htaccess file to the root of every site you want to enable proper browser caching for, containing the following:
-```apache
+```apacheconf
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType image/gif "access plus 30 days"

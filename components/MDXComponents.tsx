@@ -22,6 +22,7 @@ import { HTMLChakraProps } from '@chakra-ui/system';
 import CustomLink from '@/components/CustomLink';
 import React, { ReactNode } from 'react';
 import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/types/table';
+import Image from 'next/image';
 
 const Hr: ReactNode = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -111,4 +112,5 @@ export const MDXComponents = {
     hr: Hr,
     inlineCode: (props): ReactNode => <InlineCode {...props} />,
     blockquote: Blockquote,
+    img: (props): ReactNode => <Image {...props} />,
 };
