@@ -22,7 +22,7 @@ const CustomLink = ({ href, children, ...rest }: CustomLinkProps): ReactElement 
 };
 
 export const StylishLink = (props: CustomLinkProps) => {
-    const color = useColorModeValue('orange.400', 'orange.500');
+    const color = useColorModeValue('teal.300', 'teal.500');
     return (
         <CustomLink
             bgGradient={`linear(to-b, ${color} 0%, ${color} 100%)`}
