@@ -14,7 +14,7 @@ export type MetaProps = {
 const defaultMeta: MetaProps = {
     title: 'Daan Debie - Nice person',
     description: 'Social Code Grower, Firestarter, Music Maniac & General Nice Guy',
-    image: `${baseUrl}/public/images/testing.jpg`,
+    image: `${baseUrl}/images/banner.png`,
     type: 'website',
 };
 
