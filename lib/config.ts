@@ -1,1 +1,1 @@
-export const baseUrl = 'https://daan.is';
+export const baseUrl = 'https://daan.fyi';
