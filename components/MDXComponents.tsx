@@ -34,7 +34,7 @@ const InlineCode = (props) => {
     return <Code colorScheme={colorScheme} fontSize="md" {...props} />;
 };
 
-const Blockquote = (props: HTMLChakraProps<'blockquote'>) => (
+const Blockquote: ReactNode = (props: HTMLChakraProps<'blockquote'>) => (
     <chakra.blockquote
         p={6}
         position="relative"
