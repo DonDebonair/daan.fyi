@@ -30,8 +30,8 @@ const Meta = (metaProps: MetaProps): ReactElement => {
             <meta name="robots" content="follow, index" />
             <meta name="author" content="Daan Debie" />
             <meta name="description" content={meta.description} />
-            <meta property="og:url" content={`${baseUrl}${router.asPath}`} />
-            <link rel="canonical" href={`${baseUrl}${router.asPath}`} />
+            <meta property="og:url" content={`www.${baseUrl}${router.asPath}`} />
+            <link rel="canonical" href={`www.${baseUrl}${router.asPath}`} />
             <meta property="og:type" content={meta.type} />
             <meta property="og:site_name" content="Daan Debie" />
             <meta property="og:description" content={meta.description} />
