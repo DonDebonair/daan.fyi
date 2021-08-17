@@ -1,1 +1,2 @@
-export const baseUrl = 'https://daan.fyi';
+export const domain = 'daan.fyi';
+export const baseUrl = `https://${domain}`;

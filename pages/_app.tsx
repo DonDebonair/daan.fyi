@@ -6,14 +6,18 @@ import '@fontsource/quicksand/400.css';
 import '@fontsource/quicksand/700.css';
 import React, { ReactNode } from 'react';
 import { AppProps } from 'next/app';
+import PlausibleProvider from 'next-plausible';
+import { domain } from '@/lib/config';
 
 const MyApp = ({ Component, pageProps }: AppProps): ReactNode => {
     return (
-        <ChakraProvider resetCSS theme={theme}>
-            <BaseLayout>
-                <Component {...pageProps} />
-            </BaseLayout>
-        </ChakraProvider>
+        <PlausibleProvider domain={domain}>
+            <ChakraProvider resetCSS theme={theme}>
+                <BaseLayout>
+                    <Component {...pageProps} />
+                </BaseLayout>
+            </ChakraProvider>
+        </PlausibleProvider>
     );
 };
 

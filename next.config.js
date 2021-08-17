@@ -1,4 +1,6 @@
-module.exports = {
-    // Prefer loading of ES Modules over CommonJS
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { withPlausibleProxy } = require('next-plausible');
+
+module.exports = withPlausibleProxy()({
     experimental: { esmExternals: true },
-};
+});
