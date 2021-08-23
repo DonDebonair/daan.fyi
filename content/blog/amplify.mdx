@@ -1,0 +1,203 @@
+---
+title: 'The Woes of AWS Amplify'
+publishedAt: '2021-08-23'
+summary: 'Half-baked products lead to much frustration'
+---
+Have you ever gone above and beyond to give a product a fair chance, only giving up way past your
+own sanity and patience? I did. The product was [AWS Amplify](https://aws.amazon.com/amplify/)
+
+## Let's build something with NextJS
+
+When I started developing the primary (web) UI for the product we're building at
+[Source](https:/source.ag), I quickly decided to use the [NextJS](https://nextjs.org/) framework as
+the basis for the frontend. One thing I really like about NextJS is that it does [filesystem-based
+routing](https://nextjs.org/docs/basic-features/pages). Even though I like to diss on PHP as much
+as the next person, this particular feature of NextJS reminds me a bit of PHP _in a good way_.
+
+Another very compelling feature of NextJS, is the ability to have different rendering strategies
+for each different page. You can decide to use:
+
+- [Static generation](https://nextjs.org/docs/basic-features/pages#static-generation-recommended)
+  for pages and content that rarely change. These pages get pre-rendered at build time and can be
+  aggressively cached on a CDN.
+  These pages can of-course still be highly dynamic by using client-side data fetching methods
+- [Server-side rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) for
+  pages that need to return different content on each request and/or for each different user
+- [Incremental static regeneration](https://nextjs.org/docs/basic-features/data-fetching#incremental-static-regeneration),
+  which is a variation on Static generation that will cache pages for a period you specify and then
+  regenerate the pages server-side when they're considered stale
+
+## Deployment
+
+This particular feature requires a specific hosting setup that supports the different _flavours_
+of rendering. You basically want:
+
+- a good CDN to cache and serve your static pages
+- a server-side solution to serve the server-side rendered pages and facilitate incremental static
+  regeneration. This should also take care of
+  [API routes](https://nextjs.org/docs/api-routes/introduction), should you use them
+
+The NextJS documentation [mentions a couple of options](https://nextjs.org/docs/deployment) for
+deployment:
+
+1. Use [Vercel](https://vercel.com/). Vercel is the company behind NextJS. They offer a seamless
+   experience where you can use any rendering method, and Vercel will deploy each part of your app
+   in the right way. One neat thing they do is that they'll convert your server-side rendered pages
+   and API routes into serverless functions that they'll deploy to edge locations all over the globe.
+2. Setup a NodeJS server somewhere for the server-side stuff and use a CDN manually to serve the
+   static content.
+
+At Source however, we've made a conscious decision to use AWS for all of our infrastructure needs. We're
+too early in the lifecycle of both our product and company to consider a hybrid cloud setup and
+AWS offers all the features that we need for prices that are reasonable _for now_. Through one of
+our investors we also got a boat-load of AWS credits to get started, which helps.
+
+## Amplify
+
+I didn't want to manually set up a hybrid deployment with NodeJS and CDN - which I could probably do
+using Cloudfront and ECS - so I looked for alternatives. AWS Amplify claims to be the
+
+> Fastest, easiest way to build mobile and web apps that scale
+
+And they [claim to support NextJS](https://docs.amplify.aws/guides/hosting/nextjs/q/platform/js/)
+as well as [server-side rendering](https://aws.amazon.com/blogs/mobile/host-a-next-js-ssr-app-with-real-time-data-on-aws-amplify/)
+by virtue of [Lambda@Edge](https://aws.amazon.com/lambda/edge/)
+
+Sounds great! So how does that all work?
+
+## Amplify - the setup
+
+The idea behind Amplify is that it lets you focus on building your app without having to worry
+about the infrastructure. This means that it will not only let you build and deploy your frontend
+easily, it will also let you hook-up backend components like
+[authentication](https://docs.amplify.aws/lib/auth/getting-started/q/platform/js/) through
+[Cognito](https://aws.amazon.com/cognito/),
+a [GraphQL API](https://docs.amplify.aws/lib/graphqlapi/getting-started/q/platform/js/) using
+[AppSync](https://aws.amazon.com/appsync/)
+and a [DataStore](https://docs.amplify.aws/lib/datastore/getting-started/q/platform/js/).
+
+The way Amplify manages all of this, is through the idea of "backends". A backend contains one or
+more of the aforementioned components. You can setup different backend environments in Amplify and
+couple these to different (git) branches of your frontend.
+
+## Amplify - the developer experience
+
+We are bringing our own database and API and wanted to use a pre-existing Cognito user pool.
+Amplify lets you import an existing Cognito user pool instead of creating one for you, and this
+worked fine... until I tried to create a second "backend environment" with a different Cognito
+user pool.
+
+I want to allow different users on our development environment than our production
+environment. These environments correspond to the `main` branch in Git (production) and any other
+branches in Git (development).
+
+#### How do I tie an Amplify backend environment to a frontend branch?
+
+Interaction with Amplify is done through the web console or the
+[Amplify CLI](https://docs.amplify.aws/cli/). According to the documentation, we can create a new
+Amplify backend environment like this:
+
+```
+amplify env add
+```
+
+But nowhere is it made clear how this is linked to our frontend branch. The Amplify CLI tries to
+mimic the `git` CLI by having `amplify push` and `amplify pull`. So I assume we need to `push` our
+new environment to the cloud. Does this command depend on the git branch I'm on? I don't know.
+I could just as easily overwrite my existing backend environment when using this command.
+
+Eventually I was able to create a `main` environment and a `dev` environment, but no matter how hard
+I tried, I could not get those environments to use different Cognito user pools.
+
+#### How do new team members setup an existing project?
+
+The Amplify CLI will create some configuration files, some of which you need to commit to git, and
+some of them you need to ignore. These files should make the build reproducible. It is unclear
+however, what a new developer needs to do to be able to run an existing Amplify project.
+The documentation mentions multiple Amplify CLI commands to setup a project:
+
+```
+amplify pull
+```
+
+```
+amplify init
+```
+
+```
+amplify configure project
+```
+
+```
+amplify env checkout <my-env>
+```
+
+_To be run in arbitrary order?_
+
+[Three](https://stackoverflow.com/questions/60365208/how-to-import-existing-aws-amplify-back-end-into-an-empty-aws-amplify-project-lo)
+[similar](https://stackoverflow.com/questions/60951924/how-do-i-continue-working-with-amplify-on-a-new-machine)
+[questions](https://stackoverflow.com/questions/61104135/how-to-run-an-existing-aws-amplify-project)
+on StackOverflow give 3 different answers on this topic.
+
+When I was on-boarding new team-members, we basically tried some commands in different order until
+we were able to run the project locally for that engineer.
+
+#### How do I figure out why my build failed?
+
+In short: [you don't](https://github.com/aws-amplify/amplify-console/issues/2065). Or you enlist
+the help of AWS Support (which you will have to pay for). The Amplify web console doesn't share
+detailed build logs, so you'll have to fix your problems by trial and error.
+
+## Amplify - the bugs
+
+AWS Amplify seems to have quite some bugs. For example: when you use Gitlab, you
+cannot put the source code of your project
+[in a sub-group](https://github.com/aws-amplify/amplify-console/issues/1941). This will silently
+fail your build, with no clear error message in sight.
+
+The aforementioned problem of using multiple Cognito user pools for different
+environments of one Amplify frontend, I also consider a bug.
+
+Not having access to the _actual_ build logs, I also consider a bug.
+
+## Amplify - no help included
+
+The most painful issue I have with AWS Amplify - and AWS in general - is the complete lack of
+support. You are paying a lot of money for their services, but that does not come with any form of
+support, unless you pay extra. And when you make use of that paid support, it goes something like
+this:
+
+1. Contact AWS Business support through their website and try to explain your problem in a plain
+text field that you cannot resize or use formatting in
+2. Wait far longer than the promised 4 hours
+3. Get a response from someone telling you they'll forward it to "the team" (why not have someone
+respond who can actually help you with your problem?)
+4. Get a canned response with a solution akin to "turn it off and on again"
+5. Tell them you have an *actual problem*
+6. Get forwarded to the next person who you have to clue in again on what your problem is
+7. Go to 2 and repeat
+
+This means that in practice, AWS Amplify is *not usable* unless you are willing to pay extra for
+support and have a lot of patience.
+
+As a side note, I find it really frustrating that with big corporations like Amazon in general, you
+quickly feel helpless and ignored when you have problems. Stories about Google customer support (or
+lack thereof) are rampant on Hacker News, and I think Amazon is no different. You'd think that with
+so much revenue they should be able to set up actual proper customer support 🙄
+
+## The Pattern with AWS
+
+I think that these problems with Amplify are endemic of a larger problem with AWS: **their PaaS and
+SaaS solutions suck**. Aside from pricing (which is quite high compared to competitors like
+Digital Ocean), I think AWS' infrastructure-as-a-service offerings are fine. If you want to have a
+bunch of servers (EC2), a database here and there (RDS) and some serverless functions (Lambda), AWS
+will serve you just fine.
+
+But if you want something on top of that, like authentication (Cognito), or a PaaS solution like
+Amplify, be prepared for a sub-par offering compared to the competition. I think Amazon should
+focus on strengthening their core offerings instead of offering everything and the kitchen sink.
+
+## The solution
+
+In the end, I dropped Amplify and went with Vercel. $20/user/month is a small price to pay for
+actually being able to work on the product instead of fighting AWS services and support.

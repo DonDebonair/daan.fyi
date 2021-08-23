@@ -28,7 +28,7 @@ import imageSize from 'rehype-img-size';
 import remarkUnwrapImages from 'remark-unwrap-images';
 
 const CONTENT_DIR = 'content';
-const TITLE_OPTIONS = { special: ['PS', 'OCJP', 'VPS', 'VirtPHP'] };
+const TITLE_OPTIONS = { special: ['PS', 'OCJP', 'VPS', 'VirtPHP', 'NextJS', 'AWS'] };
 
 const root = process.cwd();
 
