@@ -1,47 +1,71 @@
-# TypeScript Next.js example
+# daan.fyi
 
-This is a really simple project that shows the usage of Next.js with TypeScript.
+This is the source code of daan.fyi, my personal website. You are free to do with it whatever you
+want, as long as you give me proper attribution. You are encouraged to learn from it and build
+upon it.
 
-## Preview
+## Tech stack
 
-Preview the example live on [StackBlitz](http://stackblitz.com/):
+This website is built on the following tech stack:
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-typescript)
+-   [React](https://reactjs.org/) as the framework of choice
+-   [Chakra UI](https://chakra-ui.com/) for beautiful and easily extensible components
+-   I write content in [MDX](https://mdxjs.com/), which combines the power of Markdown and JSX to
+    enable rich and interactive content. I use the [unified stack](https://unifiedjs.com/) (incl.
+    remark and rehype) to interpret and render the Markdown bits.
+-   [NextJS](https://nextjs.org/) is the framework that ties everything together and provide static
+    site generation and server-side rendering
 
-## Deploy your own
+This site it deployed on [Vercel](https://vercel.com/)
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example):
+## Prerequisites
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-typescript&project-name=with-typescript&repository-name=with-typescript)
+You need the following to build, run and develop this site locally:
 
-## How to use it?
+-   [NodeJS](https://nodejs.org/)
+-   [NPM](https://docs.npmjs.com/cli)
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
+## How to build and run
+
+First install all dependencies:
 
 ```bash
-npx create-next-app --example with-typescript with-typescript-app
-# or
-yarn create next-app --example with-typescript with-typescript-app
+npm prepare
+npm install
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+Start the development server:
 
-## Notes
-
-This example shows how to integrate the TypeScript type system into Next.js. Since TypeScript is supported out of the box with Next.js, all we have to do is to install TypeScript.
-
-```
-npm install --save-dev typescript
+```bash
+npm run dev
 ```
 
-To enable TypeScript's features, we install the type declarations for React and Node.
+The development server supports hot reloading of NextJS pages. This means that only the React
+components that have changed, will be updated live in the page, without completely reloading the
+page.
 
+For MDX content, it will actually refresh the whole page.
+
+You can make a production build like this:
+
+```bash
+npm run build
 ```
-npm install --save-dev @types/react @types/react-dom @types/node
+
+Now you can run the production build:
+
+```bash
+npm run start
 ```
 
-When we run `next dev` the next time, Next.js will start looking for any `.ts` or `.tsx` files in our project and builds it. It even automatically creates a `tsconfig.json` file for our project with the recommended settings.
+## Acknowledgments
 
-Next.js has built-in TypeScript declarations, so we'll get autocompletion for Next.js' modules straight away.
+When building this website, there were a few websites that inspired me and/or helped me with actual
+solutions to coding problems (yay for open source!):
 
-A `type-check` script is also added to `package.json`, which runs TypeScript's `tsc` CLI in `noEmit` mode to run type-checking separately. You can then include this, for example, in your `test` scripts.
+-   [Alyssa X](https://alyssax.com/)
+-   [Lee Robinson](https://leerob.io/)
+-   [Josh W. Comeau](https://www.joshwcomeau.com/)
+-   [Marcel Krcah](https://marcel.is/)
+
+Thanks for the inspiration!
