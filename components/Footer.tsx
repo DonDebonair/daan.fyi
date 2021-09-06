@@ -7,13 +7,28 @@ const Footer = (): ReactElement => (
     <Flex direction="column" maxW="800px" w="100%" m="0 auto">
         <Divider mb={4} />
         <HStack justify="center">
-            <Link href="https://twitter.com/DaanDebie" title="Twitter" isExternal>
+            <Link
+                href="https://twitter.com/DaanDebie"
+                title="Twitter"
+                rel="me noopener noreferrer"
+                isExternal
+            >
                 <IconButton aria-label="Twitter" icon={<GrTwitter />} size="lg" variant="ghost" />
             </Link>
-            <Link href="https://github.com/DandyDev" title="GitHub" isExternal>
+            <Link
+                href="https://github.com/DandyDev"
+                title="GitHub"
+                rel="me noopener noreferrer"
+                isExternal
+            >
                 <IconButton aria-label="GitHub" icon={<GrGithub />} size="lg" variant="ghost" />
             </Link>
-            <Link href="https://www.linkedin.com/in/danieldebie" title="LinkedIn" isExternal>
+            <Link
+                href="https://www.linkedin.com/in/danieldebie"
+                title="LinkedIn"
+                rel="me noopener noreferrer"
+                isExternal
+            >
                 <IconButton aria-label="LinkedIn" icon={<GrLinkedin />} size="lg" variant="ghost" />
             </Link>
         </HStack>
