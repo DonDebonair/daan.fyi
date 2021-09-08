@@ -15,7 +15,7 @@ const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
             date={new Date(frontMatter.publishedAt).toISOString()}
             type="article"
         >
-            <Heading as="h1" size="2xl">
+            <Heading as="h1" size="xl">
                 {frontMatter.title}
             </Heading>
             <Flex
@@ -28,12 +28,12 @@ const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
             >
                 <Flex direction="row">
                     <Avatar src="/images/daan.png" size="xs" name="Daan Debie" mr={2} />
-                    <Text fontSize="md">
+                    <Text fontSize="sm">
                         {'Daan Debie / '}
                         {format(parseISO(frontMatter.publishedAt), 'MMMM dd, yyyy')}
                     </Text>
                 </Flex>
-                <Text fontSize="md" color="gray.500" minWidth="100px" mt={[2, 0]}>
+                <Text fontSize="sm" color="gray.500" minWidth="100px" mt={[2, 0]}>
                     {frontMatter.readingTime}
                 </Text>
             </Flex>

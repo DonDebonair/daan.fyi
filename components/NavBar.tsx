@@ -17,6 +17,7 @@ const MenuItem = ({ isLast, href, children, ...rest }: MenuItemProps) => (
             textDecoration: 'none',
         }}
         href={href}
+        fontSize="sm"
         {...rest}
     >
         {children}
@@ -57,8 +58,9 @@ const NavBar = (): ReactElement => {
                     onClick={toggleColorMode}
                     backgroundColor="transparent"
                     mx={4}
+                    size="sm"
                 />
-                <Text m={0} fontSize="xl">
+                <Text m={0} fontSize="lg">
                     Daan Debie
                 </Text>
             </Flex>

@@ -13,7 +13,7 @@ const Footer = (): ReactElement => (
                 rel="me noopener noreferrer"
                 isExternal
             >
-                <IconButton aria-label="Twitter" icon={<GrTwitter />} size="lg" variant="ghost" />
+                <IconButton aria-label="Twitter" icon={<GrTwitter />} variant="ghost" />
             </Link>
             <Link
                 href="https://github.com/DandyDev"
@@ -21,7 +21,7 @@ const Footer = (): ReactElement => (
                 rel="me noopener noreferrer"
                 isExternal
             >
-                <IconButton aria-label="GitHub" icon={<GrGithub />} size="lg" variant="ghost" />
+                <IconButton aria-label="GitHub" icon={<GrGithub />} variant="ghost" />
             </Link>
             <Link
                 href="https://www.linkedin.com/in/danieldebie"
@@ -29,14 +29,16 @@ const Footer = (): ReactElement => (
                 rel="me noopener noreferrer"
                 isExternal
             >
-                <IconButton aria-label="LinkedIn" icon={<GrLinkedin />} size="lg" variant="ghost" />
+                <IconButton aria-label="LinkedIn" icon={<GrLinkedin />} variant="ghost" />
             </Link>
         </HStack>
         <Flex justify="center">
-            <DefaultLink href="/archive">Archive</DefaultLink>
+            <DefaultLink fontSize="sm" href="/archive">
+                Archive
+            </DefaultLink>
         </Flex>
         <Flex p={8} justify="center">
-            <Text>Copyright 2021 - Daan Debie</Text>
+            <Text fontSize="sm">Copyright 2021 - Daan Debie</Text>
         </Flex>
     </Flex>
 );

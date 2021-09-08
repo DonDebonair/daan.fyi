@@ -23,6 +23,7 @@ import { StylishLink } from '@/components/CustomLink';
 import React, { ReactNode } from 'react';
 import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/types/table';
 import Image from 'next/image';
+import { Small } from '@/components/typography';
 
 const Hr: ReactNode = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -31,7 +32,7 @@ const Hr: ReactNode = () => {
 
 const InlineCode = (props) => {
     const colorScheme = useColorModeValue('gray', 'pink');
-    return <Code colorScheme={colorScheme} fontSize="md" {...props} />;
+    return <Code colorScheme={colorScheme} {...props} />;
 };
 
 const Blockquote: ReactNode = (props: HTMLChakraProps<'blockquote'>) => (
@@ -88,15 +89,15 @@ const H = (props: HeadingProps) => (
 );
 
 export const MDXComponents = {
-    h1: (props: HeadingProps): ReactNode => <H as="h1" size="2xl" {...props} />,
-    h2: (props: HeadingProps): ReactNode => <H as="h2" size="xl" {...props} />,
-    h3: (props: HeadingProps): ReactNode => <H as="h3" size="lg" {...props} />,
-    h4: (props: HeadingProps): ReactNode => <H as="h4" size="md" {...props} />,
-    p: (props): ReactNode => <Text as="p" fontSize="lg" {...props} />,
+    h1: (props: HeadingProps): ReactNode => <H as="h1" size="xl" {...props} />,
+    h2: (props: HeadingProps): ReactNode => <H as="h2" size="lg" {...props} />,
+    h3: (props: HeadingProps): ReactNode => <H as="h3" size="md" {...props} />,
+    h4: (props: HeadingProps): ReactNode => <H as="h4" size="sm" {...props} />,
+    p: (props): ReactNode => <Text as="p" {...props} />,
     a: (props): ReactNode => <StylishLink {...props} />,
     ul: (props): ReactNode => <UnorderedList pl={4} {...props} />,
     ol: (props): ReactNode => <OrderedList pl={4} {...props} />,
-    li: (props): ReactNode => <ListItem fontSize="lg" {...props} />,
+    li: (props): ReactNode => <ListItem {...props} />,
     table: (props): ReactNode => <Table {...props} />,
     thead: (props): ReactNode => <Thead {...props} />,
     tbody: (props): ReactNode => <Tbody {...props} />,
@@ -113,4 +114,5 @@ export const MDXComponents = {
     inlineCode: (props): ReactNode => <InlineCode {...props} />,
     blockquote: Blockquote,
     img: (props): ReactNode => <Image {...props} />,
+    Small,
 };

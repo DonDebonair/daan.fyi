@@ -4,6 +4,7 @@ const styles: Styles = {
     global: (props) => ({
         html: {
             scrollBehavior: 'smooth',
+            fontSize: '18px',
         },
         body: {
             bg: mode('white', 'gray.900')(props),
@@ -15,6 +16,7 @@ const styles: Styles = {
         },
         code: {
             whiteSpace: 'pre',
+            fontSize: 'sm',
         },
         pre: {
             marginBottom: '4',
@@ -30,7 +32,7 @@ const styles: Styles = {
             marginTop: 0,
             background: 'none',
             fontFamily: 'mono',
-            fontSize: 'md',
+            fontSize: 'sm',
             textAlign: 'left',
             wordSpacing: 'normal',
             wordBreak: 'normal',
@@ -165,7 +167,6 @@ const styles: Styles = {
             borderColor: mode('gray.200', 'gray.600')(props),
             borderTopLeftRadius: 'lg',
             borderTopRightRadius: 'lg',
-            fontSize: 'md',
             fontWeight: 600,
             marginBottom: 0,
             width: '100%',
