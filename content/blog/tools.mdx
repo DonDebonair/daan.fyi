@@ -1,0 +1,137 @@
+---
+title: 'Use Tools that Suit You and the Problem'
+publishedAt: '2021-09-10'
+summary: "Don't let anyone tell you what tools to use. Make sure that your builds are tool-agnostic"
+---
+A couple of weeks ago someone shared
+[an article](https://alexander-hansen.dev/blog/benefits-of-not-using-an-ide) on Hacker News that
+gave discussed the drawbacks of using an IDE for programming. Needless to say, when you touch
+people's tools, you can be sure to
+[spark a hefty discussion](https://news.ycombinator.com/item?id=28257116).
+
+<Small>
+
+To be fair, the author did clarify that they're not against IDE's _in general_ and they actually
+use one on a daily basis.
+
+</Small>
+
+When reading the discussion, one of the first things I wondered is if there are places on the
+internet where carpenters or plumbers furiously criticize each other's choice of tools.
+But _even that_ has [a place on Hacker News](https://news.ycombinator.com/item?id=28257382)
+
+In this post I want to explore the fundamental problems with this type of discussion and how you
+can embrace freedom of choice.
+
+## It's all about context
+
+When discussing someone else's choice of tools -- in this case the choice of editor or IDE -- it's
+good to be mindful of what we _don't know_ about this person and their reasons for choosing certain
+tools. Aside from personal preference and/or familiarity, there can be lots of extra factors to
+consider:
+
+- We don't know what kind of problems they're working on
+- We don't know the context in which they work (e.g. security requirements laid down by the company
+  they work for, available budget)
+- We don't know their level of experience
+
+I think it's good form to only voice an opinion only when we can see the whole picture. I also
+think that people should be encouraged to **choose the right tool for the job**. And to put it
+simply: **the right tool for the job is the one that fits the problem and makes you the most
+productive**.
+
+## It's also about definition
+
+Another issue with this kind of discussion is that everyone has a different idea of what really
+constitutes an "IDE". We're inclined to frame the choice of editor as a binary choice -- "pure text
+editor" vs "IDE", almost like a false dichotomy -- while it really is a spectrum. On this spectrum
+you'll not only find different editors, but even different configurations of the same editor with
+varying degrees of "smartness" applied through plugins.
+
+So when someone says _"why use an IDE when you can do everything an IDE does in VIM if you install
+the following 20 plugins"_, is this really so different from an actual IDE (that was branded as
+such)?
+
+## Philosophies in tool choices
+
+When looking at how people setup their development environments, I basically see 2 different
+approaches:
+
+- The _"additive"_ approach: this basically follows the UNIX philosophy of composing many different
+  tools that each do one thing well. It often involves a terminal-based editor like VIM, optionally
+  with some plugins and supported by external tools like grep, sed and awk that can help with
+  refactoring code. You basically stack tools until you have an "integrated" development environment
+- The _"subtractive"_ approach: you take one "big" editor as the basis of your stack. This is often
+  an editor that is branded as an IDE (e.g. Eclipse, Jetbrains editors). Then you take away/replace
+  ("subtract") the parts that work better through dedicated tools (according to personal preference
+  of course)
+
+To me, both approaches have their merits and uses!
+
+## How to create freedom of choice?
+
+I think the most important question around editors is not
+> _How to choose the right editor?_
+
+but rather
+
+> _How to enable each member of my team to choose the editor that makes them **most productive**,
+> while enabling **effective collaboration**?_
+
+Here's my recipe to do that:
+
+My basic starting point in teams: _everyone can use the editor/IDE of their choice_. To enable
+effective collaboration, the following rules must be followed:
+
+- Editor configuration is never checked into version control, unless it's generic and
+  [applicable across editors](https://editorconfig.org/). Examples of generic editor configuration
+  are: line endings, tabs vs spaces, max line length etc. There is some overlap with linters here
+- Enforce common code style through external tools (i.e. linters, code formatters)
+- Everyone should be able to build and run a project, regardless of the choice of editor,
+  preferably through the terminal. This means that we'll always prefer external tools for this as
+  well. Many languages provide tooling for this:
+  - Java → Maven/Gradle
+  - JS/TS → NPM
+  - Go → Go
+  - Rust → Cargo
+  - ...
+- Additionally, building and running code can be made easier and better reproducible by using
+  Makefiles and/or Docker (combined with Docker Compose)
+
+I have to admit that in some ways I also limit choice within my teams: building and running
+projects often involves shell scripts which are portable between Linux and MacOS, but not to
+Windows. This can be solved by using WSL on Windows.
+
+## This is my setup
+
+My personal setup involves quite a lot of tools.
+
+For any "serious" development work (i.e. long stretches of coding and big projects) I take the
+aforementioned "subtractive" approach. My basis is one of the Jetbrains tools, depending on the
+language(s) I'm working with. I find the Jetbrains tools make _me_ really productive and their
+[_All products pack_](https://www.jetbrains.com/all/) offers great value for money, especially with
+their huge loyalty discounts after 1 or more years.
+
+I still use the terminal and external tools for many things in this case. I put quite some time in
+[my dotfiles](https://github.com/DandyDev/dotfiles) as well.
+
+- I prefer to use the terminal for: building, linting, running tests, using git
+- I prefer to use the IDE for: writing and editing code, refactoring, searching for code,
+  find/replace through regex
+
+For quick and short edits and viewing files where speed is preferred and conveniences like syntax
+highlighting and intellisense are not important, I use Sublime Text or VIM. Example of this:
+editing my dotfiles.
+
+Sometimes, but rarely, I use VSCodium for editing or viewing files which I want to reformat/reindent
+which doesn't work well for me in Sublime Text. For example: viewing/editing minified JSON files.
+
+## Conclusion
+
+To wrap this post up, I just want to reiterate: use whatever tools make you productive and help you
+solve the problems you're trying to solve and please let others do the same.
+
+And here's some additional closing advice: should you ever grow unhappy with the tools you're
+using, just write a blog post extolling the virtues of your current tools. You can be sure people
+on the internet will tell you how much better their tools are, thereby providing you with potential
+alternatives to your current setup 😇

@@ -38,6 +38,7 @@ const InlineCode = (props) => {
 const Blockquote: ReactNode = (props: HTMLChakraProps<'blockquote'>) => (
     <chakra.blockquote
         p={6}
+        mx={2}
         position="relative"
         _before={{
             content: "'“'",
