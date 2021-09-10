@@ -25,9 +25,12 @@ const AboutPage = (): ReactNode => (
             <StylishLink href="https://www.instagram.com/p/BdYpuOCnX9f/" isExternal>
                 Maine Coon
             </StylishLink>{' '}
-            and an adorable and slightly energetic Golden Retriever pup. I really do love long walks
-            on the beach. But I‘m also very happy staying indoors reading books, watching movies and
-            tv-shows and playing games.
+            and our{' '}
+            <StylishLink href="https://www.instagram.com/p/CLFmATWJ-qhk7lj9XC_GPXLbGqGnHj50FT6ZIM0/">
+                adorable and slightly energetic Golden Retriever pup
+            </StylishLink>
+            . I really do love long walks on the beach. But I‘m also very happy staying indoors
+            reading books, watching movies and tv-shows and playing games.
         </Text>
 
         <Heading as="h2" size="xl">
