@@ -38,7 +38,13 @@ export type FrontMatter = {
     title: string;
     publishedAt: string;
     readingTime: string;
+    summary?: string;
     [key: string]: string | number | boolean;
+};
+
+export type PostFile = {
+    fileName: string;
+    slug: string;
 };
 
 export type PostData = {
@@ -51,10 +57,8 @@ const getPost = (type: string, slug: string): matter.GrayMatterFile<string> => {
     return matter(postSource);
 };
 
-export const getAndSerializePost = async (type: string, slug: string): Promise<PostData> => {
-    const { data, content } = getPost(type, slug);
-    const { title, publishedAt, ...rest } = data;
-    const mdxSource = await serialize(content, {
+const serializePost = async (content: string): Promise<MDXRemoteSerializeResult> => {
+    return await serialize(content, {
         mdxOptions: {
             remarkPlugins: [
                 remarkUnwrapImages,
@@ -88,6 +92,12 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
             ],
         },
     });
+};
+
+export const getAndSerializePost = async (type: string, slug: string): Promise<PostData> => {
+    const { data, content } = getPost(type, slug);
+    const { title, publishedAt, summary, ...rest } = data;
+    const mdxSource = await serializePost(content);
     return {
         mdxSource,
         frontMatter: {
@@ -96,24 +106,30 @@ export const getAndSerializePost = async (type: string, slug: string): Promise<P
             title: makeTitle(title, TITLE_OPTIONS),
             publishedAt: publishedAt,
             readingTime: readingTime(content).text,
+            summary: summary ?? null,
             ...rest,
         },
     };
 };
 
-export const getPosts = (type: string): string[] =>
-    fs.readdirSync(path.join(root, CONTENT_DIR, type));
+export const getPosts = (type: string): PostFile[] =>
+    fs.readdirSync(path.join(root, CONTENT_DIR, type)).map((fileName) => {
+        return {
+            fileName,
+            slug: fileName.replace('.mdx', ''),
+        };
+    });
 
 export const getAllPostsFrontMatter = (type: string, limit?: number): Partial<FrontMatter>[] => {
     const posts = getPosts(type);
     const sortedFrontmatter = posts
-        .map((fileName) => {
-            const slug = fileName.replace('.mdx', '');
-            const { data } = getPost(type, slug);
+        .map((post) => {
+            const { data } = getPost(type, post.slug);
             return {
-                slug: slug,
+                slug: post.slug,
                 title: makeTitle(data.title, TITLE_OPTIONS),
                 publishedAt: data.publishedAt,
+                summary: data.summary ?? null,
             };
         })
         .sort((a, b) => parseISO(b.publishedAt).getTime() - parseISO(a.publishedAt).getTime());
@@ -121,5 +137,20 @@ export const getAllPostsFrontMatter = (type: string, limit?: number): Partial<Fr
         return sortedFrontmatter.slice(0, limit);
     } else {
         return sortedFrontmatter;
+    }
+};
+
+export const getAllPosts = async (type: string, limit?: number): Promise<PostData[]> => {
+    const posts = getPosts(type);
+    const serializedPosts = await Promise.all(posts.map((p) => getAndSerializePost(type, p.slug)));
+    serializedPosts.sort(
+        (a, b) =>
+            parseISO(b.frontMatter.publishedAt).getTime() -
+            parseISO(a.frontMatter.publishedAt).getTime()
+    );
+    if (limit) {
+        return serializedPosts.slice(0, limit);
+    } else {
+        return serializedPosts;
     }
 };

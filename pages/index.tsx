@@ -5,6 +5,7 @@ import { GetStaticProps } from 'next';
 import { FrontMatter, getAllPostsFrontMatter } from '@/lib/mdx';
 import { DefaultLink, StylishLink } from '@/components/CustomLink';
 import { format, parseISO } from 'date-fns';
+import { generateMainFeeds } from '../lib/feeds';
 
 type HomePageProps = {
     lastPosts: Partial<FrontMatter>[];
@@ -45,6 +46,7 @@ const HomePage = ({ lastPosts }: HomePageProps): ReactNode => (
 );
 
 export const getStaticProps: GetStaticProps = () => {
+    generateMainFeeds();
     const lastPosts = getAllPostsFrontMatter('blog', 3);
     return {
         props: {
