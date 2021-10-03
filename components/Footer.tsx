@@ -2,6 +2,7 @@ import { Divider, Flex, Text, HStack, IconButton, Link } from '@chakra-ui/react'
 import React, { ReactElement } from 'react';
 import { GrTwitter, GrGithub, GrLinkedin } from 'react-icons/gr';
 import { DefaultLink } from '@/components/CustomLink';
+import { copyright } from '@/lib/config';
 
 const Footer = (): ReactElement => (
     <Flex direction="column" maxW="800px" w="100%" m="0 auto">
@@ -38,7 +39,7 @@ const Footer = (): ReactElement => (
             </DefaultLink>
         </Flex>
         <Flex p={8} justify="center">
-            <Text fontSize="sm">Copyright 2021 - Daan Debie</Text>
+            <Text fontSize="sm">{copyright}</Text>
         </Flex>
     </Flex>
 );

@@ -1,5 +1,6 @@
 import { Box, Flex, IconButton, Text, useColorMode, useColorModeValue } from '@chakra-ui/react';
-import { CloseIcon, HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { CloseIcon, HamburgerIcon, MoonIcon, SunIcon, Icon } from '@chakra-ui/icons';
+import { FiRss } from 'react-icons/fi';
 import React, { ReactElement, useState } from 'react';
 import CustomLink, { CustomLinkProps } from '@/components/CustomLink';
 
@@ -81,6 +82,15 @@ const NavBar = (): ReactElement => {
                     <MenuItem href="/">Home</MenuItem>
                     <MenuItem href="/blog">Blog</MenuItem>
                     <MenuItem href="/about">About</MenuItem>
+
+                    <CustomLink href="/feeds/feed.xml">
+                        <IconButton
+                            aria-label="RSS feed"
+                            icon={<Icon as={FiRss} />}
+                            backgroundColor="transparent"
+                            size="sm"
+                        />
+                    </CustomLink>
                 </Flex>
             </Box>
         </Flex>

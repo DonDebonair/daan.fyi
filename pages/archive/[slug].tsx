@@ -53,12 +53,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const posts = await getPosts('archive');
+    const posts = getPosts('archive');
 
     return {
         paths: posts.map((p) => ({
             params: {
-                slug: p.replace(/\.mdx/, ''),
+                slug: p.slug,
             },
         })),
         fallback: false,

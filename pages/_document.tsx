@@ -26,6 +26,24 @@ class MyDocument extends Document {
                         sizes="16x16"
                         type="image/png"
                     />
+                    <link
+                        rel="alternate"
+                        type="application/rss+xml"
+                        title="Daan Debie RSS feed"
+                        href="/feeds/feed.xml"
+                    />
+                    <link
+                        rel="alternate"
+                        type="application/atom+xml"
+                        title="Daan Debie Atom feed"
+                        href="/feeds/atom.xml"
+                    />
+                    <link
+                        rel="alternate"
+                        type="application/feed+json"
+                        title="Daan Debie JSON feed"
+                        href="/feeds/feed.json"
+                    />
                 </Head>
                 <body>
                     <ColorModeScript initialColorMode="system" />
