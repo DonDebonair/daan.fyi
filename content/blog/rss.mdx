@@ -1,0 +1,190 @@
+---
+title: 'How to Add An RSS Feed to an NextJS Blog'
+publishedAt: '2021-10-05'
+summary: "RSS is an important feature to give your content maximum exposure while also retaining control over your content. This post shows how to add syndication feeds to a statically generated NextJS site"
+---
+Today, I released a new version of my website with only one new feature:
+[syndication](https://en.wikipedia.org/wiki/Web_syndication) through RSS, Atom and JSON Feed. Even
+though [by some accounts](https://techcrunch.com/2018/04/07/rss-is-undead/), RSS
+[seems to be dead](https://mjtsai.com/blog/2019/12/26/apple-news-no-longer-supports-rss/),
+I strongly believe RSS is an important feature in the fight to keep ownership over your own content
+while also increasing exposure. The way I approach publishing and sharing my content, is called
+[POSSE](https://indieweb.org/POSSE): 
+
+> **Publish (on your) Own Site, Syndicate Elsewhere**. 
+
+RSS is an important part of that strategy.
+
+Luckily, I'm not the only one who values RSS. [There](https://news.ycombinator.com/item?id=20813021)
+[are](https://news.ycombinator.com/item?id=23212812) [others](https://news.ycombinator.com/item?id=26014344)
+
+In this article I want to share how I implemented syndication feeds in my
+[NextJS-powered](https://nextjs.org/) website.
+
+## Options and Requirements
+
+I did some Googling to see how other NextJS users were generating RSS feeds, and there turned out
+to be many people that had solved this particular problem [and wrote about it](https://www.google.com/search?q=rss+feed+nextjs)
+I found a couple of different approaches to generating and rendering RSS feeds in NextJS:
+
+**Generating feeds**:
+
+- Hand-build the required XML using templated strings 🤢
+- Use a library to do it for you. The most popular library for this in the JS ecosystem seems to be
+  [_feed_](https://www.npmjs.com/package/feed) 🤩
+
+**Rendering feeds**:
+
+- Use [Server-side rendering](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering)
+  - Advantages:
+    - Create dynamic feeds (more on that later) that can be different for each visitor
+    - Using NextJS pages to represent feeds feels natural in the NextJS way of doing things
+  - Disadvantages:
+    - You can't generate the website statically anymore (at least parts of it remain dynamic), 
+      which reduces performance
+  As a side note: from a development perspective, server-side rendered pages and statically generated 
+  pages in NextJS are so similar that the difference doesn't matter
+- Use [Static generation](https://nextjs.org/docs/basic-features/data-fetching#getstaticprops-static-generation)
+  - Advantages:
+    - Because the feeds are generated at build time, the site remains snappy
+  - Disadvantages
+    - You cannot set the `Content-Type` header for statically generated pages, so you can't serve 
+      those pages as `application/rss+xml`. I'm not how big of a problem this is and what black 
+      magic [Vercel](https://vercel.com/) applies when serving my NextJS site
+
+
+### Picking the requirements
+
+After looking at the options, I decided on the following requirements for my feeds:
+
+- I want to go for statically generated feeds, to keep my site fast and the implementation simple
+- Support for [RSS](https://en.wikipedia.org/wiki/RSS), 
+  [Atom](https://en.wikipedia.org/wiki/Atom_(Web_standard)) and [JSON Feed](https://www.jsonfeed.org/)
+- I want to include the **complete blog post contents** in the feeds. This is an important one 
+  because I personally really hate it when my RSS reader only shows me a summary of a post and 
+  I have to go the the website to read all of it.
+  Caveat though: my website is built using MDX, so I might include components in the future 
+  that are not easily convertible to static HTML without Javascript enabled. In that case, 
+  readers will have to click through to my site.
+
+## Implementation
+
+As per my requirements, I wanted to generate the feeds at build time. But as mentioned before, 
+NextJS doesn't support setting the `Content-Type` header for statically generated pages. 
+The alternative that many people use, is to have a separate script generate your feeds and 
+writing them to the public folder where all other static assets such as images are stored as well. 
+That way, the feeds would be served as static assets instead of statically generated pages -- which, 
+from the browsers perspective doesn't make a difference!
+
+I found a [good explanation by Ashlee Boyer](https://ashleemboyer.com/how-i-added-an-rss-feed-to-my-nextjs-site) 
+of this technique.
+
+My plan:
+
+1. Write script to generate feeds, using the _feed_ library from NPM
+2. Run this script as a `postbuild` step so it would always be invoked after building the site 
+   using `npm run build` (this happens not only locally, but also when Vercel deploys my site)
+
+### Problem 1: running using Typescript modules is hard
+
+I immediately hit a snag with (1), because I couldn't manage to use ES6/Typescript modules in a 
+script run outside of my normal website code. I'm using Typescript, and apparently `ts-node`, the 
+tool to run Typescript files, doesn't support modules. Writing the script in Javascript wasn't 
+really an option for me because I wanted to reuse a lot of logic that I already wrote for reading 
+and parsing MDX files.
+
+#### Solution
+
+I decided to follow the route that Ashlee Boyer suggests in her blog post and sneak in the 
+function to generate my feeds as a "stowaway" in the `getStaticProps` function of my index 
+page. This works beautifully!
+
+```typescript:pages/index.tsx
+export const getStaticProps: GetStaticProps = () => {
+    generateMainFeeds();
+    const lastPosts = getAllPostsFrontMatter('blog', 3);
+    return {
+        props: {
+            lastPosts,
+        },
+    };
+};
+```
+
+### Problem 2: including the full content in the feeds
+
+The code of my website already supported translating MDX files into valid JSX to be rendered 
+by React. But how to generate valid HTML from that content and include it in the feeds?
+
+#### Solution
+
+I couldn't find many examples of this, but did find out about 
+[`ReactDOMServer.renderToStaticMarkup`](https://reactjs.org/docs/react-dom-server.html#rendertostaticmarkup). 
+This function will take a bunch of React components and render them in to HTML. This is what is 
+used by many React server-side rendering solutions _(maybe also by NextJS?)_ and works perfectly 
+here as well.
+
+One caveat: if your content contains internal links -- which are often relative links -- then you 
+have to be mindful that those relative links are meaningless in the context of an RSS feed. 
+The way I solved this is by doing some regex-based replacements on the generated HTML.
+
+The complete content generation part looks like this:
+
+```typescript:lib/feeds.tsx
+const url = `${baseUrl}/blog/${post.frontMatter.slug}`;
+const htmlContent = ReactDOMServer.renderToStaticMarkup(
+    <ChakraProvider resetCSS theme={theme}>
+        <MDXRemote {...post.mdxSource} components={MDXComponents} />
+    </ChakraProvider>
+    .replace(/href="\/#/g, `href="${url}#`)
+    .replace(/href="\//g, `href="${baseUrl}/`)
+    .replace(/src="\//g, `src="${baseUrl}/`);
+)
+```
+
+
+### Problem 3: getting rid of style information
+
+My site uses [Chakra UI](https://chakra-ui.com/) for themeing, which will happily render tons 
+of `<style>` tags when statically generating HTML from your React components. For most use cases 
+where you render React on the server (statically or not), this is desirable. In the case of 
+RSS/Atom feeds, this is pretty useless.
+
+#### Solution
+
+The solution here is to strip all the `<script>` and `<style>` tags from the generated HTML. 
+Rather than summoning 
+[_The One whose Name cannot be expressed in the Basic Multilingual Plane_](https://stackoverflow.com/a/1732454/872397) 
+by trying to use regex here, I found [this library](https://www.npmjs.com/package/string-strip-html) 
+to help me with this task:
+
+```typescript:lib/feeds.tsx
+const cleanHtmlContent = stripHtml(htmlContent, {
+    onlyStripTags: ['script', 'style'],
+    stripTogetherWithTheirContents: ['script', 'style'],
+}).result;
+```
+
+## The end result
+
+I now have serve [RSS](/feeds/feed.xml), [Atom](/feeds/atom.xml) and a [JSON Feed](/feeds/feed.json) 
+for your reading pleasure. Most of the relevant code [can be found here](https://github.com/DandyDev/daan.fyi/blob/main/lib/feeds.tsx)
+
+## Future plans
+
+At some point I want to diversify my writing output by not only writing about tech. And 
+even within the topic of tech there are many sub-topics I could write about, not all of which 
+are equally interesting to every reader (all 5 of them, including my mom 👩‍👦).
+I'm planning to introduce [tags](https://github.com/DandyDev/daan.fyi/issues/3) to allow 
+filtering content once I have enough of it.
+
+Once I have tags, I would like to start supporting dynamic feeds so readers can subscribe only 
+to the stuff they actually want to read. I imagine building an endpoint like this:
+
+```
+/feeds/by-tags.xml?tags=tag1,tag2
+```
+
+I'm curious if others are doing this!
+
+
