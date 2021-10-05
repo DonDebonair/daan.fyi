@@ -1,5 +1,5 @@
 ---
-title: 'How to Add An RSS Feed to an NextJS Blog'
+title: 'How to Add An RSS Feed to a NextJS Blog'
 publishedAt: '2021-10-05'
 summary: "RSS is an important feature to give your content maximum exposure while also retaining control over your content. This post shows how to add syndication feeds to a statically generated NextJS site"
 ---
@@ -88,10 +88,10 @@ My plan:
 ### Problem 1: running Typescript modules is hard
 
 I immediately hit a snag with (1), because I couldn't manage to use ES6/Typescript modules in a
-script run outside of my normal website code. I'm using Typescript, and apparently `ts-node`, the
-tool to run Typescript files, doesn't support modules. Writing the script in Javascript wasn't
-really an option for me because I wanted to reuse a lot of logic that I already wrote for reading
-and parsing MDX files.
+script run outside of my normal website code. I'm using Typescript, and apparently
+`ts-node`, the tool to run Typescript files, doesn't support modules. Writing the script in
+Javascript wasn't really an option for me because I wanted to reuse a lot of logic that I already
+wrote for reading and parsing MDX files in the website itself.
 
 #### Solution
 
@@ -120,7 +120,7 @@ by React. But how to generate valid HTML from that content and include it in the
 
 I couldn't find many examples of this, but did find out about
 [`ReactDOMServer.renderToStaticMarkup`](https://reactjs.org/docs/react-dom-server.html#rendertostaticmarkup).
-This function will take a bunch of React components and render them in to HTML. This is what is
+This function will take a bunch of React components and render them into HTML. This is what is
 used by many React server-side rendering solutions _(maybe also by NextJS?)_ and works perfectly
 here as well.
 
@@ -145,10 +145,11 @@ const htmlContent = ReactDOMServer.renderToStaticMarkup(
 
 ### Problem 3: getting rid of style information
 
-My site uses [Chakra UI](https://chakra-ui.com/) for themeing, which will happily render tons
-of `<style>` tags when statically generating HTML from your React components. For most use cases
-where you render React on the server (statically or not), this is desirable. In the case of
-RSS/Atom feeds, this is pretty useless.
+My site uses [Chakra UI](https://chakra-ui.com/) for theming, which uses
+[Emotion](https://emotion.sh/) -- a CSS-in-JS library -- under the hood. Emotion will happily
+render tons of `<style>` tags when statically generating HTML from your React components. For most
+use cases where you render React on the server (statically or not), this is desirable. In the case
+of RSS/Atom feeds, this is pretty useless.
 
 #### Solution
 
