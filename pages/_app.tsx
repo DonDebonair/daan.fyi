@@ -11,7 +11,7 @@ import { domain } from '@/lib/config';
 
 const MyApp = ({ Component, pageProps }: AppProps): ReactNode => {
     return (
-        <PlausibleProvider domain={domain}>
+        <PlausibleProvider domain={domain} enabled={process.env.NODE_ENV === 'production'}>
             <ChakraProvider resetCSS theme={theme}>
                 <BaseLayout>
                     <Component {...pageProps} />
