@@ -1,14 +1,14 @@
-import { Flex, Heading, Text } from '@chakra-ui/react';
+import { Heading, Text } from '@chakra-ui/react';
 import DefaultLayout from '@/layouts/DefaultLayout';
 import React, { ReactNode } from 'react';
 import { GetStaticProps } from 'next';
-import { FrontMatter, getAllPostsFrontMatter } from '@/lib/mdx';
-import { DefaultLink, StylishLink } from '@/components/CustomLink';
-import { format, parseISO } from 'date-fns';
-import { generateMainFeeds } from '../lib/feeds';
+import { StylishLink } from '@/components/CustomLink';
+import { generateMainFeeds } from '@/lib/feeds';
+import { getPostsFrontMatter, PartialFrontMatter } from '@/lib/posts';
+import PostsList from '@/components/PostsList';
 
 type HomePageProps = {
-    lastPosts: Partial<FrontMatter>[];
+    lastPosts: PartialFrontMatter[];
 };
 
 const HomePage = ({ lastPosts }: HomePageProps): ReactNode => (
@@ -30,24 +30,13 @@ const HomePage = ({ lastPosts }: HomePageProps): ReactNode => (
         <Heading as="h2" size="xl">
             Recent posts
         </Heading>
-        {lastPosts.map((frontMatter) => {
-            return (
-                <Flex key={frontMatter.slug} direction="column">
-                    <DefaultLink href={`/blog/${frontMatter.slug}`}>
-                        <Heading as="h2" size="md" mb={2}>
-                            {frontMatter.title}
-                        </Heading>
-                    </DefaultLink>
-                    <Text>{format(parseISO(frontMatter.publishedAt), 'MMMM dd, yyyy')}</Text>
-                </Flex>
-            );
-        })}
+        <PostsList posts={lastPosts} />
     </DefaultLayout>
 );
 
 export const getStaticProps: GetStaticProps = () => {
     generateMainFeeds();
-    const lastPosts = getAllPostsFrontMatter('blog', 3);
+    const lastPosts = getPostsFrontMatter('writings', 3);
     return {
         props: {
             lastPosts,

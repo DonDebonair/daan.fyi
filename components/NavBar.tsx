@@ -80,7 +80,7 @@ const NavBar = (): ReactElement => {
                     pt={[4, 4, 0, 0]}
                 >
                     <MenuItem href="/">Home</MenuItem>
-                    <MenuItem href="/blog">Blog</MenuItem>
+                    <MenuItem href="/writings">Writings</MenuItem>
                     <MenuItem href="/about">About</MenuItem>
 
                     <CustomLink href="/feeds/feed.xml">

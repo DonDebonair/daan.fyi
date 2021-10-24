@@ -33,7 +33,10 @@ const Footer = (): ReactElement => (
                 <IconButton aria-label="LinkedIn" icon={<GrLinkedin />} variant="ghost" />
             </Link>
         </HStack>
-        <Flex justify="center">
+        <Flex direction="column" align="center">
+            <DefaultLink pb={2} fontSize="sm" href="/topics">
+                All posts by topic
+            </DefaultLink>
             <DefaultLink fontSize="sm" href="/archive">
                 Archive
             </DefaultLink>

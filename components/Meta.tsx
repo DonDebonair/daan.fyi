@@ -7,7 +7,7 @@ export type MetaProps = {
     title?: string;
     description?: string;
     image?: string;
-    type?: string;
+    type?: 'website' | 'article' | 'profile' | 'book';
     date?: string;
 };
 

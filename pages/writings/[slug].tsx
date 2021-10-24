@@ -1,13 +1,13 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { getAndSerializePost, getPosts, PostData } from '@/lib/mdx';
 import { MDXComponents } from '@/components/MDXComponents';
 import { MDXRemote } from 'next-mdx-remote';
 import { Avatar, Flex, Heading, Text } from '@chakra-ui/react';
 import DefaultLayout from '@/layouts/DefaultLayout';
 import React, { ReactNode } from 'react';
 import { format, parseISO } from 'date-fns';
+import { getAndSerializePost, getPosts, PostData } from '@/lib/posts';
 
-const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
+const ArticlePage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
     return (
         <DefaultLayout
             as="article"
@@ -43,7 +43,7 @@ const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-    const { mdxSource, frontMatter } = await getAndSerializePost('blog', params.slug as string);
+    const { mdxSource, frontMatter } = await getAndSerializePost('writings', params.slug as string);
     return {
         props: {
             mdxSource,
@@ -53,7 +53,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const posts = getPosts('blog');
+    const posts = getPosts('writings');
 
     return {
         paths: posts.map((p) => ({
@@ -65,4 +65,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     };
 };
 
-export default BlogPage;
+export default ArticlePage;
