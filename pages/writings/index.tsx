@@ -4,27 +4,27 @@ import DefaultLayout from '@/layouts/DefaultLayout';
 import { GetStaticProps } from 'next';
 import { getPostsFrontMatter, PartialFrontMatter } from '@/lib/posts';
 import PostsList from '@/components/PostsList';
+import { StylishLink } from '@/components/CustomLink';
 
-type ArchiveOverviewProps = {
+type WritingsOverviewProps = {
     allPosts: PartialFrontMatter[];
 };
 
-const ArchiveOverviewPage = ({ allPosts }: ArchiveOverviewProps): ReactNode => (
-    <DefaultLayout title="Archive | Daan Debie">
+const WritingsOverviewPage = ({ allPosts }: WritingsOverviewProps): ReactNode => (
+    <DefaultLayout title="Blog | Daan Debie">
         <Heading as="h1" size="xl">
-            Archive
+            Writings
         </Heading>
         <Text>
-            These are older articles that I wrote for previous incarnations of my blog that used to
-            live at DandyDev.net. These articles do not represent my current interests, skills and
-            who I am anymore, but I leave them here for historical context.
+            These are some of my writings. You can also{' '}
+            <StylishLink href="/topics">browse them by topic.</StylishLink>
         </Text>
         <PostsList posts={allPosts} />
     </DefaultLayout>
 );
 
 export const getStaticProps: GetStaticProps = () => {
-    const allPosts = getPostsFrontMatter('archive');
+    const allPosts = getPostsFrontMatter('writings');
     return {
         props: {
             allPosts,
@@ -32,4 +32,4 @@ export const getStaticProps: GetStaticProps = () => {
     };
 };
 
-export default ArchiveOverviewPage;
+export default WritingsOverviewPage;

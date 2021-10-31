@@ -1,13 +1,13 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { getAndSerializePost, getPosts, PostData } from '@/lib/mdx';
 import { MDXComponents } from '@/components/MDXComponents';
 import { MDXRemote } from 'next-mdx-remote';
 import { Avatar, Flex, Heading, Text } from '@chakra-ui/react';
 import DefaultLayout from '@/layouts/DefaultLayout';
 import React, { ReactNode } from 'react';
 import { format, parseISO } from 'date-fns';
+import { getAndSerializePost, getPosts, PostData } from '@/lib/posts';
 
-const BlogPage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
+const ArticlePage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
     return (
         <DefaultLayout
             as="article"
@@ -65,4 +65,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     };
 };
 
-export default BlogPage;
+export default ArticlePage;

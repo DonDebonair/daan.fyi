@@ -1,7 +1,6 @@
 import { Feed, Item } from 'feed';
 import { baseUrl, copyright } from '@/lib/config';
 import fs from 'fs';
-import { getAllPosts, PostData } from '@/lib/mdx';
 import ReactDOMServer from 'react-dom/server';
 import makeTitle from 'title';
 import { parseISO } from 'date-fns';
@@ -11,9 +10,10 @@ import React from 'react';
 import theme from '../styles/theme';
 import { ChakraProvider } from '@chakra-ui/react';
 import { stripHtml } from 'string-strip-html';
+import { getPostsWithContent, PostData } from '@/lib/posts';
 
 const buildFeed = (): Feed => {
-    const feed = new Feed({
+    return new Feed({
         title: 'Daan Debie',
         description: 'This is a feed of all posts on the website of Daan Debie',
         id: 'https://www.daan.fyi/',
@@ -34,12 +34,10 @@ const buildFeed = (): Feed => {
             link: 'https://www.daan.fyi',
         },
     });
-
-    return feed;
 };
 
 const makeItem = (post: PostData): Item => {
-    const url = `${baseUrl}/blog/${post.frontMatter.slug}`;
+    const url = `${baseUrl}/writings/${post.frontMatter.slug}`;
     const htmlContent = ReactDOMServer.renderToStaticMarkup(
         <ChakraProvider resetCSS theme={theme}>
             <MDXRemote {...post.mdxSource} components={MDXComponents} />
@@ -64,7 +62,7 @@ const makeItem = (post: PostData): Item => {
 
 export const generateMainFeeds = async (): Promise<void> => {
     const feed = buildFeed();
-    const posts = await getAllPosts('blog');
+    const posts = await getPostsWithContent('writings');
     posts.forEach((post) => feed.addItem(makeItem(post)));
     fs.mkdirSync('public/feeds/', { recursive: true });
     fs.writeFileSync('public/feeds/feed.xml', feed.rss2());
