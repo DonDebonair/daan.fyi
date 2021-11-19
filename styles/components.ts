@@ -2,19 +2,21 @@ const components = {
     Heading: {
         baseStyle: {
             mt: 2,
-            mb: 8,
+            mb: 4,
         },
     },
     Text: {
         baseStyle: {
-            mb: 4,
+            mb: 2,
+            mt: 2,
         },
     },
     List: {
         parts: ['container', 'item', 'icon'],
         baseStyle: {
             container: {
-                mb: 4,
+                mb: 2,
+                mt: 2,
             },
         },
     },
