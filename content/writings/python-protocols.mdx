@@ -1,0 +1,132 @@
+---
+title: 'Static Duck Typing in Python with Protocols'
+publishedAt: '2021-11-19'
+summary: "Duck typing is considered to be one of Python's strengths. If you want to have the benefits of duck typing but also want your types statically checked, Protocols offer an excellent solution."
+topics: ['python', 'typing']
+---
+At [Source](https://source.ag/), we write most of our code in Python. It's a language that both our
+Software Engineers and Data Scientists are equally at home in. It's easy to be productive in Python,
+in part due to its dynamic nature. Not having to think too much about the types of your variables
+and functions, can make it easier to experiment, especially if you're not entirely clear yet
+on how you're going to solve a particular problem.
+
+When moving our code to production however, we want to have more guarantees about the behaviour of
+our code. Writing (unit) tests is one way to get more guarantees, but we also make heavy use of
+[type hints](https://www.python.org/dev/peps/pep-0484/) to give us more confidence in our code.
+Type hints can also provide a productivity boost, because not only humans can reason better about
+type hinted code, your editor can as well!
+
+Sometimes though, using type hints everywhere can feel like you're losing out on a lot of the magic
+and speed that a dynamic type system brings you. One particular trait of dynamic typing that is
+pretty idiomatic in Python, is **duck typing**.
+
+## Duck Typing
+
+[Duck typing](https://en.wikipedia.org/wiki/Duck_typing) is a philosophy in programming where you
+care more about the behaviour and properties of an object than its stated type to determine if that
+object is useful in a certain situation. Duck typing is inspired by the _duck test_:
+
+> If it walks like a duck and it quacks like a duck, then it must be a duck
+
+In practice this means that when you write a function that receives a certain input, you care only
+about the behaviour and/or attributes of that input, not the explicit _type_ of that input.
+
+One interesting question that arises is: if you don't want to be strict about the type of the
+parameters a function receives, are there still any _static type guarantees_ to be had?
+
+And the other way around is interesting as well: if you have a function with statically typed
+inputs, can I _loosen up_ those parameters to make the function more universally useful, the way
+duck typing does?
+
+As it turns out, Python provides a neat way to have our cake and eat it too!
+
+## Protocols to the Rescue
+
+When reviewing some code recently, I came across a function that looked roughly like this:
+
+```python
+def calculate_windowed_avg(
+        measurements: List[Union[TemperatureMeasurement, HumidityMeasurement]],
+        window_size: timedelta,
+        field_name: str
+    ) -> Dict[datetime, float]:
+    window_upper_bound = measurements[0].timestamp + window_size
+    current_window = []
+    window_averages = OrderedDict()
+    for m in measurements:
+        # various calculations happen here
+        # based on the timestamp of each measurement
+        ...
+    return window_averages
+```
+
+The goal of this function is to calculate the average of a certain field (identified by
+`field_name`) in a rolling window. At the time of writing this function, we were using it for
+`TemperatureMeasurement` and `HumidityMeasurement`, but it is very likely we'll want to use it for
+different types of measurements in the future.
+
+If we look closely at how the function uses the input, it turns out that the only thing we want to
+be guaranteed of, is that the items we pass into the function have a `timestamp` field. So instead
+of specifying each different type that has adheres to this contract, we'd like to tell the type
+checker that we only care about having a `timestamp` field to work with.
+
+`Protocol` from the `typing` module lets us do that. Just like with duck typing, **Protocols** lets
+you specify the behaviour or attributes you expect, without caring about the type. Here is what
+that looks like:
+
+```python{4,5,8}
+from typing import Protocol, List, Dict
+from datetime import datetime
+
+class MeasurementLike(Protocol):
+    timestamp: datetime
+
+def calculate_windowed_avg(
+        measurements: List[MeasurementLike],
+        window_size: timedelta,
+        field_name: str
+    ) -> Dict[datetime, float]:
+    window_upper_bound = measurements[0].timestamp + window_size
+    ...
+```
+
+Now the type checker doesn't know _exactly_ what the type is of whatever is provided as
+`measurements` but it does know what those items have a `timestamp` field because they adhere to
+the `MeasurementLike` Protocol.
+
+In a sense, a Protocol acts like one side of an _Interface_ as we know it from Java or Typescript.
+Instead of having to specify the behaviour and properties both on a type and on the functions that
+use it, we only have to specify it on a function, without caring about the types of the objects
+that are provided to the function.
+
+## Protocol and TypeVar
+
+You can also use Protocols together with `TypeVar` for even more general functions that are still
+type checked. One use-case that comes to mind, is when you don't care about the input type to a
+function, as long as it follows a protocol, but you also want to guarantee that the _output_ of
+the function is of the same type as the _input_, no matter what the exact type is.
+
+This works as follows:
+
+```python
+from typing import Protocol, TypeVar
+from datetime import datetime
+
+class MeasurementLike(Protocol):
+    timestamp: datetime
+
+M = TypeVar('M', bound=MeasurementLike)
+
+def measurement_at_timezone(measurement: M, tz: tzinfo) -> M:
+    measurement.timestamp = measurement.timestamp.astimezone(tz)
+    return measurement
+```
+
+Here we created a function that takes any object that has a `timestamp` field and guarantees that
+the output will be of the same type as the input.
+
+## Conclusion
+
+Protocols in Python provide a nice way to use duck typing while still having some static type
+guarantees. You can define contracts for your functions without caring too much about the actual
+types of your inputs.
