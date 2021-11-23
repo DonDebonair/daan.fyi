@@ -46,7 +46,7 @@ When reviewing some code recently, I came across a function that looked roughly 
 
 ```python
 def calculate_windowed_avg(
-        measurements: List[Union[TemperatureMeasurement, HumidityMeasurement]],
+        measurements: Union[List[TemperatureMeasurement], List[HumidityMeasurement]],
         window_size: timedelta,
         field_name: str
     ) -> Dict[datetime, float]:
@@ -130,3 +130,8 @@ the output will be of the same type as the input.
 Protocols in Python provide a nice way to use duck typing while still having some static type
 guarantees. You can define contracts for your functions without caring too much about the actual
 types of your inputs.
+
+---
+
+_Update on 2021-11-23: There was a wrong type annotation in this article, as [pointed out by
+**ragebol** on Hacker News](https://news.ycombinator.com/item?id=29315363), which is now fixed_
