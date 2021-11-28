@@ -1,0 +1,65 @@
+---
+title: 'Customzing pyenv behavior with hooks'
+publishedAt: '2021-11-28'
+summary: 'You can customize the behavior of pyenv or its plugins - like pyenv virtualenv - by using hooks. These are simple (bash) scripts that are run at specific points when pyenv commands are run.'
+topics: ['python', 'pyenv', 'plugins', 'snippets']
+---
+I use [pyenv](https://github.com/pyenv/pyenv) to manage different Python versions on my laptop. It
+also comes with an [official plugin](https://github.com/pyenv/pyenv-virtualenv) that lets you manage
+_virtualenvs_ through pyenv, which I find very convenient. Basically, virtualenvs are treated as
+just different Python versions by pyenv.
+
+One thing that bothered me is that, whenever I create a new virtualenv and use `pip` in it, I am
+inevitably greeted by a message telling me `pip` is out-of-date:
+
+```
+WARNING: You are using pip version 21.2.3; however, version 21.3.1 is available.
+You should consider upgrading via the '~/.pyenv/versions/3.10.0/envs/test/bin/python3.10 -m pip install --upgrade pip' command.
+```
+
+So I end up always having to upgrade pip after creating a new virtualenv. Wouldn't it be nice if
+this could be automated?
+
+Turns out, we actually _can_ by leveraging [_pyenv hooks_](https://github.com/pyenv/pyenv/wiki/Authoring-plugins#pyenv-hooks).
+
+## pyenv hooks
+
+pyenv hooks are scripts that are executed by pyenv whenever certain commands are run. These can be
+regular pyenv commands like `pyenv install` or `pyenv rehash` for example. But what is not
+apparent from the pyenv documentation, is that you can also create hooks for plugins, like
+`pyenv virtualenv`.
+
+You can create a hook by creating a script at the following location:
+
+```bash
+$PYENV_ROOT/pyenv.d/<hook-name>/<whatever>.bash
+```
+
+`hook-name` here can be any of: `exec`, `rehash`, `which`, `install` -- which are all regular pyenv
+commands -- but it can also be a plugin command, like `virtualenv`. The filename of the script doesn't
+matter, and neither does the extension. I use `.bash` here to make it explicit that this is a bash
+script, but pyenv hooks can be written in any language.
+
+To create a hook that upgrades `pip` and some other default packages, you can create a new script
+as follows:
+
+```bash
+mkdir -p $PYENV_ROOT/pyenv.d/virtualenv/
+$EDITOR $PYENV_ROOT/pyenv.d/virtualenv/after.bash
+```
+
+Where `$EDITOR` is your favorite editor (like `vim`, **RIGHT?!**)
+
+Then add the following contents:
+
+```bash
+after_virtualenv 'PYENV_VERSION="$VIRTUALENV_NAME" pyenv-exec pip install --upgrade pip setuptools wheel'
+```
+
+`after_virtualenv` is the command that tells pyenv _when_ to execute the following command. In this
+case its defined by the `pyen virtualenv` plugin. First we set the pyenv version to the name
+of the virtualenv we just created. This is set by pyenv virtualenv as `$VIRTUALENV_NAME`. Then we
+install/upgrade `pip` itself and `setuptools` and `wheel`.
+
+That is all there is to it! Now any time you create a new virtualenv using `pyenv virtualenv`, the
+aforementioned packages will be automatically upgraded after the virtualenv was created.
