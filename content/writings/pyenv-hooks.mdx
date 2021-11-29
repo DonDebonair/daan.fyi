@@ -57,7 +57,7 @@ after_virtualenv 'PYENV_VERSION="$VIRTUALENV_NAME" pyenv-exec pip install --upgr
 ```
 
 `after_virtualenv` is the command that tells pyenv _when_ to execute the following command. In this
-case its defined by the `pyen virtualenv` plugin. First we set the pyenv version to the name
+case its defined by the `pyenv virtualenv` plugin. First we set the pyenv version to the name
 of the virtualenv we just created. This is set by pyenv virtualenv as `$VIRTUALENV_NAME`. Then we
 install/upgrade `pip` itself and `setuptools` and `wheel`.
 
