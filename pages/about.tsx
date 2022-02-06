@@ -22,11 +22,11 @@ const AboutPage = (): ReactNode => (
         </Text>
         <Text fontSize="lg">
             I live in a small coastal town in The Netherlands with my lovely wife, our beautiful{' '}
-            <StylishLink href="https://www.instagram.com/p/BdYpuOCnX9f/" isExternal>
+            <StylishLink href="https://twitter.com/DaanDebie/status/1396426887312904200/photo/2">
                 Maine Coon
             </StylishLink>{' '}
             and our{' '}
-            <StylishLink href="https://www.instagram.com/p/CLFmATWJ-qhk7lj9XC_GPXLbGqGnHj50FT6ZIM0/">
+            <StylishLink href="https://twitter.com/DaanDebie/status/1420453059130531854/photo/1">
                 adorable and slightly energetic Golden Retriever pup
             </StylishLink>
             . I really do love long walks on the beach. But I‘m also very happy staying indoors
