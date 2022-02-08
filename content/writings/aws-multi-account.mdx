@@ -1,6 +1,6 @@
 ---
 title: 'Setting up multiple AWS acounts for fun nor profit'
-publishedAt: '2022-02-07'
+publishedAt: '2022-02-09'
 summary: 'Using multiple AWS accounts is not fun, nor is it profitable, but it can help you set up your infrastructure in a more secure way. It also helps with keeping your sanity as your company/team grows in size.'
 topics: ['aws', 'multi-account', 'infrastructure']
 ---
@@ -10,7 +10,7 @@ product and a blatant disregard for any non-functional distractions? I do.
 When I started working at [Source](https://source.ag) about 9 months ago, it was just me -- the
 first employee -- and the 2 founders. The only code written, were a couple of demos for investor
 pitches which we threw away quickly. I was in the luxurious position to be able to start building
-our product _from scratch_. I deployed _everything_ I built into **a single AWS account**.
+our product _from scratch_. I deployed _everything_ I built into **a single AWS root account**.
 
 Fast-forward to today, and we're with more than 30 people -- most of whom are software engineers
 and data scientists writing and deploying code. In December, we finished migrating all of our
@@ -105,9 +105,9 @@ According to AWS:
 ![What does that even mean?!](/images/whatdoesthatevenmean.gif)
 
 AWS Organizations lets you organize a bunch of related AWS accounts in a hierarchical, tree-like
-structure. It will let you manage all those accounts from one central _management account_. All
-bills from all member accounts will be aggregated to the management account where you can pay them
-as one.
+structure. It will let you manage all those accounts from one central _management account_. With
+_Consolidated Billing_, all bills from all member accounts will be aggregated to the management
+account where you can pay them as one.
 
 Arguably the most powerful feature of AWS Organizations is that you can group the member accounts
 together in _Organizational Units_ (OUs) and apply common security policies to those. This lets you
@@ -192,3 +192,7 @@ sensitive data and/or critical infrastructure.
 
 In future blog posts I will elaborate on the steps taken to set all of this up and share some
 practical guides on how to use a multi-account setup on a day-to-day basis.
+
+---
+
+_Thanks to [Dan](https://twitter.com/djvdorp) for proofreading this ❤️_
