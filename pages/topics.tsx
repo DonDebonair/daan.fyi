@@ -22,8 +22,9 @@ const TopicsPage = ({ topics }: TopicsProps): ReactNode => {
                         maxWidth="800px"
                         w="100%"
                         m="0 auto 0 auto"
+                        pb={4}
                     >
-                        <DefaultLink href={`/topics/${topic}`}>
+                        <DefaultLink href={`/${topic}`}>
                             <Heading as="h2" fontSize="lg" mb={3}>
                                 {topic}
                             </Heading>
