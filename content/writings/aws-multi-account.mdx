@@ -1,0 +1,198 @@
+---
+title: 'Setting up multiple AWS acounts for fun nor profit'
+publishedAt: '2022-02-09'
+summary: 'Using multiple AWS accounts is not fun, nor is it profitable, but it can help you set up your infrastructure in a more secure way. It also helps with keeping your sanity as your company/team grows in size.'
+topics: ['aws', 'multi-account', 'infrastructure']
+---
+Don't you just love the freedom of working at an early stage startup, with a relentless focus on
+product and a blatant disregard for any non-functional distractions? I do.
+
+When I started working at [Source](https://source.ag) about 9 months ago, it was just me -- the
+first employee -- and the 2 founders. The only code written, were a couple of demos for investor
+pitches which we threw away quickly. I was in the luxurious position to be able to start building
+our product _from scratch_. I deployed _everything_ I built into **a single AWS root account**.
+
+Fast-forward to today, and we're with more than 30 people -- most of whom are software engineers
+and data scientists writing and deploying code. In December, we finished migrating all of our
+infrastructure to a **multi-account setup** in AWS. In this blog post I want to explain why we
+did this and what our multi-account setup looks like.
+
+![Buy why?!](/images/butwhy.gif)
+
+## When the Cracks Start Showing
+
+As mentioned, when we started everything was deployed into a single AWS account.
+When the moment came that we wanted to have separate development and production environments, I
+created 2 VPCs in the same account and deployed an identical setup in both, each consisting of:
+
+- An ECS cluster for our backend services
+- A PostgreSQL database on RDS for persistence
+- Some S3 buckets for storing unstructured data
+- Some Lambdas for data processing.
+
+It looked something like this:
+
+![All AWS resources in 1 account](/images/aws-single-account.png)
+
+I deployed our applications and services (except for our frontend, which is deployed on Vercel) in
+two identical VPCs -- still living in the same AWS account -- and called it a day.
+
+---
+
+When we started building our team and the first software engineers and data scientists joined, I
+created IAM users for everyone and solved access control by defining groups with specific IAM
+policies (permissions) attached to them and adding the IAM users to those groups. The more people
+joined the team, the more diverse the access requirements became, for example:
+
+- A data scientist does need access to the same things as a software engineer
+- A junior person does not need the same _level_ of access as a senior person
+
+And there are many more subtle differences in the kind of access to infrastructure people need and
+should have.
+
+### Single-account Problems in a Nutshell
+
+In the end, our single-account setup made it difficult to build a secure and resilient
+infrastructure:
+
+- **It is less secure**. If someone gains access to this one account, they have
+  access to _everything_. It's hard to separate resources for different environments
+  (e.g. production, development) and treat these resources differently security wise.
+- **It is less safe and resilient**. If something goes wrong with one environment (e.g. development),
+  it's easy to affect services in other environments (e.g. production) when they're in the same
+  account. They get caught in the _blast radius_
+- **It's hard to maintain**. All AWS resources live in 1 account so when different users need
+  different levels of access, this needs to be controlled on a per-resource level, which is hard to
+  configure and keep track of
+- **It's hard to control spend in this way**. Once certain access is granted to create new resources,
+  there is no limit to how many resources can be created and what services can be used
+
+Many of these problems _can_ actually be solved -- even in a single-account setup -- by "properly"
+tagging all your AWS resources and creating elaborate IAM policies for users and resources based on
+those tags. But such a tagging strategy will quickly become really complex and will cost a lot of
+time to maintain. Needless to say that it's quite error-prone as well.
+
+Aside from the security and safety implications, our setup had some other problems:
+
+- All IAM Users were created and managed through CDK/CloudFormation, because we love _Infrastructure
+  as Code_. This is problematic:
+  - It makes it possible for anyone with access to CloudFormation to see all Access Keys + Secrets
+  - It's not easy to scale, because we now need to manually deploy a CDK stack when new users need
+    to be added
+  - It's hard to broadly define policies for different access patterns in this way
+- Users have to use a separate set of credentials for accessing AWS instead of using an existing
+  login (i.e. their Google Workspace account)
+
+## There is a Better Way
+
+When I was researching a way forward, I found [many](https://aws.amazon.com/blogs/mt/governance-risk-and-compliance-when-establishing-your-cloud-presence/)
+[blog](https://www.parkmycloud.com/blog/aws-multi-account-strategy/) [posts](https://medium.com/@mailyashacharya/aws-account-strategy-for-every-business-22aad27b7fa1)
+[extolling the virtues](https://medium.com/cloudpegboard/aws-multi-account-management-has-come-of-age-510ddf33f9d3)
+of putting your infrastructure into multiple AWS accounts. But before getting a better
+understanding of how this would work, I had some reservations about using multiple AWS accounts:
+
+- Do I need to create multiple IAM users for each person, so they can log in to multiple accounts?
+- How do we control costs? Do I need to keep track of different bills for each account?
+- How can I share resources, such as reusable Docker images or shared data in an S3 bucket?
+
+AWS offers a nice solution to these problems (and others) in the form of [**AWS Organizations**](https://docs.aws.amazon.com/whitepapers/latest/organizing-your-aws-environment/core-concepts.html#aws-organizations)
+
+According to AWS:
+
+> An organization is an entity that you create to consolidate a collection of accounts so that you
+> can administer them as a single unit.
+
+![What does that even mean?!](/images/whatdoesthatevenmean.gif)
+
+AWS Organizations lets you organize a bunch of related AWS accounts in a hierarchical, tree-like
+structure. It will let you manage all those accounts from one central _management account_. With
+_Consolidated Billing_, all bills from all member accounts will be aggregated to the management
+account where you can pay them as one.
+
+Arguably the most powerful feature of AWS Organizations is that you can group the member accounts
+together in _Organizational Units_ (OUs) and apply common security policies to those. This lets you
+define permissions and control access in broad strokes -- and from a central place -- while keeping
+the natural separation of concerns that comes from using separate AWS accounts to organize your
+infrastructure.
+
+### Easy user management using AWS SSO
+
+When it comes to user management, AWS Organizations offers the convenience of letting users log in
+with _one_ user account (not to be confused with AWS account), using
+[_AWS Single Sign-on_](https://aws.amazon.com/single-sign-on/). AWS SSO lets you create users and
+give them login credentials within AWS itself or link them to an external _identity provider_
+like Google or Active Directory. You can then give these users access to specific AWS accounts in
+your AWS Organization. Users can be assigned specific permissions within these accounts.
+<Small>(I will explain more on how this works in a later blog post)</Small>
+
+This has several advantages compared to using regular IAM users:
+
+- Everyone can log in using credentials they already use on a daily basis (Google Workspace
+  credentials in our case)
+- There is no more need to create and manage IAM users through CDK
+- There is no credential leakage through CloudFormation
+- We can potentially automate user creation by programmatically syncing AWS users and Google
+  Workspace users
+
+## What does a good AWS Organization setup look like?
+
+Well, I don't know. But I do know what works for us <Small as="span">so far</Small>
+
+When deciding what AWS accounts to create and how to group them, I had the following requirements:
+
+- There must be a clear separation between Development, Staging and Production resources/infrastructure
+- It should be easy to control access to resources with different security and "stability"
+  properties without having to manually define lots of policies
+- We want to give _sandbox_ accounts to individual engineers and data scientists to allow and
+  encourage experimentation while limiting spend
+- Sensitive resources and data should be placed out of reach from easy access when not needed for
+  normal day-to-day activities
+- We want to follow the _Principle of least privilege_: give only the minimum set of permissions to
+  allow access to exactly the resources a person or service needs to perform their job and not more.
+- We want as little overhead and bureaucracy as possible within the constraints of the previous
+  requirements
+
+This was aside from solving the aforementioned problems we had with our single-account setup.
+
+This led me to create the following accounts, organized by Organizational Unit:
+
+![AWS Organization design](/images/aws-org-design.png)
+
+Some notes and highlights:
+
+- **Workloads**: this contains the "meat" of the infrastructure used for the day-to-day running of
+  our products. Each of the workload accounts represents a different _environment_, like Production,
+  Staging and Development. They all have a similar setup and contain basic infrastructure like:
+  - a VPC network with private and public subnets
+  - a couple of ECS clusters for running services in (Docker) containers
+  - some PostgreSQL databases on RDS
+  - many lambdas for data processing, machine learning etc.
+- **Shared**: as the name implies, this OU houses accounts with infrastructure that is shared
+  between workloads/services on other accounts. Some highlights:
+  - _Access Management_: this contains IAM users for external machines and services that need to
+    access AWS infrastructure on our behalf. Given the sensitive and "dangerous" access some of these
+    machine users get, the Access Management account is tightly locked down. Example of an IAM user in
+    this account, is the _Github Actions_ user that is used to deploy code to our workload accounts.
+    This user assumes roles within the workload accounts for deployments.
+  - _Sensitive Data_: this account holds sensitive data that is not needed for day-to-day operations,
+    but is occasionally used for training ML models and building new features
+  - _Infra_: contains shared infrastructure, such as our central Docker registry. Docker images
+    pushed to this registry are automatically replicated to our workload accounts for easy access
+- **Sandbox**: our employees occasionally need to experiment with AWS services so they get a
+  sandbox account to do so, without messing up our operational workloads. Budget restrictions are
+  placed on these accounts
+
+## Conclusion
+
+Using AWS Organizations we have now set up our infrastructure at Source in such a way that it is
+more secure and also more scalable and easier to maintain from a security perspective.
+Our Software Engineers and Data Scientists have easier access to the infrastructure, services and
+resources they need -- using only _one_ set of credentials -- without exposing them to
+sensitive data and/or critical infrastructure.
+
+In future blog posts I will elaborate on the steps taken to set all of this up and share some
+practical guides on how to use a multi-account setup on a day-to-day basis.
+
+---
+
+_Thanks to [Dan](https://twitter.com/djvdorp) for proofreading this ❤️_
