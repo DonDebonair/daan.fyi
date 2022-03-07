@@ -24,6 +24,7 @@ import React, { ReactNode } from 'react';
 import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/types/table';
 import Image from 'next/image';
 import { Small } from '@/components/typography';
+import SideNote from '@/components/SideNote';
 
 const Hr: ReactNode = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -116,4 +117,5 @@ export const MDXComponents = {
     blockquote: Blockquote,
     img: (props): ReactNode => <Image {...props} />,
     Small,
+    SideNote,
 };

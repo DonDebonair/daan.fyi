@@ -3,7 +3,7 @@ import { getAllTopics } from '@/lib/topics';
 import { PartialFrontMatter } from '@/lib/posts';
 import React, { ReactNode } from 'react';
 import DefaultLayout from '@/layouts/DefaultLayout';
-import { Box, Flex, Heading } from '@chakra-ui/react';
+import { Flex, Heading } from '@chakra-ui/react';
 import { PostSummaryList } from '@/components/PostsList';
 import { DefaultLink } from '@/components/CustomLink';
 
