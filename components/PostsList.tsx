@@ -1,5 +1,5 @@
 import { PartialFrontMatter } from '@/lib/posts';
-import { Badge, Flex, Heading, Text } from '@chakra-ui/react';
+import { Flex, Heading, Text } from '@chakra-ui/react';
 import { DefaultLink } from '@/components/CustomLink';
 import { format, parseISO } from 'date-fns';
 import React, { ReactElement } from 'react';
