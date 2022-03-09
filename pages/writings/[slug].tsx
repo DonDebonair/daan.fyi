@@ -7,8 +7,9 @@ import React, { ReactNode } from 'react';
 import { format, parseISO } from 'date-fns';
 import { getAndSerializePost, getPosts, PostData } from '@/lib/posts';
 import TopicBadge from '@/components/TopicBadge';
+import SeriesOverview from '@/components/SeriesOverview';
 
-const ArticlePage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
+const ArticlePage = ({ mdxSource, frontMatter, seriesData }: PostData): ReactNode => {
     return (
         <DefaultLayout
             as="article"
@@ -42,17 +43,30 @@ const ArticlePage = ({ mdxSource, frontMatter }: PostData): ReactNode => {
                     <TopicBadge key={t} topic={t} />
                 ))}
             </Flex>
+            {frontMatter.series ? (
+                <SeriesOverview
+                    title={seriesData.title}
+                    posts={seriesData.posts}
+                    currentSlug={frontMatter.slug}
+                />
+            ) : null}
+
             <MDXRemote {...mdxSource} components={MDXComponents} />
         </DefaultLayout>
     );
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-    const { mdxSource, frontMatter } = await getAndSerializePost('writings', params.slug as string);
+    const { mdxSource, frontMatter, seriesData } = await getAndSerializePost(
+        'writings',
+        params.slug as string,
+        true
+    );
     return {
         props: {
             mdxSource,
             frontMatter,
+            seriesData,
         },
     };
 };
