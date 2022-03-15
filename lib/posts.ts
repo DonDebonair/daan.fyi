@@ -14,22 +14,36 @@ export type FrontMatter = {
     publishedAt: string;
     readingTime: string;
     summary?: string;
+    series?: string;
     topics?: string[];
 };
 
 export type PartialFrontMatter = Pick<
     FrontMatter,
-    'slug' | 'title' | 'publishedAt' | 'summary' | 'topics'
+    'slug' | 'title' | 'publishedAt' | 'summary' | 'topics' | 'series'
 >;
+
+export type SimplePost = {
+    title: string;
+    slug: string;
+    publishedAt: string;
+};
 
 export type PostFile = {
     fileName: string;
     slug: string;
 };
 
+export type SeriesData = {
+    title: string;
+    type: ContentType;
+    posts: SimplePost[];
+};
+
 export type PostData = {
     mdxSource: MDXRemoteSerializeResult;
     frontMatter: FrontMatter;
+    seriesData?: SeriesData;
 };
 
 const getPost = (type: ContentType, slug: string): matter.GrayMatterFile<string> => {
@@ -37,10 +51,15 @@ const getPost = (type: ContentType, slug: string): matter.GrayMatterFile<string>
     return matter(postSource);
 };
 
-export const getAndSerializePost = async (type: ContentType, slug: string): Promise<PostData> => {
+export const getAndSerializePost = async (
+    type: ContentType,
+    slug: string,
+    includeSeriesData = false
+): Promise<PostData> => {
     const { data, content } = getPost(type, slug);
-    const { title, publishedAt, summary, topics } = data;
+    const { title, publishedAt, summary, topics, series } = data;
     const mdxSource = await serializePost(content);
+    const seriesData = includeSeriesData && series ? await getSeriesData(type, series) : null;
     return {
         mdxSource,
         frontMatter: {
@@ -51,7 +70,9 @@ export const getAndSerializePost = async (type: ContentType, slug: string): Prom
             readingTime: readingTime(content).text,
             summary: summary ?? null,
             topics: topics ?? null,
+            series: series ?? null,
         },
+        seriesData: seriesData,
     };
 };
 
@@ -74,6 +95,7 @@ export const getPostsFrontMatter = (type: ContentType, limit?: number): PartialF
                 publishedAt: data.publishedAt,
                 summary: data.summary ?? null,
                 topics: data.topics ?? null,
+                series: data.series ?? null,
             };
         })
         .sort((a, b) => parseISO(b.publishedAt).getTime() - parseISO(a.publishedAt).getTime());
@@ -100,4 +122,24 @@ export const getPostsWithContent = async (
     } else {
         return serializedPosts;
     }
+};
+
+const getSeriesData = async (type: ContentType, series: string): Promise<SeriesData> => {
+    const posts = getPostsFrontMatter(type);
+    const postsInSeries = posts.filter((p) => p.series != null && p.series == series);
+    const simplePosts = postsInSeries.map((p) => {
+        return {
+            title: p.title,
+            slug: p.slug,
+            publishedAt: p.publishedAt,
+        };
+    });
+    simplePosts.sort(
+        (a, b) => parseISO(a.publishedAt).getTime() - parseISO(b.publishedAt).getTime()
+    );
+    return {
+        title: series,
+        type: type,
+        posts: simplePosts,
+    };
 };
