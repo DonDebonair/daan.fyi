@@ -138,7 +138,7 @@ const getSeriesData = async (type: ContentType, series: string): Promise<SeriesD
         (a, b) => parseISO(a.publishedAt).getTime() - parseISO(b.publishedAt).getTime()
     );
     return {
-        title: series,
+        title: titleCase(series),
         type: type,
         posts: simplePosts,
     };

@@ -3,6 +3,7 @@ title: 'Setting up an AWS multi-account strategy for fun nor profit'
 publishedAt: '2022-02-09'
 summary: 'Using multiple AWS accounts is not fun, nor is it profitable, but it can help you set up your infrastructure in a more secure way. It also helps with keeping your sanity as your company/team grows in size.'
 topics: ['aws', 'multi-account', 'infrastructure']
+series: 'AWS Multi-account Strategy'
 ---
 Don't you just love the freedom of working at an early stage startup, with a relentless focus on
 product and a blatant disregard for any non-functional distractions? I do.
@@ -44,7 +45,7 @@ created IAM users for everyone and solved access control by defining groups with
 policies (permissions) attached to them and adding the IAM users to those groups. The more people
 joined the team, the more diverse the access requirements became, for example:
 
-- A data scientist does need access to the same things as a software engineer
+- A data scientist does not need access to the same things as a software engineer
 - A junior person does not need the same _level_ of access as a senior person
 
 And there are many more subtle differences in the kind of access to infrastructure people need and
@@ -119,14 +120,16 @@ infrastructure.
 
 When it comes to user management, AWS Organizations offers the convenience of letting users log in
 with _one_ user account (not to be confused with AWS account), using
-[_AWS Single Sign-on_](https://aws.amazon.com/single-sign-on/). AWS SSO lets you create users and
+[_AWS Single Sign-on_](https://aws.amazon.com/single-sign-on/). AWS SSO lets you create users in
+the _root account_ (also known as _management account_) of your organization and
 give them login credentials within AWS itself or link them to an external _identity provider_
-like Google or Active Directory. You can then give these users access to specific AWS accounts in
+like Google or Active Directory. You can then give these users access to specific AWS accounts within
 your AWS Organization. Users can be assigned specific permissions within these accounts.
 <Small>(I will explain more on how this works in a later blog post)</Small>
 
 This has several advantages compared to using regular IAM users:
 
+- Users only need _one_ set of credentials to log into multiple AWS Accounts
 - Everyone can log in using credentials they already use on a daily basis (Google Workspace
   credentials in our case)
 - There is no more need to create and manage IAM users through CDK
