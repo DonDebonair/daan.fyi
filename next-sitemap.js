@@ -1,4 +1,4 @@
-const domain = process.env.VERCEL_URL || `www.daan.fyi`;
+const domain = process.env.URL || process.env.VERCEL_URL || `www.daan.fyi`;
 const environment = process.env.VERCEL_ENV || process.env.NODE_ENV;
 
 let policy = {
