@@ -40,3 +40,7 @@ yarn-error.log*
 
 # Feeds
 public/feeds/*
+
+# Sitemap + robots
+public/sitemap*.xml
+public/robots.txt
