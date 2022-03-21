@@ -25,6 +25,7 @@ import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/ty
 import Image from 'next/image';
 import { Small } from '@/components/typography';
 import SideNote from '@/components/SideNote';
+import Asterisk from '@/components/Asterisk';
 
 const Hr: ReactNode = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -118,4 +119,5 @@ export const MDXComponents = {
     img: (props): ReactNode => <Image {...props} />,
     Small,
     SideNote,
+    Asterisk,
 };

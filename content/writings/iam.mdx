@@ -1,0 +1,278 @@
+---
+title: 'AWS IAM Demystified'
+publishedAt: '2022-03-21'
+summary: "AWS Identity and Access Management (IAM) provides a way to configure who can do what in AWS Accounts. It's powerful but also hard to understand. This post explains the basics."
+topics: ['aws', 'multi-account', 'infrastructure', 'iam']
+series: 'AWS Multi-account Strategy'
+---
+All access management in AWS is done through [**AWS Identity and Access Management**](https://aws.amazon.com/iam/)
+(or _IAM_ in short). IAM provides a way to configure _who_ can do _what_ in an AWS account.
+The "who" in this case can be humans, machines/software or other AWS services.
+
+IAM is quite complex and there are several concepts you need to understand in order to know how to
+give people, software and machines the right access to the right resources in your AWS Accounts.
+This can become complicated quite fast if you're managing multiple AWS Accounts with many different
+resources and services, as explained in the [previous post in this series](/aws-multi-account).
+
+In this blog post I'm going to attempt to explain the terminology in a clear and concise way. Over
+the past months, we worked hard at [Source.ag](https://source.ag/) to create a good setup for our
+AWS-hosted infrastructure. I feel that this gave me a solid understanding of how IAM works
+(among other things). This blog post will help me personally as a kind of _cheat sheet_ for later
+recall and hopefully be of use to others to whom these concepts are still new.
+
+## Accounts and Resources
+
+A **Resource** in AWS is basically any piece of infrastructure or any AWS service you can pay for
+and use. This also represents the things you want to control access to. Some examples of this:
+[**EC2**](https://aws.amazon.com/ec2/) servers and [**S3**](https://aws.amazon.com/s3/) buckets.
+
+For all these resources, you can control who or what can access them and to what extent.
+
+An **Account** in AWS is a container for resources. So it's **_not_ a representation of a human**
+using AWS services. In that sense, it's quite different from the typical definition of an account
+in online services like Twitter or Facebook, where accounts are digital extensions of human beings.
+
+An AWS Account is used to **create, manage and pay for resources**. It can be similar to an
+_environment_ or _project_, with servers, databases, S3 buckets etc.
+
+Even though an account does not represent a user, it still has -- confusingly -- a unique email
+address attached to it and a password to log in. This login represents the
+[_AWS account root user_](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html) of
+an AWS account.
+
+<SideNote title="AWS Account root users should not be regularly used!" type="danger">
+
+You could use the AWS Account root user to do _anything_ you want in an AWS Account. It is a bad
+habit to do so. This **root** user is basically the keys to the kingdom and as such, should be
+locked away securely and not be used for everyday tasks.
+
+Instead, you should create separate IAM and/or AWS SSO users for normal tasks, even for
+administrator tasks.
+
+</SideNote>
+
+## Identities in AWS
+
+So if _Accounts_ in AWS do not represent human users, how is **identity** established so that
+access can be granted to resources in AWS Accounts?
+
+This is done through **Users, Roles and Groups**. All three are a form of **Identity** in AWS.
+An Identity is something that can be granted access to an AWS service or resource.
+
+### IAM Users
+
+An **IAM User** represents a human that can log into AWS and/or leverage the AWS API to use
+AWS services and access resources on AWS. An IAM User has 2 sets of credentials:
+
+- **Username/Password**: used to log into the web-based [_AWS Management Console_](https://aws.amazon.com/console/)
+- **Access Key/Access Key Secret**: used to access AWS programmatically through the API and/or command line
+
+Two key things to understand about IAM users:
+
+- a regular IAM User does **not** have an email address attached to it
+- IAM Users are created _within a single AWS Account_ and (usually) only have access to resources
+  within that account
+
+As we'll see later, there are special kinds of users you can create that _do have an email address_
+and can access resources in multiple AWS Accounts. These are created through AWS SSO.
+
+IAM Users can have permissions (policies, see below) that dictate what they can and cannot do on
+AWS. These permissions are used to allow/deny access to AWS services and resources.
+
+Users usually represent humans but can also represent software and machines _outside of AWS_ that
+you want to give programmatic access to certain AWS services and resources through the AWS API.
+If you want to grant software running _inside_ AWS access to other AWS services and resources, you
+can use **Roles**.
+
+### IAM Roles
+
+A **Role** in IAM is similar to a User in that it is an Identity with permissions that determine
+what it can and cannot do within AWS. The difference with a User is that a Role is not tied to a
+specific human or machine. Instead, a role can be **assumed** by users or AWS services to
+temporarily gain access to certain AWS services and/or resources.
+
+Roles do not have permanent login/API credentials. Instead, a role provides temporary credentials
+when the role is assumed.
+
+### IAM Groups
+
+In IAM, **Groups** are used to group Users together so the same permissions (_policies_, see below)
+can be applied to multiple Users at once.
+
+## Granting and Denying Access: Policies
+
+Now that we have established that we have _Resources_<Asterisk content="Infrastructure you can rent from AWS" />
+and _Identities_<Asterisk content="Users, Roles and Groups" /> that can potentially access those
+Resources, how exactly do we determine _who_ can access _what_?
+
+This is done through **Policies**. In IAM, Policies are basically _permissions_ on _resources_
+
+A policy defines access (or denial) to an AWS service and/or resource. There are 2 types of policies:
+
+- **Identity-based policy**: this policy is attached to a certain _Identity_ to allow/deny this identity access to one or more Resources
+- **Resource-based policy**: this policy is attached to a _Resource_ to define access to that Resource
+
+A policy contains the following elements:
+
+- **Effect**: should we _allow_ or _deny_ something?
+- **Resource**: what do we want to control access to?
+- **Action**: what action is allowed/denied?
+- **Principal**: who should be allowed/denied access?
+
+The _Principal_ is only specified in the case of Resource-based policies. That makes sense if you
+think about it, because in the case of Identity-based policies, the Principal is the Identity itself
+the policy is attached to!
+
+### Example: identity-based policy
+
+Let's say that we want to give IAM User _kiara_ access to read all files in the `confidential-data`
+S3 bucket. What would the Effect, Resource and Action look like for our policy? The policy would
+look something like this:
+
+```json
+{
+  "Effect": "Allow",
+  "Action": [
+    "s3:List*",
+    "s3:Get*"
+  ],
+  "Resource": [
+    "arn:aws:s3:::confidential-data",
+    "arn:aws:s3:::confidential-data/*"
+  ]
+}
+```
+
+This policy would then be attached to the IAM User _kiara_ to grant her access.
+
+### It's a matter of Principal
+
+As mentioned before, for Identity-based policies, you don't need to specify a Principal. But what
+exactly _is_ a Principal? Is it the same as an _Identity_? It turns out it's more than that:
+
+A Principal is an AWS identity **or Service**. To understand why services can be used as Principal,
+we have to understand where Principals are specified, which is in 2 places:
+
+- In a Resource-based policy, the principal determines _who_ can access the resource the policy is attached to
+- In a Role, the principal determines who (what Identity) can assume the role
+
+When specifying a Principal in a Role, we can say that instead of allowing a regular (human) User
+to assume the Role, we can allow an AWS Service (e.g. AWS Lambda) to assume the role for us. An
+example of how this can be useful: we could allow a function run on AWS Lambda to send a message on
+an SNS topic for us whenever something important happens during its execution. To do this, we would
+create a special Role for this Lambda function with a Policy attached that would allow this Role
+to publish messages on an SNS topic. Then we would allow AWS Lambda to assume this Role.
+
+### Resource-based policies
+
+What is perhaps counter-intuitive, is that _Identity-based policies_ are more common than
+_Resource-based policies_ for defining access to resources. The common way of doing things, is to
+attach policies to Identities to specify what _Resources_ they have access to and in what ways.
+
+Part of the reason is that Resource-based policies are not supported by all services and
+resource-types in AWS, whereas you can use any Resource identifier in an Identity-based polity.
+
+**So in what situations are Resource-based policies being used?**
+
+Resource-based policies are often used when you want to grant an Identity **outside your AWS
+account** access to a Resource in your AWS account. To understand how this works, let's assume the
+following scenario:
+
+- There are 2 AWS Accounts: Account A (managed by Company A) and Account B (managed by Company B)
+- Account A has a special Resource: S3 bucket `secret-stuff`
+- Company A wants to grant Company B access to the `secret-stuff` bucket
+- Company B decides that they want to use User X to access the `secret-stuff` bucket that Company A
+  as granted them access to
+
+To make this happen you have to do 2 things:
+
+1. **Allow access from AWS Account B to a specific Resource** (the `secret-stuff` bucket): on the
+   aforementioned S3 bucket, we would create a _Resource-based policy_ that has _AWS Account B_ as
+   principal
+2. **Allow access from a specific Identity in Account B to a specific Resource in Account A**: on
+   the _IAM User X_ that we want to grant access to, we would create an _Identity-based policy_ to
+   grant access specifically to the `secret-stuff` bucket, which happens to live in AWS Account A.
+
+What is interesting here, is that Company A would have no say in exactly what _Identity_ is used
+by Company B -- in AWS Account B -- to access their resource. The only thing they would control, is
+the fact that AWS Account B can access their resource in AWS Account A. It is Account B where it is
+determined exactly what Identity gets to access the `secret-stuff` bucket.
+
+## IAM with multiple AWS Accounts: Organizations
+
+As explained in the [previous blog post](/aws-multi-account), you can leverage AWS Organizations to
+group multiple AWS Accounts together to consolidate billing but also access control.
+
+How does IAM work in the context of AWS Organizations? This happens through 2 additional concepts:
+
+- AWS SSO Users & Groups
+- Permission sets
+
+### AWS SSO
+
+AWS Single Sign-on lets you define Users and Groups in a central place -- usually in the
+_management account_ of your AWS Organization -- and control access to resources in all AWS Accounts
+in an Organization for those Users and Groups.
+
+**SSO Users** have a few fundamental differences compared to regular IAM users:
+
+- SSO Users have an email address to identify them
+- SSO Users usually have access to resources in _multiple_ AWS Accounts
+- SSO Users don't have (Identity-based) policies attached directly to them
+
+**SSO Groups** are similar to IAM Groups in that they're used to group together Users so that the
+same policies can be applied to all users within a group. A key difference here is that -- just
+like with SSO Users -- policies are not attached to SSO Groups directly.
+
+If you cannot attach policies to SSO Users & Groups directly, how can you allow those Users & Groups
+access to resources in the AWS Accounts in your Organization? This is done through
+**Permission Sets**.
+
+### Permission Sets
+
+Permission Sets are basically the AWS SSO alternative to regular IAM Policies. They are set up in a
+very similar way -- with Effects, Actions and Resources. The big difference is that Permission Sets
+are not applied to an SSO User/Group alone, but they are applied in combination with an AWS Account.
+
+**A Permission Set is applied to an SSO User/Group for a _specific AWS Account_**
+
+This means that when you apply a Permission Set to an SSO User/Group, you choose an AWS Account so
+that the policies defined in the Permission Set are applied to the SSO User/Group _for the selected
+AWS Account_.
+
+Example: let's say you have created a Permission Set that allows read-only access to all resources.
+Now you can grant `kiara@examplecorp.com` read access to all resources in Account A in your
+Organization by applying the aforementioned Permission Set to `kiara@examplecorp.com` _specifically_
+for Account A.
+
+Permission Sets encourage reuse of similar policies across AWS Accounts and SSO Users.
+
+### How AWS applies access control in SSO
+
+If you apply a Permission Set to an SSO User for a specific AWS Account, how does that work
+internally? In the end, AWS will still use IAM to do the actual access management. For each
+Permission Set you apply to a certain AWS Account -- for 1 or more SSO Users/Groups -- AWS will
+create a dedicated Role in that AWS Account. Let's say that in the example above where we want to
+grant _read-only_ access, we called the Permission Set `ReadOnlyPermissions`. When we apply this
+Permission Set to Account A for `kiara@examplecorp.com`, AWS will do 3 things:
+
+- It will create a Role in Account A based on the `ReadOnlyPermissions` Permission Set
+- It will attach policies to that Role according to the policies defined in the `ReadOnlyPermissions`
+  Permission Set
+- It will add `kiara@examplecorp.com` as Principal to the created Role so she can assume that Role
+  in Account A
+
+Now when `kiara@examplecorp.com` logs into AWS using SSO, she will be presented with a choice to
+assume the `ReadOnlyPermissions` Role in Account A -- next to all the other Roles she can assume
+in the same or other AWS Accounts in the Organization, all based on the Permission Sets applied
+to her for specific Accounts.
+
+## Conclusion
+
+When I started writing this post, I hoped it would be concise. I guess I failed a bit on that
+account, which just goes to show how complex AWS IAM really is. I still hope that this gives you an
+overview that is easier to digest than reading through pages of AWS documentation.
+
+---
+
+_Thanks to [Dan](https://twitter.com/djvdorp) for proofreading this yet again! ❤️_
