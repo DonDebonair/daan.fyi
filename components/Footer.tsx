@@ -17,7 +17,7 @@ const Footer = (): ReactElement => (
                 <IconButton aria-label="Twitter" icon={<GrTwitter />} variant="ghost" />
             </Link>
             <Link
-                href="https://github.com/DandyDev"
+                href="https://github.com/DonDebonair"
                 title="GitHub"
                 rel="me noopener noreferrer"
                 isExternal
