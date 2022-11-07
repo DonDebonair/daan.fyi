@@ -19,7 +19,7 @@ const ArchiveOverviewPage = ({ allPosts }: ArchiveOverviewProps): ReactNode => (
             live at DandyDev.net. These articles do not represent my current interests, skills and
             who I am anymore, but I leave them here for historical context.
         </Text>
-        <PostsList posts={allPosts} />
+        <PostsList prefix={'/archive'} posts={allPosts} />
     </DefaultLayout>
 );
 

@@ -13,6 +13,5 @@ const overrides = {
     components,
 };
 
-// @ts-ignore
 const theme = extendTheme(overrides);
 export default theme;

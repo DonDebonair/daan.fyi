@@ -1,7 +1,6 @@
 import { Box, Heading, HStack, useColorModeValue, Icon } from '@chakra-ui/react';
-import React, { ReactElement, ReactNode, ElementType } from 'react';
-import { Token } from '@chakra-ui/styled-system/dist/types/utils';
-import * as CSS from 'csstype';
+import React, { ReactElement, ReactNode } from 'react';
+import { ThemeTypings } from '@chakra-ui/styled-system/dist/theming.types';
 import {
     MdLocalFireDepartment,
     MdInfoOutline,
@@ -10,10 +9,12 @@ import {
 } from 'react-icons/md';
 import { IconType } from 'react-icons';
 
+type ThemeColor = ThemeTypings['colors'];
+
 type BaseSideNoteProps = {
     title: string;
-    bg: Token<CSS.Property.Color, 'colors'>;
-    borderColor: Token<CSS.Property.Color, 'colors'>;
+    bg: ThemeColor;
+    borderColor: ThemeColor;
     icon: ReactNode;
     children: ReactNode;
 };
@@ -53,7 +54,7 @@ const BaseSideNote = ({
 type SideNoteType = 'info' | 'success' | 'warning' | 'danger';
 
 type SideNoteVariant = {
-    Icon: ElementType<IconType>;
+    Icon: IconType;
     dark: Pick<BaseSideNoteProps, 'bg' | 'borderColor'>;
     light: Pick<BaseSideNoteProps, 'bg' | 'borderColor'>;
 };
@@ -63,7 +64,7 @@ const sideNoteVariants: { [V in SideNoteType]: SideNoteVariant } = {
         Icon: MdOutlineCheckCircleOutline,
         dark: {
             bg: 'green.700',
-            borderColor: 'green.300',
+            borderColor: 'green.333',
         },
         light: {
             bg: 'green.200',
