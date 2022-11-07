@@ -20,14 +20,14 @@ import {
 } from '@chakra-ui/react';
 import { HTMLChakraProps } from '@chakra-ui/system';
 import { StylishLink } from '@/components/CustomLink';
-import React, { ReactNode } from 'react';
-import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table/dist/types/table';
+import React from 'react';
+import { TableCellProps, TableColumnHeaderProps } from '@chakra-ui/table';
 import Image from 'next/image';
 import { Small } from '@/components/typography';
 import SideNote from '@/components/SideNote';
 import Asterisk from '@/components/Asterisk';
 
-const Hr: ReactNode = () => {
+const Hr = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     return <Divider borderColor={borderColor} my={4} w="100%" />;
 };
@@ -37,7 +37,7 @@ const InlineCode = (props) => {
     return <Code colorScheme={colorScheme} {...props} />;
 };
 
-const Blockquote: ReactNode = (props: HTMLChakraProps<'blockquote'>) => (
+const Blockquote = (props: HTMLChakraProps<'blockquote'>) => (
     <chakra.blockquote
         p={6}
         mx={2}
@@ -92,31 +92,31 @@ const H = (props: HeadingProps) => (
 );
 
 export const MDXComponents = {
-    h1: (props: HeadingProps): ReactNode => <H as="h1" size="xl" {...props} />,
-    h2: (props: HeadingProps): ReactNode => <H as="h2" size="lg" {...props} />,
-    h3: (props: HeadingProps): ReactNode => <H as="h3" size="md" {...props} />,
-    h4: (props: HeadingProps): ReactNode => <H as="h4" size="sm" {...props} />,
-    p: (props): ReactNode => <Text as="p" {...props} />,
-    a: (props): ReactNode => <StylishLink {...props} />,
-    ul: (props): ReactNode => <UnorderedList pl={4} {...props} />,
-    ol: (props): ReactNode => <OrderedList pl={4} {...props} />,
-    li: (props): ReactNode => <ListItem {...props} />,
-    table: (props): ReactNode => <Table {...props} />,
-    thead: (props): ReactNode => <Thead {...props} />,
-    tbody: (props): ReactNode => <Tbody {...props} />,
-    tfoot: (props): ReactNode => <Tfoot {...props} />,
-    tr: (props): ReactNode => <Tr {...props} />,
-    th: (props: TableColumnHeaderProps): ReactNode => {
+    h1: (props: HeadingProps) => <H as="h1" size="xl" {...props} />,
+    h2: (props: HeadingProps) => <H as="h2" size="lg" {...props} />,
+    h3: (props: HeadingProps) => <H as="h3" size="md" {...props} />,
+    h4: (props: HeadingProps) => <H as="h4" size="sm" {...props} />,
+    p: (props) => <Text as="p" {...props} />,
+    a: (props) => <StylishLink {...props} />,
+    ul: (props) => <UnorderedList pl={4} {...props} />,
+    ol: (props) => <OrderedList pl={4} {...props} />,
+    li: (props) => <ListItem {...props} />,
+    table: (props) => <Table {...props} />,
+    thead: (props) => <Thead {...props} />,
+    tbody: (props) => <Tbody {...props} />,
+    tfoot: (props) => <Tfoot {...props} />,
+    tr: (props) => <Tr {...props} />,
+    th: (props: TableColumnHeaderProps) => {
         return <Th isNumeric={props.align && props.align == 'right'} {...props} />;
     },
-    td: (props: TableCellProps): ReactNode => {
+    td: (props: TableCellProps) => {
         return <Td isNumeric={props.align && props.align == 'right'} {...props} />;
     },
-    caption: (props): ReactNode => <TableCaption {...props} />,
+    caption: (props) => <TableCaption {...props} />,
     hr: Hr,
-    inlineCode: (props): ReactNode => <InlineCode {...props} />,
+    code: (props) => <InlineCode {...props} />,
     blockquote: Blockquote,
-    img: (props): ReactNode => <Image {...props} />,
+    img: (props) => <Image src={props.src} alt={props.alt} {...props} />,
     Small,
     SideNote,
     Asterisk,

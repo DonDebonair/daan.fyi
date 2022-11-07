@@ -2,7 +2,6 @@
 const { withPlausibleProxy } = require('next-plausible');
 
 module.exports = withPlausibleProxy()({
-    experimental: { esmExternals: true },
     async redirects() {
         return [
             {

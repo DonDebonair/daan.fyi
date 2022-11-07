@@ -2,7 +2,7 @@ import { serialize } from 'next-mdx-remote/serialize';
 import mdxPrism from 'mdx-prism';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import remarkCodeTitles from 'remark-code-titles';
+import rehypeCodeTitles from 'rehype-code-titles';
 import remarkCapitalize from 'remark-capitalize';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { TITLE_OPTIONS } from '@/lib/titleCase';
@@ -26,10 +26,11 @@ const serializePost = async (content: string): Promise<MDXRemoteSerializeResult>
     return await serialize(content, {
         mdxOptions: {
             remarkPlugins: [
+                // @ts-ignore
                 remarkUnwrapImages,
-                remarkCodeTitles,
                 [remarkCapitalize, TITLE_OPTIONS],
                 [
+                    // @ts-ignore
                     remarkTextr,
                     {
                         plugins: [
@@ -50,6 +51,7 @@ const serializePost = async (content: string): Promise<MDXRemoteSerializeResult>
                 ],
             ],
             rehypePlugins: [
+                rehypeCodeTitles,
                 mdxPrism,
                 rehypeSlug,
                 rehypeAutolinkHeadings,

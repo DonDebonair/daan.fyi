@@ -156,7 +156,7 @@ const styles: Styles = {
             boxShadow: 'inset 4px 0px 0 0px var(--chakra-colors-blue-600)',
             minWidth: 'fit-content',
         },
-        '.remark-code-title': {
+        '.rehype-code-title': {
             paddingX: 4,
             paddingY: 4,
             fontFamily: 'mono',

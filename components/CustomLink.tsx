@@ -9,7 +9,7 @@ const CustomLink = ({ href, children, ...rest }: CustomLinkProps): ReactElement 
     const hrefInternal = href.startsWith('/') || href.startsWith('#');
     if (hrefInternal) {
         return (
-            <Link href={href} passHref>
+            <Link href={href} legacyBehavior passHref>
                 <ChakraLink {...rest}>{children}</ChakraLink>
             </Link>
         );

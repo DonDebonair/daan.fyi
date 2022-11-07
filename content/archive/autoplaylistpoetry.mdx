@@ -84,13 +84,13 @@ If at some point a sublist is encountered for which none of the "slices" yield a
 2. subtract one word
 3. continue processing as above
 
-So if have the sentence "This is a painfully boring example message", which is currently divided as follows, where <\> means they have already matched and [] is currently being processed:
+So if have the sentence "This is a painfully boring example message", which is currently divided as follows, where \<> means they have already matched and [] is currently being processed:
 
-    [<this is>, <a painfully boring>, [example message]]
+    [\<this is>, \<a painfully boring>, [example message]]
 
 The backtracking algorithm will go back to the last match, "unmatch" it, subtract a word from it and continue processing:
 
-    [<this is>, [a painfully], [boring example message]]
+    [\<this is>, [a painfully], [boring example message]]
 
 The middle group is now the group that is currently processed, the last group is the remainder of the message.
 

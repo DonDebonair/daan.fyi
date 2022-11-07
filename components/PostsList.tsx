@@ -5,17 +5,21 @@ import { format, parseISO } from 'date-fns';
 import React, { ReactElement } from 'react';
 import TopicBadge from '@/components/TopicBadge';
 
+const DEFAULT_PREFIX = '/writings';
+
 type PostsListProps = {
     posts: PartialFrontMatter[];
+    prefix?: string;
 };
 
 type PostProps = {
     frontMatter: PartialFrontMatter;
+    prefix?: string;
 };
 
-const Post = ({ frontMatter }: PostProps): ReactElement => (
+const Post = ({ frontMatter, prefix = DEFAULT_PREFIX }: PostProps): ReactElement => (
     <Flex direction="column">
-        <DefaultLink href={`/writings/${frontMatter.slug}`}>
+        <DefaultLink href={`${prefix}/${frontMatter.slug}`}>
             <Heading as="h2" fontSize="lg" mb={2}>
                 {frontMatter.title}
             </Heading>
@@ -29,14 +33,14 @@ const Post = ({ frontMatter }: PostProps): ReactElement => (
     </Flex>
 );
 
-const PostSummary = ({ frontMatter }: PostProps): ReactElement => (
+const PostSummary = ({ frontMatter, prefix = DEFAULT_PREFIX }: PostProps): ReactElement => (
     <Flex
         direction={['column', 'row', 'row', 'row']}
         justify={['center', 'space-between', 'space-between', 'space-between']}
         align={['flex-start', 'center', 'center', 'center']}
         pr={[0, 10, 10, 10]}
     >
-        <DefaultLink href={`/writings/${frontMatter.slug}`}>
+        <DefaultLink href={`${prefix}/${frontMatter.slug}`}>
             <Text as="h3" fontSize="sm" mb={[2, 0, 0, 0]}>
                 {frontMatter.title}
             </Text>
@@ -47,21 +51,26 @@ const PostSummary = ({ frontMatter }: PostProps): ReactElement => (
     </Flex>
 );
 
-const PostsList = ({ posts }: PostsListProps): ReactElement => {
+const PostsList = ({ posts, prefix = DEFAULT_PREFIX }: PostsListProps): ReactElement => {
     return (
         <>
             {posts.map((frontMatter) => {
-                return <Post key={frontMatter.slug} frontMatter={frontMatter} />;
+                return <Post key={frontMatter.slug} prefix={prefix} frontMatter={frontMatter} />;
             })}
         </>
     );
 };
 
-export const PostSummaryList = ({ posts }: PostsListProps): ReactElement => {
+export const PostSummaryList = ({
+    posts,
+    prefix = DEFAULT_PREFIX,
+}: PostsListProps): ReactElement => {
     return (
         <>
             {posts.map((frontMatter) => {
-                return <PostSummary key={frontMatter.slug} frontMatter={frontMatter} />;
+                return (
+                    <PostSummary key={frontMatter.slug} prefix={prefix} frontMatter={frontMatter} />
+                );
             })}
         </>
     );
