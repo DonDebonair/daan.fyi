@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { withPlausibleProxy } = require('next-plausible');
 
-module.exports = withPlausibleProxy()({
+module.exports = {
     async redirects() {
         return [
             {
@@ -11,4 +10,4 @@ module.exports = withPlausibleProxy()({
             },
         ];
     },
-});
+};
