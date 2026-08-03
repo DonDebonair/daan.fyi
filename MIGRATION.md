@@ -172,7 +172,8 @@ break in a minor release. Working spike at `astro@7.1.6`.
 
 **Decision:** Shiki with two custom themes. Keeping Prism is not needed.
 
-Working artifacts are at **`../spike-artifacts/`** — drop them straight into Phase 4.
+Working artifacts are committed at **[`spike/`](spike/)** — drop them straight into
+Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
 
 -   [x] `shiki/prism-default-light.json` — Prism default palette, ported scope by scope
 -   [x] `shiki/night-owl-pink.json` — Night Owl + the three `#FFA7C4` overrides
@@ -205,7 +206,7 @@ Working artifacts are at **`../spike-artifacts/`** — drop them straight into P
         rendered output** with one fewer moving part, and moves the fences to standard
         Shiki syntax that matches every Astro doc. See "Fence edits" in Phase 4.
 -   [x] Visual comparison against the Phase 0 screenshots — see
-        `../spike-artifacts/screenshots/`
+        `spike/screenshots/`
 
 ### Two gotchas found (both fixed in the artifacts)
 
