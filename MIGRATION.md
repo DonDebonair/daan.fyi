@@ -261,8 +261,26 @@ Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
 The single highest-leverage step. Getting tokens right first means components are
 mechanical; retrofitting them later is miserable.
 
--   [ ] Extract the 26 Chakra colour values to hex. Full list:
-        `blue.100 blue.600 cyan.600 gray.50 gray.100 gray.200 gray.600 gray.700 gray.800 gray.900 green.200 green.700 red.200 red.700 teal.200 teal.300 teal.400 teal.500 teal.800 teal.900 whiteAlpha.800 whiteAlpha.900 yellow.200 yellow.300 yellow.700`
+-   [x] **Chakra colour values, already extracted.** Captured here because the extraction
+        needs `@chakra-ui/react` in `node_modules`, which the cutover uninstalls — after
+        that these are painful to recover.
+
+    | Token            | Value                    | Token            | Value                                            |
+    | ---------------- | ------------------------ | ---------------- | ------------------------------------------------ |
+    | `gray.50`        | `#F7FAFC`                | `teal.200`       | `#81E6D9`                                        |
+    | `gray.100`       | `#EDF2F7`                | `teal.300`       | `#4FD1C5`                                        |
+    | `gray.200`       | `#E2E8F0`                | `teal.400`       | `#38B2AC`                                        |
+    | `gray.600`       | `#4A5568`                | `teal.500`       | `#319795`                                        |
+    | `gray.700`       | `#2D3748`                | `teal.800`       | `#234E52`                                        |
+    | `gray.800`       | `#1A202C`                | `teal.900`       | `#1D4044`                                        |
+    | `gray.900`       | `#171923`                | `cyan.600`       | `#00A3C4`                                        |
+    | `green.200`      | `#9AE6B4`                | `blue.100`       | `#BEE3F8`                                        |
+    | `green.700`      | `#276749`                | `blue.600`       | `#2B6CB0`                                        |
+    | `yellow.200`     | `#FAF089`                | `red.200`        | `#FEB2B2`                                        |
+    | `yellow.300`     | `#F6E05E`                | `red.700`        | `#9B2C2C`                                        |
+    | `yellow.700`     | `#975A16`                | `whiteAlpha.800` | `rgba(255,255,255,0.80)`                         |
+    | `whiteAlpha.900` | `rgba(255,255,255,0.92)` | `green.333`      | ⚠️ **does not exist** — see pre-existing issue 1 |
+
 -   [ ] Define **semantic** tokens as CSS custom properties in `:root`, flipped in `.dark`
         (`--color-surface`, `--color-accent`, `--color-rule`, …). Do _not_ translate each
         `useColorModeValue` to `bg-white dark:bg-gray-900` at the call site — that

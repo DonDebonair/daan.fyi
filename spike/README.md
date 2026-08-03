@@ -17,6 +17,7 @@ scope mappings is the tedious part, and it has already been done once correctly.
 | `plugins/transformer-code-title.mjs` | 4     | `src/plugins/`                                       |
 | `feeds/feed.xml.ts`                  | 7     | `src/pages/feeds/` — split into rss/atom/json routes |
 | `screenshots/`                       | 8     | reference only, not shipped                          |
+| `tools/`                             | 8     | verification scripts — see `tools/README.md`         |
 
 ## What each proves
 
