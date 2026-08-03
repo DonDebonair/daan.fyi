@@ -83,5 +83,10 @@
     },
     "engines": {
         "yarn": "YARN NO LONGER USED - use npm instead."
+    },
+    "allowScripts": {
+        "esbuild@0.17.19": true,
+        "fsevents@2.3.3": true,
+        "rehype-code-titles@1.2.0": true
     }
 }
