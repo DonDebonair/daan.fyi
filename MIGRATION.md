@@ -6,7 +6,7 @@
 baseline you can diff against, then port mechanically. Nothing about this migration is
 hard except feeds and syntax highlighting — do those before committing.
 
-**Branch:** `feat/astro-migration`. `git mv` `content/` and `public/` rather than recreating
+**Branch:** `feat/astro-rewrite`. `git mv` `content/` and `public/` rather than recreating
 them, so history follows the files that matter.
 
 ---
@@ -15,16 +15,17 @@ them, so history follows the files that matter.
 
 These are the things that must not change. Check them at every phase boundary.
 
-| Invariant                                                                       | Why                                    |
-| ------------------------------------------------------------------------------- | -------------------------------------- |
-| All 65 URLs resolve identically                                                 | permalink stability is the stated goal |
-| `/blog/:slug` → `/writings/:slug` returns **301**                               | legacy inbound links                   |
-| Trailing-slash behaviour matches current                                        | silent permalink regression otherwise  |
-| `/feeds/feed.xml`, `/atom.xml`, `/feed.json` exist and contain **rendered** MDX | subscribers                            |
-| `public/archive-assets/**` paths unchanged                                      | 10 archive posts reference them        |
-| Heading title-casing + typographic substitutions byte-identical                 | content rendering                      |
+| Invariant                                                                       | Why                                              |
+| ------------------------------------------------------------------------------- | ------------------------------------------------ |
+| All 61 pages resolve identically                                                | permalink stability is the stated goal           |
+| **No trailing slash** — `/writings/rss/` 308s to `/writings/rss`                | verified in Phase 0; silent regression otherwise |
+| `/blog/:slug` → `/writings/:slug` returns **308** (not 301)                     | legacy inbound links                             |
+| `/feeds/feed.xml`, `/atom.xml`, `/feed.json` exist and contain **rendered** MDX | subscribers                                      |
+| `public/archive-assets/**` paths unchanged                                      | 10 archive posts reference them                  |
+| Heading title-casing + typographic substitutions byte-identical                 | content rendering                                |
+| **GFM stays off** (or the kitchen sink gets fixed deliberately)                 | see Phase 0 findings                             |
 
-### URL inventory (65 total)
+### URL inventory — 61 pages + 6 generated files
 
 -   `/`, `/about`, `/topics`, `/writings`, `/archive`, `/_kitchensink` — 6
 -   `/writings/{9 slugs}` — 9
@@ -32,7 +33,9 @@ These are the things that must not change. Check them at every phase boundary.
 -   `/{23 topic slugs}` — 23
     `amplify aws editors hn iam ide infrastructure lgbtqi mental-health multi-account news nextjs opinions plugins pyenv python rss snippets sourceag syndication tooling typing website`
 -   `/feeds/feed.xml`, `/feeds/atom.xml`, `/feeds/feed.json` — 3
--   `/sitemap.xml`, `/robots.txt` — 2
+-   `/sitemap.xml` (**an index**), `/sitemap-0.xml`, `/robots.txt` — 3
+
+Full list in `../baseline/meta/urls.txt`.
 
 > Note: `rss` is both a topic (`/rss`) and a post (`/writings/rss`). Different
 > namespaces, no collision — but don't "fix" it.
@@ -52,23 +55,57 @@ These are the things that must not change. Check them at every phase boundary.
 
 ---
 
-## Phase 0 — Baseline capture
+## Phase 0 — Baseline capture ✅ DONE
 
-Do this before touching anything. This is what makes "did I break something?"
-answerable later.
+Captured at `../baseline/` (outside the repo, so it survives the cutover commit and
+never enters git history). See `../baseline/README.md` for contents and the Phase 8
+diff recipe.
 
--   [ ] `npm run build && npm start`
--   [ ] Mirror the whole site to `../baseline/`:
-        `wget --mirror --page-requisites --adjust-extension --no-host-directories -P ../baseline http://localhost:3000/`
--   [ ] Copy `public/feeds/{feed.xml,atom.xml,feed.json}` to `../baseline/feeds/` (gitignored, so they'd be lost)
--   [ ] Record trailing-slash behaviour: `curl -sI localhost:3000/writings/rss/ | head -1`
--   [ ] Record the redirect: `curl -sI localhost:3000/blog/rss | head -2`
--   [ ] Screenshot in **light and dark**: `/`, `/writings`, `/topics`, `/_kitchensink`,
-        `/writings/mental-health` (SideNote), `/writings/iam` (SideNote + series),
-        `/writings/python-protocols` (line highlighting), `/writings/rss` (code titles),
-        `/writings/aws-multi-account` (images), `/archive/there-is-no-big-data`, `/python`
+-   [x] `npm run build && npm start` — builds clean on Node 26
+-   [x] All **61 pages** fetched to `../baseline/html/`, all 200. URL list derived from
+        `.next/server/pages` rather than by crawling — `/_kitchensink` is linked from
+        nowhere and a link-following crawler misses it.
+-   [x] Feeds copied to `../baseline/feeds/` — 9 items in each of the three formats
+-   [x] Sitemap, `sitemap-0.xml`, robots captured
+-   [x] Trailing-slash + redirect + 404 behaviour recorded in `meta/behaviour.txt`
+-   [x] Checksums (`meta/html.sha256`, `meta/feeds.sha256`) and provenance recorded
+-   [x] **26 screenshots** — 13 pages × light/dark, full-page, 2× DPI, in
+        `../baseline/screenshots/`
 
-**Exit criteria:** `../baseline/` contains every URL in the inventory above.
+### Findings that change the plan
+
+1. **Canonical URLs have no trailing slash.** `/writings/rss/` → **308** →
+   `/writings/rss`. Astro needs `trailingSlash: 'never'` + `build.format: 'file'`.
+2. **The legacy redirect is a 308, not a 301** — Next's `permanent: true` emits 308.
+   Match it in `vercel.json`; both are permanent for SEO, but don't downgrade it silently.
+3. **`remark-gfm` is absent — and Astro enables GFM by default.** Today, tables,
+   footnotes, task lists and strikethrough render as **literal text**: there is not a
+   single `<table>` element anywhere in the built site. A naive port would silently start
+   rendering all of it. Blast radius is limited — `_kitchensink.mdx` is the only file
+   containing GFM syntax; no real post is affected. **Decision required** → `____`
+    - Set `markdown.gfm: false` to match today exactly, **or**
+    - Accept GFM and deliberately fix `_kitchensink.mdx`
+    - Either way: `MDXComponents.tsx`'s `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/
+      `caption` mappings and `styles/components.ts`'s `Table` baseStyle are **dead code**
+      today. Don't port them without deciding this first.
+4. **`sitemap.xml` is an index** pointing at `sitemap-0.xml`. Decide whether
+   `@astrojs/sitemap` should reproduce the index or emit a single file.
+5. **`SideNote` markup does survive into the current feeds** (verified: `aside` appears
+   in `feed.xml`). This is exactly what Phase 1A must preserve — it is a real regression
+   risk, not a hypothetical one.
+
+### Local-only capture caveats (not site defects)
+
+-   `robots.txt` says `Disallow: /` because `VERCEL_ENV` is unset locally. Production
+    gets the real policy. Compare against the local baseline, not production.
+-   `sharp` is not installed, so Next's image optimizer uses a slow fallback; the
+    optimizer cache had to be warmed before screenshots captured images.
+-   Screenshots force `loading="eager"` — `next/image` lazy-loads below the fold and
+    neither full-page capture nor fast scrolling triggers the `IntersectionObserver`.
+    Images are captured; lazy-load _behaviour_ is not.
+
+**Exit criteria:** met — `../baseline/` holds all 61 pages, 3 feeds, 3 generated files,
+26 screenshots, checksums and provenance.
 
 ---
 
@@ -127,7 +164,8 @@ Your light theme is stock Prism default; your dark theme is Night Owl with
 -   [ ] Port `lib/config.ts` verbatim (env-var-driven `baseUrl` still works on Vercel)
 -   [ ] Prettier config: 4-space, single quotes, 100 cols, ES5 trailing commas
 -   [ ] Husky + lint-staged
--   [ ] Set `trailingSlash` + `build.format` to match the Phase 0 recording
+-   [ ] Set `trailingSlash: 'never'` + `build.format: 'file'` (confirmed in Phase 0:
+        `/writings/rss/` 308s to `/writings/rss`)
 
 **Exit criteria:** empty site builds, aliases resolve.
 
@@ -175,6 +213,9 @@ mechanical; retrofitting them later is miserable.
         `remark-smartypants` in this migration — it has no arrows or math symbols, and
         `.tsx` prose contains pre-typographied characters matched to current output.
         Consolidate later, separately, if at all.
+-   [ ] **Apply the GFM decision from Phase 0.** Astro defaults to `markdown.gfm: true`;
+        the current site has no `remark-gfm` at all. Leaving the default on silently
+        changes rendering of tables, footnotes, task lists and strikethrough.
 -   [ ] `remark-unwrap-images`, `rehype-autolink-headings` (drop `rehype-slug` — Astro
         slugs headings natively)
 -   [ ] Images: move `public/images/` → `src/assets/` for optimisation + automatic
