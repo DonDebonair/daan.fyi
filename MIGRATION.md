@@ -114,43 +114,112 @@ diff recipe.
 Throwaway Astro project. Do not start the real migration until both resolve.
 **If spike A fails, the plan changes** — so run it first.
 
-### 1A. Feeds (the real risk)
+### 1A. Feeds ✅ PASSED — use the Container API
 
-`@astrojs/rss` explicitly does not process components in MDX. The documented fallback
-(`markdown-it` over `post.body`) would silently drop `<SideNote>` from 3 posts.
+**Decision:** Container API. The fallback is not needed.
 
--   [ ] Render one content-collection entry to an HTML string via
-        `experimental_AstroContainer.renderToString()`, including a custom component
--   [ ] Confirm the `SideNote` markup appears in the output
--   [ ] Confirm the `feed` package (keep it — it's framework-agnostic and it's what gives
-        you all three formats) can consume that string
--   [ ] Note the Astro version pinned; the Container API is **experimental** and can break
-        in minor releases
+Ran on **Astro 7.1.6** with `@astrojs/mdx`, against real content (`iam`,
+`mental-health`, `aws-multi-account`, `python-protocols`).
 
-**Fallback if this fails:** render each post to a hidden static route at build time and
-read the HTML back off disk. Uglier, stable.
+-   [x] `experimental_AstroContainer.renderToString()` renders a content-collection entry
+-   [x] `SideNote` renders fully — `type` prop, title, slotted children, and nested
+        markdown (`<em>`, `<strong>`, `<p>`) all present. `Asterisk` and `Small` too.
+-   [x] Zero raw `<SideNote` strings leak into the output
+-   [x] The `feed` package consumes the string and emits **all three formats**
+        (rss2 / atom / json), content in CDATA
+-   [x] Images render and the `src="/"` → absolute rewrite works; no leftover relative URLs
+-   [x] Word-count parity against the Phase 0 baseline: 1920/1920, 1736/1736, 2305/2302
 
-**Decision gate:** Container API, or build-and-read-back? Record the answer here → `____`
+**The one non-obvious step:** the MDX renderer must be registered manually, because the
+container runs outside a page render. Without this you get a cryptic failure:
 
-### 1B. Syntax highlighting
+```ts
+import mdxRenderer from '@astrojs/mdx/server.js';
+const container = await experimental_AstroContainer.create();
+container.addServerRenderer({ name: '@astrojs/mdx', renderer: mdxRenderer });
+const { Content } = await render(post);
+const html = await container.renderToString(Content, {
+    props: { components: { SideNote, Asterisk, Small } },
+});
+```
 
-Your light theme is stock Prism default; your dark theme is Night Owl with
-`keyword`/`tag`/`operator` overridden to `#ffa7c4`. Shiki bundles `night-owl`.
+Custom components are passed via the `components` prop — the MDX sources don't import
+them, exactly as today.
 
--   [ ] Write `shiki-light.json` (~20 scope entries, port from `styles/styles.ts` lines 74–148)
--   [ ] Write `shiki-dark.json` = `night-owl` + the three pink overrides
--   [ ] Configure `themes: { light, dark }` with `defaultColor: false`
--   [ ] Verify class-based dark toggle works via `--shiki-dark` CSS var override
--   [ ] Verify `transformerMetaHighlight` reads your existing `{4,5,8}` syntax unchanged
--   [ ] **Verify `rehype-code-titles` still fires** — it reads the meta string, and Astro's
-        Shiki pass may strip it first. Plugin ordering risk. Fallback: ~20-line Shiki
-        transformer reading raw meta.
--   [ ] Render a TS + Python block, compare against Phase 0 screenshots
+⚠️ **Pin the Astro version.** `experimental_` is in the API name for a reason; it can
+break in a minor release. Working spike at `astro@7.1.6`.
 
-**Fallback if fidelity is unacceptable:** `syntaxHighlight: 'prism'` and port
-`styles/styles.ts` verbatim to plain CSS. One-line config change, zero visual delta.
+### Findings from the spike (all feed into Phase 4)
 
-**Decision gate:** Shiki, or keep Prism? Record → `____`
+1. **🐞 Pre-existing bug: feed titles are double-title-cased.** `lib/feeds.tsx:54` calls
+   `makeTitle(post.frontMatter.title)` **without `TITLE_OPTIONS`**, on a string that
+   `lib/posts.ts:68` has already correctly title-cased. The second pass destroys the
+   acronym exceptions. Subscribers currently receive `Aws Iam Demystified` while the site
+   shows `AWS IAM Demystified`. **Fix during the port; don't reproduce it.**
+2. **Astro enables SmartyPants by default, and it conflicts with `remark-textr`.** The
+   spike produced `–` (en dash) where the baseline has `—` (em dash), and curled quotes
+   the baseline leaves straight. Set **`markdown.smartypants: false`** or typography
+   silently changes across every post.
+3. **`rehype-autolink-headings` accounts for the `<a>` count gap** (baseline 22 vs spike
+   14 on `mental-health` — one anchor per heading). Confirms it must be ported.
+4. **`remark-capitalize` confirmed load-bearing.** Baseline renders `Keeping up with Current Events`; the spike, without the plugin, renders `Keeping Up with…`.
+5. **Images in `public/` get no `width`/`height` from Astro** — `<img src="…" alt="…"/>`
+   and nothing else. This is what `rehype-img-size` provides today. Moving to
+   `src/assets/` for dimensions + optimisation means **rewriting the `/images/…` paths in
+   the MDX**, which is a content change. See Phase 4.
+
+### 1B. Syntax highlighting ✅ PASSED — use Shiki
+
+**Decision:** Shiki with two custom themes. Keeping Prism is not needed.
+
+Working artifacts are at **`../spike-artifacts/`** — drop them straight into Phase 4.
+
+-   [x] `shiki/prism-default-light.json` — Prism default palette, ported scope by scope
+-   [x] `shiki/night-owl-pink.json` — Night Owl + the three `#FFA7C4` overrides
+-   [x] `themes: { light, dark }` with `defaultColor: false` → **342 `--shiki-light` /
+        `--shiki-dark` pairs, zero hard-coded colours** in the output
+-   [x] Class-based dark toggle works. The entire light/dark mechanism is **six lines of
+        CSS**, replacing ~150 lines of paired `mode()` calls in `styles/styles.ts`:
+
+    ```css
+    .astro-code,
+    .astro-code span {
+        color: var(--shiki-light);
+        background-color: var(--shiki-light-bg);
+    }
+    html.dark .astro-code,
+    html.dark .astro-code span {
+        color: var(--shiki-dark);
+        background-color: var(--shiki-dark-bg);
+    }
+    ```
+
+-   [x] Line highlighting works — `transformerMetaHighlight()` emits `.line.highlighted`,
+        replacing `.mdx-marker`. Verified 3 highlighted lines from `{4,5,8}`.
+-   [x] Code titles work — `plugins/transformer-code-title.mjs` (~25 lines) replaces
+        `rehype-code-titles` and emits the same `.rehype-code-title` div. Verified all
+        three titles in `rss.mdx`.
+-   [x] **Fence syntax: edit the 5 fences, don't write a parser.** The spike first used a
+        `remark-normalize-code-meta.mjs` plugin to translate the existing syntax. That
+        plugin was **dropped** — editing the content produces **byte-for-byte identical
+        rendered output** with one fewer moving part, and moves the fences to standard
+        Shiki syntax that matches every Astro doc. See "Fence edits" in Phase 4.
+-   [x] Visual comparison against the Phase 0 screenshots — see
+        `../spike-artifacts/screenshots/`
+
+### Two gotchas found (both fixed in the artifacts)
+
+1. **`apacheconf` is not a Shiki language** — Shiki bundles it as `apache`. Without a
+   fix, the block in `archive/how-to-speed-up-your-websites.mdx` silently falls back to
+   plaintext. Fixed with `langAlias: { apacheconf: 'apache' }`. All 10 languages you use
+   (`bash typescript python php puppet yaml json js cpp apacheconf`) now resolve with
+   **zero fallbacks**.
+2. **The Prism-vs-TextMate taxonomy divergence is real and visible.** Mapping TextMate's
+   `variable` scope to Prism's `.token.variable` colour painted **every function
+   parameter orange** — Prism leaves parameters untokenised (verified against the
+   baseline HTML: `measurements`, `window_size`, `field_name` carry no token class).
+   Fixed by narrowing the scope so parameters inherit the foreground. Worth re-checking
+   this class of difference on a TS and a Python block after the real port.
 
 ---
 
@@ -213,6 +282,20 @@ mechanical; retrofitting them later is miserable.
         `remark-smartypants` in this migration — it has no arrows or math symbols, and
         `.tsx` prose contains pre-typographied characters matched to current output.
         Consolidate later, separately, if at all.
+-   [ ] **Fence edits — 5 fences, 3 files.** Shiki needs a space before the line range,
+        and `title="…"` instead of `:filename`. Verified in the 1B spike to produce
+        byte-identical output to the plugin-based alternative. ⚠️ These edits **break the
+        current Next build** (`mdx-prism` / `rehype-code-titles` expect the old form), so
+        they must land in the migration commit, not on `main` beforehand.
+
+    | File                            | Line | From                                  | To                                             |
+    | ------------------------------- | ---- | ------------------------------------- | ---------------------------------------------- |
+    | `writings/python-protocols.mdx` | 77   | ` ```python{4,5,8} `                  | ` ```python {4,5,8} `                          |
+    | `writings/rss.mdx`              | 104  | ` ```typescript:pages/index.tsx `     | ` ```typescript title="pages/index.tsx" `      |
+    | `writings/rss.mdx`              | 135  | ` ```typescript:lib/feeds.tsx `       | ` ```typescript title="lib/feeds.tsx" `        |
+    | `writings/rss.mdx`              | 164  | ` ```typescript:lib/feeds.tsx `       | ` ```typescript title="lib/feeds.tsx" `        |
+    | `special/_kitchensink.mdx`      | 119  | ` ```js{5,6,9-13}:components/foo.js ` | ` ```js {5,6,9-13} title="components/foo.js" ` |
+
 -   [ ] **Apply the GFM decision from Phase 0.** Astro defaults to `markdown.gfm: true`;
         the current site has no `remark-gfm` at all. Leaving the default on silently
         changes rendering of tables, footnotes, task lists and strikethrough.
@@ -336,6 +419,12 @@ Decide intent for each; don't port a bug by accident.
    `initialColorMode="system"` (Phase 3).
 3. **`lib/topics.ts:40`** — stray `console.log(data)`.
 4. **`pages/[topic].tsx`** — `new Date().toISOString()` as the article date.
+5. **`lib/feeds.tsx:54`** — feed titles are **double-title-cased**. `makeTitle()` is
+   called without `TITLE_OPTIONS` on an already-title-cased string, so acronyms are
+   destroyed: subscribers get `Aws Iam Demystified`, the site shows `AWS IAM Demystified`.
+   Confirmed in the 1A spike. Fix during the port.
+6. **Dead code** — `MDXComponents.tsx`'s eight table mappings and `styles/components.ts`'s
+   `Table` baseStyle. No `<table>` exists anywhere in the built site (no `remark-gfm`).
 
 ---
 
