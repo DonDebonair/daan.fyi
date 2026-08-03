@@ -21,9 +21,9 @@ These are the things that must not change. Check them at every phase boundary.
 | **No trailing slash** — `/writings/rss/` 308s to `/writings/rss`                | verified in Phase 0; silent regression otherwise |
 | `/blog/:slug` → `/writings/:slug` returns **308** (not 301)                     | legacy inbound links                             |
 | `/feeds/feed.xml`, `/atom.xml`, `/feed.json` exist and contain **rendered** MDX | subscribers                                      |
-| `public/archive-assets/**` paths unchanged                                      | 10 archive posts reference them                  |
+| `public/archive-assets/files/**` URLs unchanged                                 | 4 download links (PDF/xlsx) in archive posts     |
 | Heading title-casing + typographic substitutions byte-identical                 | content rendering                                |
-| **GFM stays off** (or the kitchen sink gets fixed deliberately)                 | see Phase 0 findings                             |
+| **GFM is ON** — `_kitchensink` is expected to change; nothing else may          | decided, see Phase 0 finding 3                   |
 
 ### URL inventory — 61 pages + 6 generated files
 
@@ -50,7 +50,8 @@ Full list in `../baseline/meta/urls.txt`.
 | Code line highlighting `{4,5,8}` | `writings/python-protocols`, `_kitchensink`              |
 | Code titles `:filename`          | `writings/rss` (3×), `_kitchensink`                      |
 | Images in MDX                    | `writings/aws-multi-account`, `_kitchensink`             |
-| `archive-assets`                 | 10 archive posts                                         |
+| `archive-assets` images          | 7 archive posts (14 refs) — all move to `src/assets/`    |
+| `archive-assets/files` downloads | 4 links — URLs must NOT change                           |
 | Topic preamble                   | **none** — `content/topics/` doesn't exist yet           |
 
 ---
@@ -78,16 +79,29 @@ diff recipe.
    `/writings/rss`. Astro needs `trailingSlash: 'never'` + `build.format: 'file'`.
 2. **The legacy redirect is a 308, not a 301** — Next's `permanent: true` emits 308.
    Match it in `vercel.json`; both are permanent for SEO, but don't downgrade it silently.
-3. **`remark-gfm` is absent — and Astro enables GFM by default.** Today, tables,
-   footnotes, task lists and strikethrough render as **literal text**: there is not a
-   single `<table>` element anywhere in the built site. A naive port would silently start
-   rendering all of it. Blast radius is limited — `_kitchensink.mdx` is the only file
-   containing GFM syntax; no real post is affected. **Decision required** → `____`
-    - Set `markdown.gfm: false` to match today exactly, **or**
-    - Accept GFM and deliberately fix `_kitchensink.mdx`
-    - Either way: `MDXComponents.tsx`'s `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/
-      `caption` mappings and `styles/components.ts`'s `Table` baseStyle are **dead code**
-      today. Don't port them without deciding this first.
+3. **`remark-gfm` is absent — and Astro enables GFM by default.** ✅ **DECIDED: GFM ON.**
+
+    `remark-gfm` has never been in this project (checked the full git history), so
+    tables, footnotes, task lists and strikethrough have always rendered as **literal
+    text** — there is not a single `<table>` element anywhere in the built site.
+
+    `_kitchensink.mdx` has sections literally headed "Tables", "Task lists" and
+    "Footnotes" that have never worked, and `MDXComponents.tsx` has mapped
+    `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/`caption` since the first commit for
+    tables that never rendered. Turning GFM off would preserve a bug, and would leave
+    Phase 5 with no way to style or test tables.
+
+    **Verified blast radius** (scan strips code fences, inline code, existing links and
+    raw HTML, so these are real):
+
+    | File                                        | Change                                                                                                           |
+    | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+    | `special/_kitchensink.mdx`                  | 2 tables, 5 footnote refs, 3 task items, 1 strikethrough start rendering                                         |
+    | `archive/statserver-…`                      | `http://matt.aimonetti.net/posts/…` autolinks — **accepted**                                                     |
+    | `archive/installing-virtual-hadoop-cluster` | `http://vm-cluster-node1:7180` autolinks — **wrap in backticks**, it's a local hostname and would be a dead link |
+
+    Nothing else in any post is affected. See Phase 4 for the actions.
+
 4. **`sitemap.xml` is an index** pointing at `sitemap-0.xml`. Decide whether
    `@astrojs/sitemap` should reproduce the index or emit a single file.
 5. **`SideNote` markup does survive into the current feeds** (verified: `aside` appears
@@ -164,9 +178,10 @@ break in a minor release. Working spike at `astro@7.1.6`.
    14 on `mental-health` — one anchor per heading). Confirms it must be ported.
 4. **`remark-capitalize` confirmed load-bearing.** Baseline renders `Keeping up with Current Events`; the spike, without the plugin, renders `Keeping Up with…`.
 5. **Images in `public/` get no `width`/`height` from Astro** — `<img src="…" alt="…"/>`
-   and nothing else. This is what `rehype-img-size` provides today. Moving to
-   `src/assets/` for dimensions + optimisation means **rewriting the `/images/…` paths in
-   the MDX**, which is a content change. See Phase 4.
+   and nothing else. Worse, the current site optimises images at request time via Next's
+   `/_next/image`, which `public/` in Astro does **not** replace — so leaving images there
+   is a regression from optimised to raw across 23.2 MB of source images. Resolved by
+   the images decision below.
 
 ### 1B. Syntax highlighting ✅ PASSED — use Shiki
 
@@ -297,14 +312,37 @@ mechanical; retrofitting them later is miserable.
     | `writings/rss.mdx`              | 164  | ` ```typescript:lib/feeds.tsx `       | ` ```typescript title="lib/feeds.tsx" `        |
     | `special/_kitchensink.mdx`      | 119  | ` ```js{5,6,9-13}:components/foo.js ` | ` ```js {5,6,9-13} title="components/foo.js" ` |
 
--   [ ] **Apply the GFM decision from Phase 0.** Astro defaults to `markdown.gfm: true`;
-        the current site has no `remark-gfm` at all. Leaving the default on silently
-        changes rendering of tables, footnotes, task lists and strikethrough.
+-   [ ] **GFM: leave Astro's default ON** (decided — Phase 0 finding 3). Concretely:
+    -   [ ] Do **not** set `markdown.gfm: false` (note the 1B spike config has it set —
+            remove that line when merging `spike/astro.config.mjs`)
+    -   [ ] `archive/installing-virtual-hadoop-cluster.mdx:41` — wrap
+            `http://vm-cluster-node1:7180` in backticks so autolink leaves the local
+            hostname alone
+    -   [ ] Port the `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/`caption` styling
+            (previously dead code) — `_kitchensink` now exercises it for the first time
+    -   [ ] Style footnotes, task lists and `<del>` — all new elements on the page
+    -   [ ] Expect a **large, intentional** Phase 8 diff on `/_kitchensink` only. Every
+            other page must still diff clean.
 -   [ ] `remark-unwrap-images`, `rehype-autolink-headings` (drop `rehype-slug` — Astro
         slugs headings natively)
--   [ ] Images: move `public/images/` → `src/assets/` for optimisation + automatic
-        dimensions, which deletes `rehype-img-size`. **Leave `public/archive-assets/`
-        alone** — 10 archive posts reference those paths.
+-   [ ] **Images: move all 20 `![]()` targets to `src/assets/`** (decided). Deletes
+        `rehype-img-size`. Measured on the three worst cases: `butwhy.gif` 13 MB → 2.4 MB
+        (−81%), `img_20111025_152826.jpg` 1.4 MB → 468 KB (−67%), `aws-org-design.png`
+        356 KB → 52 KB (−85%), plus automatic `width`/`height`, `loading="lazy"` and
+        content-hashed filenames.
+    -   [ ] `public/images/` → `src/assets/` — 6 refs in `writings/aws-multi-account.mdx`
+            and `special/_kitchensink.mdx`
+    -   [ ] `public/archive-assets/images/` → `src/assets/` — 14 refs across 7 archive
+            posts. Heaviest wins are here: `burglar-s-doom` drops ~8.7 MB → ~2–3 MB.
+    -   [ ] Rewrite refs to relative paths (`../../assets/foo.png` — verified working in
+            the spike)
+    -   [ ] ⚠️ **Leave `public/archive-assets/files/` alone** — the 4 PDF/xlsx download
+            links are not images and their URLs must stay stable
+    -   [ ] ✅ Animated GIF safety verified: the 791-frame `butwhy.gif` converts to
+            **animated** WebP (`ANIM`/`ANMF` chunks present), not a flattened first frame
+    -   [ ] Accept that asset URLs become hashed `/_astro/*`; external hotlinks to the
+            old `/images/…` and `/archive-assets/images/…` URLs will break. Decided
+            against keeping duplicate `public/` copies.
 -   [ ] Reading time + word count: `reading-time` still works, or a remark plugin
         injecting into frontmatter
 -   [ ] Port `lib/topics.ts` (drop the stray `console.log(data)` on line 40)
@@ -389,7 +427,8 @@ Against `../baseline/` from Phase 0. This is the phase that justifies Phase 0 ex
 -   [ ] `curl -I /blog/rss` returns 301 to the right place
 -   [ ] Feed diff: item count, titles, dates, and `<content>` containing rendered `SideNote`
 -   [ ] Screenshot diff, light **and** dark, against the Phase 0 set
--   [ ] Verify the 10 archive posts' `archive-assets` images load
+-   [ ] Verify all 20 migrated images render, and that the 4 `archive-assets/files/`
+        download links still resolve at their original URLs
 -   [ ] Verify typographic output byte-identical (curly quotes, em/en dashes, arrows)
 -   [ ] Verify heading title-casing incl. acronyms: `AWS`, `IAM`, `RSS`, `NextJS`, `OCJP`,
         `VirtPHP`, `TypeVar`, `SSO`, `VPS`, `PS`
@@ -424,8 +463,14 @@ Decide intent for each; don't port a bug by accident.
    called without `TITLE_OPTIONS` on an already-title-cased string, so acronyms are
    destroyed: subscribers get `Aws Iam Demystified`, the site shows `AWS IAM Demystified`.
    Confirmed in the 1A spike. Fix during the port.
-6. **Dead code** — `MDXComponents.tsx`'s eight table mappings and `styles/components.ts`'s
-   `Table` baseStyle. No `<table>` exists anywhere in the built site (no `remark-gfm`).
+6. ~~**Dead code**~~ — resolved by the GFM decision: `MDXComponents.tsx`'s eight table
+   mappings and `styles/components.ts`'s `Table` baseStyle stop being dead and get
+   ported and tested against `_kitchensink`.
+7. **48.3 MB of unreferenced files in `public/archive-assets/files/`** — `sf2hadoop.jar`
+   (44.7 MB), `dino.swf` (3.6 MB), 3 zips and `coursera-ml-2014.pdf`. Nothing in
+   `content/` links to any of them, but they are live URLs so something external might.
+   Shipped in every deploy and carried in git history. **Not part of the migration** —
+   decide separately whether to keep, and do not delete blind.
 
 ---
 
