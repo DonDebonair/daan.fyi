@@ -48,6 +48,28 @@ responsible for the `<a>` count gap.
 
 Edit the `OLD` / `NEW` paths at the top before running.
 
+## `compare-content.mjs`
+
+Batch-compares every content file's rendered output against `../../../baseline/html/`.
+Written for Phase 4 and reusable in Phase 8.
+
+```bash
+node compare-content.mjs      # edit BASE / CAND at the top if paths differ
+```
+
+Checks two things across all 33 documents:
+
+1. **Heading ids** — the strongest single signal available. One string encodes
+   title-casing, the acronym exceptions, the `remark-capitalize` trim quirk and the
+   slugger all at once, so a regression in any of them shows up as a changed id.
+2. **Typographic characters** — counts all 14 (curly quotes, em/en dashes, ellipses,
+   arrows, `×`, `±`, `©`, `®`, `™`) per document.
+
+It expects `CAND` to point at bare-content pages, which is what
+`src/pages/check/[collection]/[slug].astro` produced in Phase 4. Once that route is
+deleted in Phase 6, point it at the real pages — page chrome adds headings, so compare
+ids by set membership rather than by index (which is what it already does).
+
 ## `gfm-scan.mjs`
 
 Scans `content/` for GFM-sensitive syntax (tables, strikethrough, footnotes, task lists,

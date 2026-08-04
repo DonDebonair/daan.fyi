@@ -1,112 +1,30 @@
 ---
-// Phase 3 token preview. Replaced by the real home page in Phase 6.
+// Phase 4 verification page. Replaced by the real home page in Phase 6.
 //
-// This is how the token layer gets checked: every semantic role rendered as a swatch
-// in both modes, so a wrong or missing flip is visible rather than theoretical.
+// Renders whole posts so the content pipeline can be diffed against ../baseline/html/:
+// title-casing, typographic substitutions, heading anchors, Shiki output.
+import { getEntry, render } from 'astro:content';
 import ColorModeScript from '@/components/ColorModeScript.astro';
+import { mdxComponents } from '@/components/mdx/components';
 
 import '../styles/global.css';
 
-const groups = [
-    {
-        name: 'Surface & text',
-        tokens: ['surface', 'text', 'rule', 'divider'],
-    },
-    {
-        name: 'Accent',
-        tokens: ['accent', 'badge-fg', 'badge-hover-bg', 'badge-hover-fg'],
-    },
-    {
-        name: 'Series overview',
-        tokens: [
-            'series-border',
-            'series-separator',
-            'series-circle-bg',
-            'series-circle-fg',
-            'series-circle-current-bg',
-            'series-circle-current-fg',
-        ],
-    },
-    {
-        name: 'SideNote',
-        tokens: [
-            'note-success-bg',
-            'note-success-border',
-            'note-warning-bg',
-            'note-warning-border',
-            'note-info-bg',
-            'note-info-border',
-            'note-danger-bg',
-            'note-danger-border',
-        ],
-    },
-    {
-        name: 'Code',
-        tokens: [
-            'code-bg',
-            'code-fg',
-            'code-border',
-            'code-title-bg',
-            'code-title-fg',
-            'code-highlight-bg',
-            'code-highlight-bar',
-            'inline-code-bg',
-            'inline-code-fg',
-            'heading-anchor',
-        ],
-    },
-];
+const slug = Astro.url.searchParams.get('post') ?? 'iam';
+const entry = await getEntry('writings', slug);
+const { Content } = await render(entry!);
 ---
 
 <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>daan.fyi — design tokens</title>
+        <title>{entry!.data.title}</title>
         <ColorModeScript />
     </head>
     <body>
         <main class="mx-auto max-w-[800px] p-8">
-            <div class="flex items-baseline justify-between">
-                <h1 class="text-2xl">Design tokens</h1>
-                <button
-                    id="toggle"
-                    class="border border-rule px-3 py-1 text-sm"
-                    aria-label="Toggle colour mode">toggle mode</button
-                >
-            </div>
-
-            <p class="mt-4 text-sm">
-                Body text at <code>--text-sm</code> (0.89rem), root font size 18px, body font Quicksand,
-                headings Raleway.
-            </p>
-
-            {
-                groups.map((group) => (
-                    <section class="mt-8">
-                        <h2 class="text-lg">{group.name}</h2>
-                        <ul class="mt-2 grid grid-cols-2 gap-2">
-                            {group.tokens.map((token) => (
-                                <li class="flex items-center gap-3 text-xs">
-                                    <span
-                                        class="inline-block h-8 w-8 shrink-0 border border-rule"
-                                        style={`background: var(--ui-${token})`}
-                                    />
-                                    <code>--ui-{token}</code>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-                ))
-            }
+            <h1>{entry!.data.title}</h1>
+            <Content components={mdxComponents} />
         </main>
-
-        <script is:inline>
-            document.getElementById('toggle').addEventListener('click', function () {
-                var next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-                localStorage.setItem('color-mode', next);
-                document.documentElement.classList.toggle('dark', next === 'dark');
-            });
-        </script>
     </body>
 </html>

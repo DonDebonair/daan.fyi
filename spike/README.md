@@ -7,6 +7,11 @@ proven configuration waiting to be moved into place.
 Committed here rather than left in a scratch directory because re-deriving the Shiki
 scope mappings is the tedious part, and it has already been done once correctly.
 
+> **Status:** the syntax-highlighting artifacts have landed. `shiki/*.json` and
+> `plugins/transformer-code-title.mjs` were copied into `src/` in Phase 4 and are wired up
+> in `astro.config.mjs`; the copies here are now historical. `feeds/feed.xml.ts` is still
+> waiting for Phase 7.
+
 ## Where each file lands
 
 | File                                 | Phase | Destination                                          |
