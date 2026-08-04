@@ -1,10 +1,11 @@
-module.exports = {
+/** @type {import('prettier').Config} */
+export default {
     arrowParens: 'always',
+    bracketSameLine: false,
     bracketSpacing: true,
     embeddedLanguageFormatting: 'auto',
     htmlWhitespaceSensitivity: 'css',
     insertPragma: false,
-    jsxBracketSameLine: false,
     jsxSingleQuote: false,
     printWidth: 100,
     proseWrap: 'preserve',
@@ -16,4 +17,11 @@ module.exports = {
     trailingComma: 'es5',
     useTabs: false,
     vueIndentScriptAndStyle: false,
+    plugins: ['prettier-plugin-astro'],
+    overrides: [
+        {
+            files: '*.astro',
+            options: { parser: 'astro' },
+        },
+    ],
 };

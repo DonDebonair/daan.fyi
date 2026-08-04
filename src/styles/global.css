@@ -1,0 +1,9 @@
+/*
+ * Tailwind 4 is configured in CSS, not in a JS config file.
+ *
+ * Phase 3 fills this in: the semantic colour tokens as custom properties on :root,
+ * flipped in .dark, exposed to Tailwind via `@theme inline`, plus the dark variant,
+ * the font stacks and the 18px root font size. Right now this only proves the
+ * @tailwindcss/vite pipeline is wired up.
+ */
+@import 'tailwindcss';

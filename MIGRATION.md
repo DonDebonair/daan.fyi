@@ -27,13 +27,13 @@ These are the things that must not change. Check them at every phase boundary.
 
 ### URL inventory — 61 pages + 6 generated files
 
--   `/`, `/about`, `/topics`, `/writings`, `/archive`, `/_kitchensink` — 6
--   `/writings/{9 slugs}` — 9
--   `/archive/{23 slugs}` — 23
--   `/{23 topic slugs}` — 23
-    `amplify aws editors hn iam ide infrastructure lgbtqi mental-health multi-account news nextjs opinions plugins pyenv python rss snippets sourceag syndication tooling typing website`
--   `/feeds/feed.xml`, `/feeds/atom.xml`, `/feeds/feed.json` — 3
--   `/sitemap.xml` (**an index**), `/sitemap-0.xml`, `/robots.txt` — 3
+- `/`, `/about`, `/topics`, `/writings`, `/archive`, `/_kitchensink` — 6
+- `/writings/{9 slugs}` — 9
+- `/archive/{23 slugs}` — 23
+- `/{23 topic slugs}` — 23
+  `amplify aws editors hn iam ide infrastructure lgbtqi mental-health multi-account news nextjs opinions plugins pyenv python rss snippets sourceag syndication tooling typing website`
+- `/feeds/feed.xml`, `/feeds/atom.xml`, `/feeds/feed.json` — 3
+- `/sitemap.xml` (**an index**), `/sitemap-0.xml`, `/robots.txt` — 3
 
 Full list in `../baseline/meta/urls.txt`.
 
@@ -62,16 +62,16 @@ Captured at `../baseline/` (outside the repo, so it survives the cutover commit 
 never enters git history). See `../baseline/README.md` for contents and the Phase 8
 diff recipe.
 
--   [x] `npm run build && npm start` — builds clean on Node 26
--   [x] All **61 pages** fetched to `../baseline/html/`, all 200. URL list derived from
-        `.next/server/pages` rather than by crawling — `/_kitchensink` is linked from
-        nowhere and a link-following crawler misses it.
--   [x] Feeds copied to `../baseline/feeds/` — 9 items in each of the three formats
--   [x] Sitemap, `sitemap-0.xml`, robots captured
--   [x] Trailing-slash + redirect + 404 behaviour recorded in `meta/behaviour.txt`
--   [x] Checksums (`meta/html.sha256`, `meta/feeds.sha256`) and provenance recorded
--   [x] **26 screenshots** — 13 pages × light/dark, full-page, 2× DPI, in
-        `../baseline/screenshots/`
+- [x] `npm run build && npm start` — builds clean on Node 26
+- [x] All **61 pages** fetched to `../baseline/html/`, all 200. URL list derived from
+      `.next/server/pages` rather than by crawling — `/_kitchensink` is linked from
+      nowhere and a link-following crawler misses it.
+- [x] Feeds copied to `../baseline/feeds/` — 9 items in each of the three formats
+- [x] Sitemap, `sitemap-0.xml`, robots captured
+- [x] Trailing-slash + redirect + 404 behaviour recorded in `meta/behaviour.txt`
+- [x] Checksums (`meta/html.sha256`, `meta/feeds.sha256`) and provenance recorded
+- [x] **26 screenshots** — 13 pages × light/dark, full-page, 2× DPI, in
+      `../baseline/screenshots/`
 
 ### Findings that change the plan
 
@@ -110,13 +110,13 @@ diff recipe.
 
 ### Local-only capture caveats (not site defects)
 
--   `robots.txt` says `Disallow: /` because `VERCEL_ENV` is unset locally. Production
-    gets the real policy. Compare against the local baseline, not production.
--   `sharp` is not installed, so Next's image optimizer uses a slow fallback; the
-    optimizer cache had to be warmed before screenshots captured images.
--   Screenshots force `loading="eager"` — `next/image` lazy-loads below the fold and
-    neither full-page capture nor fast scrolling triggers the `IntersectionObserver`.
-    Images are captured; lazy-load _behaviour_ is not.
+- `robots.txt` says `Disallow: /` because `VERCEL_ENV` is unset locally. Production
+  gets the real policy. Compare against the local baseline, not production.
+- `sharp` is not installed, so Next's image optimizer uses a slow fallback; the
+  optimizer cache had to be warmed before screenshots captured images.
+- Screenshots force `loading="eager"` — `next/image` lazy-loads below the fold and
+  neither full-page capture nor fast scrolling triggers the `IntersectionObserver`.
+  Images are captured; lazy-load _behaviour_ is not.
 
 **Exit criteria:** met — `../baseline/` holds all 61 pages, 3 feeds, 3 generated files,
 26 screenshots, checksums and provenance.
@@ -135,14 +135,14 @@ Throwaway Astro project. Do not start the real migration until both resolve.
 Ran on **Astro 7.1.6** with `@astrojs/mdx`, against real content (`iam`,
 `mental-health`, `aws-multi-account`, `python-protocols`).
 
--   [x] `experimental_AstroContainer.renderToString()` renders a content-collection entry
--   [x] `SideNote` renders fully — `type` prop, title, slotted children, and nested
-        markdown (`<em>`, `<strong>`, `<p>`) all present. `Asterisk` and `Small` too.
--   [x] Zero raw `<SideNote` strings leak into the output
--   [x] The `feed` package consumes the string and emits **all three formats**
-        (rss2 / atom / json), content in CDATA
--   [x] Images render and the `src="/"` → absolute rewrite works; no leftover relative URLs
--   [x] Word-count parity against the Phase 0 baseline: 1920/1920, 1736/1736, 2305/2302
+- [x] `experimental_AstroContainer.renderToString()` renders a content-collection entry
+- [x] `SideNote` renders fully — `type` prop, title, slotted children, and nested
+      markdown (`<em>`, `<strong>`, `<p>`) all present. `Asterisk` and `Small` too.
+- [x] Zero raw `<SideNote` strings leak into the output
+- [x] The `feed` package consumes the string and emits **all three formats**
+      (rss2 / atom / json), content in CDATA
+- [x] Images render and the `src="/"` → absolute rewrite works; no leftover relative URLs
+- [x] Word-count parity against the Phase 0 baseline: 1920/1920, 1736/1736, 2305/2302
 
 **The one non-obvious step:** the MDX renderer must be registered manually, because the
 container runs outside a page render. Without this you get a cryptic failure:
@@ -190,12 +190,12 @@ break in a minor release. Working spike at `astro@7.1.6`.
 Working artifacts are committed at **[`spike/`](spike/)** — drop them straight into
 Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
 
--   [x] `shiki/prism-default-light.json` — Prism default palette, ported scope by scope
--   [x] `shiki/night-owl-pink.json` — Night Owl + the three `#FFA7C4` overrides
--   [x] `themes: { light, dark }` with `defaultColor: false` → **342 `--shiki-light` /
-        `--shiki-dark` pairs, zero hard-coded colours** in the output
--   [x] Class-based dark toggle works. The entire light/dark mechanism is **six lines of
-        CSS**, replacing ~150 lines of paired `mode()` calls in `styles/styles.ts`:
+- [x] `shiki/prism-default-light.json` — Prism default palette, ported scope by scope
+- [x] `shiki/night-owl-pink.json` — Night Owl + the three `#FFA7C4` overrides
+- [x] `themes: { light, dark }` with `defaultColor: false` → **342 `--shiki-light` /
+      `--shiki-dark` pairs, zero hard-coded colours** in the output
+- [x] Class-based dark toggle works. The entire light/dark mechanism is **six lines of
+      CSS**, replacing ~150 lines of paired `mode()` calls in `styles/styles.ts`:
 
     ```css
     .astro-code,
@@ -210,18 +210,18 @@ Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
     }
     ```
 
--   [x] Line highlighting works — `transformerMetaHighlight()` emits `.line.highlighted`,
-        replacing `.mdx-marker`. Verified 3 highlighted lines from `{4,5,8}`.
--   [x] Code titles work — `plugins/transformer-code-title.mjs` (~25 lines) replaces
-        `rehype-code-titles` and emits the same `.rehype-code-title` div. Verified all
-        three titles in `rss.mdx`.
--   [x] **Fence syntax: edit the 5 fences, don't write a parser.** The spike first used a
-        `remark-normalize-code-meta.mjs` plugin to translate the existing syntax. That
-        plugin was **dropped** — editing the content produces **byte-for-byte identical
-        rendered output** with one fewer moving part, and moves the fences to standard
-        Shiki syntax that matches every Astro doc. See "Fence edits" in Phase 4.
--   [x] Visual comparison against the Phase 0 screenshots — see
-        `spike/screenshots/`
+- [x] Line highlighting works — `transformerMetaHighlight()` emits `.line.highlighted`,
+      replacing `.mdx-marker`. Verified 3 highlighted lines from `{4,5,8}`.
+- [x] Code titles work — `plugins/transformer-code-title.mjs` (~25 lines) replaces
+      `rehype-code-titles` and emits the same `.rehype-code-title` div. Verified all
+      three titles in `rss.mdx`.
+- [x] **Fence syntax: edit the 5 fences, don't write a parser.** The spike first used a
+      `remark-normalize-code-meta.mjs` plugin to translate the existing syntax. That
+      plugin was **dropped** — editing the content produces **byte-for-byte identical
+      rendered output** with one fewer moving part, and moves the fences to standard
+      Shiki syntax that matches every Astro doc. See "Fence edits" in Phase 4.
+- [x] Visual comparison against the Phase 0 screenshots — see
+      `spike/screenshots/`
 
 ### Two gotchas found (both fixed in the artifacts)
 
@@ -239,20 +239,91 @@ Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
 
 ---
 
-## Phase 2 — Scaffold
+## Phase 2 — Scaffold ✅ DONE
 
--   [ ] `npm create astro@latest` — minimal, TypeScript strict
--   [ ] `npx astro add mdx sitemap`
--   [ ] `npx astro add tailwind` (Tailwind 4 via `@tailwindcss/vite` — **not** `@astrojs/tailwind`)
--   [ ] Port path aliases to `tsconfig.json`: `@/components/*`, `@/lib/*`, `@/layouts/*`
--   [ ] `git mv content src/content`, `git mv public public` (stays put)
--   [ ] Port `lib/config.ts` verbatim (env-var-driven `baseUrl` still works on Vercel)
--   [ ] Prettier config: 4-space, single quotes, 100 cols, ES5 trailing commas
--   [ ] Husky + lint-staged
--   [ ] Set `trailingSlash: 'never'` + `build.format: 'file'` (confirmed in Phase 0:
-        `/writings/rss/` 308s to `/writings/rss`)
+Scaffolded by hand from a throwaway `npm create astro@latest` reference project rather
+than by running the creator in place — the repo is not empty and the creator wants to own
+`package.json`, `tsconfig.json` and `.gitignore`.
 
-**Exit criteria:** empty site builds, aliases resolve.
+- [x] Astro **7.1.6** (the version the 1A spike was verified against — pinned as planned)
+- [x] `@astrojs/mdx` 7.0.5, `@astrojs/sitemap` 3.7.3
+- [x] Tailwind 4.3.3 via `@tailwindcss/vite` — **not** `@astrojs/tailwind`
+- [x] Path aliases in `tsconfig.json`: `@/components/*`, `@/layouts/*`, `@/lib/*` →
+      `src/*`. Astro resolves `tsconfig` paths natively; no `vite-tsconfig-paths` needed
+- [x] `git mv content src/content` (history preserved); `public/` stays put
+- [x] `lib/config.ts` → `src/lib/config.ts`, verbatim
+- [x] Prettier 2.7.1 → **3.9.6** + `prettier-plugin-astro`, same options
+- [x] Husky + lint-staged kept on 8/15; `*.astro` added to the lint-staged glob
+- [x] `trailingSlash: 'never'` + `build.format: 'file'` — verified: emits `index.html`,
+      and `/about` (absent) 404s rather than redirecting
+- [x] `type-check` is now `astro check` — **0 errors**, 0 warnings, 0 hints
+- [x] `npm run build` and `npm run dev` both clean; Tailwind emits CSS; the `@/lib/*`
+      alias resolves at both type-check and bundle time
+
+### Decisions taken while scaffolding
+
+1. **`"type": "module"`.** Astro's default, and the end state anyway. Required renaming
+   `.eslintrc.js` → `.eslintrc.cjs` and `.prettierrc.js` → `.prettierrc.mjs`.
+   `next.config.js` and `next-sitemap.config.js` are left as-is: nothing loads them any
+   more, so their CJS-ness is inert. They are excluded from `tsconfig.json` so
+   `astro check` stays quiet.
+2. **The Next build is dead from this phase on, not Phase 4.** Moving `content/` breaks
+   `lib/posts.ts` immediately. Rather than keep dead `next:*` scripts around, the Next
+   scripts are gone. The Next _files_ stay on disk as the porting reference for Phases
+   3–7 and are deleted in Phase 9.
+3. **Legacy deps moved to `devDependencies`** rather than deleted — they are the porting
+   reference, but none of them is a runtime dependency of the Astro build. Phase 9 just
+   deletes the block.
+4. **`patch-package` and the `postinstall` hook are already gone** (Phase 4 had them
+   scheduled). `remark-capitalize` went with them, since keeping a patched package whose
+   patch no longer applies is worse than removing both. `patches/` is now inert — Phase 9
+   deletes the directory.
+5. **`@types/node` 18 → 24.** Vite 8 peer-requires `^20.19.0 || >=22.12.0`; the install
+   fails outright on the old pin. Also added `engines.node: ">=22.12.0"`.
+6. **TypeScript pinned to `^5.9.3`, not latest.** TypeScript 7.0.2 is out, but
+   `@astrojs/check` peer-requires `^5.0.0 || ^6.0.0`.
+7. **`src/content/` added to `.prettierignore`.** 30 of the 33 MDX files already fail
+   `prettier --check` on the pre-migration tree, so formatting was never really applied
+   to content — but `prettier --write .` would now rewrite all of it, and byte-identical
+   rendering is a ground rule. Revisit after Phase 8.
+
+### Findings that change later phases
+
+1. **⚠️ Astro 7 made the Markdown engine pluggable, and the config shape moved.**
+   `markdown.gfm`, `.smartypants`, `.remarkPlugins`, `.rehypePlugins` and `.remarkRehype`
+   are **all deprecated** at the `markdown` level and now belong on a processor:
+
+    ```js
+    import { unified } from '@astrojs/markdown-remark';
+    markdown: {
+        processor: unified({ smartypants: false, remarkPlugins: [...], rehypePlugins: [...] }),
+        shikiConfig: { ... },   // NOT deprecated — stays at this level
+    }
+    ```
+
+    `markdown.shikiConfig` and `markdown.syntaxHighlight` are unaffected, so the **1B
+    spike's `shikiConfig` still drops in unchanged**. Only the `gfm`/`smartypants` lines
+    move. Already applied to `astro.config.mjs`; Phase 4 adds the plugin arrays inside
+    `unified()` rather than next to it.
+
+    This also answers the original "is rehype still current?" question: unified/remark/
+    rehype is now _one_ processor option rather than the only path (Astro also ships
+    `satteri`), but it is still first-class and is what this port uses.
+
+2. **`@astrojs/sitemap` emits `sitemap-index.xml`, not `sitemap.xml`.** The baseline has
+   `sitemap.xml` (an index) + `sitemap-0.xml`. Out of the box `/sitemap.xml` would 404 —
+   a real regression, not a cosmetic one. There is a `filenameBase` option but it renames
+   _both_ files. Resolve in Phase 7 (this is open decision 4).
+
+3. **Stale generated artifacts were sitting in `public/`.** `public/feeds/*`,
+   `public/sitemap*.xml` and `public/robots.txt` are gitignored but were still on disk
+   from the last Next build — and Astro copies `public/` verbatim, so they landed in
+   `dist/` and made the site look like it already had working feeds. **Deleted.** Phase 7
+   must now generate them for real, and Phase 8 cannot get a false pass. The only copies
+   are in `../baseline/`.
+
+**Exit criteria:** met — site builds, dev server serves, aliases resolve, `astro check`
+is clean.
 
 ---
 
@@ -261,9 +332,9 @@ Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
 The single highest-leverage step. Getting tokens right first means components are
 mechanical; retrofitting them later is miserable.
 
--   [x] **Chakra colour values, already extracted.** Captured here because the extraction
-        needs `@chakra-ui/react` in `node_modules`, which the cutover uninstalls — after
-        that these are painful to recover.
+- [x] **Chakra colour values, already extracted.** Captured here because the extraction
+      needs `@chakra-ui/react` in `node_modules`, which the cutover uninstalls — after
+      that these are painful to recover.
 
     | Token            | Value                    | Token            | Value                                            |
     | ---------------- | ------------------------ | ---------------- | ------------------------------------------------ |
@@ -281,19 +352,19 @@ mechanical; retrofitting them later is miserable.
     | `yellow.700`     | `#975A16`                | `whiteAlpha.800` | `rgba(255,255,255,0.80)`                         |
     | `whiteAlpha.900` | `rgba(255,255,255,0.92)` | `green.333`      | ⚠️ **does not exist** — see pre-existing issue 1 |
 
--   [ ] Define **semantic** tokens as CSS custom properties in `:root`, flipped in `.dark`
-        (`--color-surface`, `--color-accent`, `--color-rule`, …). Do _not_ translate each
-        `useColorModeValue` to `bg-white dark:bg-gray-900` at the call site — that
-        duplicates one decision 15 times.
--   [ ] Expose them to Tailwind via `@theme inline`
--   [ ] `@custom-variant dark (&:where(.dark, .dark *))`
--   [ ] Port `fontSizes.ts` (note: `sm` is a non-default `0.89rem`)
--   [ ] `html { font-size: 18px; scroll-behavior: smooth }` — easy to miss, changes everything
--   [ ] `@fontsource/raleway/400.css`, `@fontsource/quicksand/{400,700}.css`; Raleway =
-        headings, Quicksand = body
--   [ ] Inline blocking dark-mode script (Chakra's `ColorModeScript` did this for you —
-        without it you get a flash of the wrong theme)
--   [ ] Reconcile the Preflight/Chakra-reset delta against Phase 0 screenshots
+- [ ] Define **semantic** tokens as CSS custom properties in `:root`, flipped in `.dark`
+      (`--color-surface`, `--color-accent`, `--color-rule`, …). Do _not_ translate each
+      `useColorModeValue` to `bg-white dark:bg-gray-900` at the call site — that
+      duplicates one decision 15 times.
+- [ ] Expose them to Tailwind via `@theme inline`
+- [ ] `@custom-variant dark (&:where(.dark, .dark *))`
+- [ ] Port `fontSizes.ts` (note: `sm` is a non-default `0.89rem`)
+- [ ] `html { font-size: 18px; scroll-behavior: smooth }` — easy to miss, changes everything
+- [ ] `@fontsource/raleway/400.css`, `@fontsource/quicksand/{400,700}.css`; Raleway =
+      headings, Quicksand = body
+- [ ] Inline blocking dark-mode script (Chakra's `ColorModeScript` did this for you —
+      without it you get a flash of the wrong theme)
+- [ ] Reconcile the Preflight/Chakra-reset delta against Phase 0 screenshots
 
 > **Resolve first:** `styles/config.ts` says `useSystemColorMode: false` but
 > `_document.tsx` renders `<ColorModeScript initialColorMode="system" />`. These
@@ -303,24 +374,24 @@ mechanical; retrofitting them later is miserable.
 
 ## Phase 4 — Content layer
 
--   [ ] Content collections with the `glob()` loader: `writings`, `archive`, `topics`, `special`
--   [ ] Zod schemas — `title`, `publishedAt`, `summary?`, `topics?`, `series?`. This
-        replaces the hand-rolled types in `lib/posts.ts` and gives real validation
-        (current tsconfig is `strict: false`)
--   [ ] **Write `remark-title-case.ts` in-repo** (~15 lines: visit `heading` nodes, run the
-        `title` package with `TITLE_OPTIONS`). Deletes `remark-capitalize`, the patch,
-        `patch-package`, and the `postinstall` hook.
--   [ ] Port `lib/titleCase.ts` unchanged — note titles are ALSO title-cased in JS, separately
-        from headings in MDX. Both mechanisms must survive.
--   [ ] **Keep `remark-textr` + the 12 `typographic-*` packages as-is.** Do not swap to
-        `remark-smartypants` in this migration — it has no arrows or math symbols, and
-        `.tsx` prose contains pre-typographied characters matched to current output.
-        Consolidate later, separately, if at all.
--   [ ] **Fence edits — 5 fences, 3 files.** Shiki needs a space before the line range,
-        and `title="…"` instead of `:filename`. Verified in the 1B spike to produce
-        byte-identical output to the plugin-based alternative. ⚠️ These edits **break the
-        current Next build** (`mdx-prism` / `rehype-code-titles` expect the old form), so
-        they must land in the migration commit, not on `main` beforehand.
+- [ ] Content collections with the `glob()` loader: `writings`, `archive`, `topics`, `special`
+- [ ] Zod schemas — `title`, `publishedAt`, `summary?`, `topics?`, `series?`. This
+      replaces the hand-rolled types in `lib/posts.ts` and gives real validation
+      (current tsconfig is `strict: false`)
+- [ ] **Write `remark-title-case.ts` in-repo** (~15 lines: visit `heading` nodes, run the
+      `title` package with `TITLE_OPTIONS`). Deletes `remark-capitalize`, the patch,
+      `patch-package`, and the `postinstall` hook.
+- [ ] Port `lib/titleCase.ts` unchanged — note titles are ALSO title-cased in JS, separately
+      from headings in MDX. Both mechanisms must survive.
+- [ ] **Keep `remark-textr` + the 12 `typographic-*` packages as-is.** Do not swap to
+      `remark-smartypants` in this migration — it has no arrows or math symbols, and
+      `.tsx` prose contains pre-typographied characters matched to current output.
+      Consolidate later, separately, if at all.
+- [ ] **Fence edits — 5 fences, 3 files.** Shiki needs a space before the line range,
+      and `title="…"` instead of `:filename`. Verified in the 1B spike to produce
+      byte-identical output to the plugin-based alternative. ⚠️ These edits **break the
+      current Next build** (`mdx-prism` / `rehype-code-titles` expect the old form), so
+      they must land in the migration commit, not on `main` beforehand.
 
     | File                            | Line | From                                  | To                                             |
     | ------------------------------- | ---- | ------------------------------------- | ---------------------------------------------- |
@@ -330,40 +401,41 @@ mechanical; retrofitting them later is miserable.
     | `writings/rss.mdx`              | 164  | ` ```typescript:lib/feeds.tsx `       | ` ```typescript title="lib/feeds.tsx" `        |
     | `special/_kitchensink.mdx`      | 119  | ` ```js{5,6,9-13}:components/foo.js ` | ` ```js {5,6,9-13} title="components/foo.js" ` |
 
--   [ ] **GFM: leave Astro's default ON** (decided — Phase 0 finding 3). Concretely:
-    -   [ ] Do **not** set `markdown.gfm: false` (note the 1B spike config has it set —
-            remove that line when merging `spike/astro.config.mjs`)
-    -   [ ] `archive/installing-virtual-hadoop-cluster.mdx:41` — wrap
-            `http://vm-cluster-node1:7180` in backticks so autolink leaves the local
-            hostname alone
-    -   [ ] Port the `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/`caption` styling
-            (previously dead code) — `_kitchensink` now exercises it for the first time
-    -   [ ] Style footnotes, task lists and `<del>` — all new elements on the page
-    -   [ ] Expect a **large, intentional** Phase 8 diff on `/_kitchensink` only. Every
-            other page must still diff clean.
--   [ ] `remark-unwrap-images`, `rehype-autolink-headings` (drop `rehype-slug` — Astro
-        slugs headings natively)
--   [ ] **Images: move all 20 `![]()` targets to `src/assets/`** (decided). Deletes
-        `rehype-img-size`. Measured on the three worst cases: `butwhy.gif` 13 MB → 2.4 MB
-        (−81%), `img_20111025_152826.jpg` 1.4 MB → 468 KB (−67%), `aws-org-design.png`
-        356 KB → 52 KB (−85%), plus automatic `width`/`height`, `loading="lazy"` and
-        content-hashed filenames.
-    -   [ ] `public/images/` → `src/assets/` — 6 refs in `writings/aws-multi-account.mdx`
-            and `special/_kitchensink.mdx`
-    -   [ ] `public/archive-assets/images/` → `src/assets/` — 14 refs across 7 archive
-            posts. Heaviest wins are here: `burglar-s-doom` drops ~8.7 MB → ~2–3 MB.
-    -   [ ] Rewrite refs to relative paths (`../../assets/foo.png` — verified working in
-            the spike)
-    -   [ ] ⚠️ **Leave `public/archive-assets/files/` alone** — the 4 PDF/xlsx download
-            links are not images and their URLs must stay stable
-    -   [ ] ✅ Animated GIF safety verified: the 791-frame `butwhy.gif` converts to
-            **animated** WebP (`ANIM`/`ANMF` chunks present), not a flattened first frame
-    -   [ ] Accept that asset URLs become hashed `/_astro/*`; external hotlinks to the
-            old `/images/…` and `/archive-assets/images/…` URLs will break. Decided
-            against keeping duplicate `public/` copies.
--   [ ] Reading time + word count: `reading-time` still works, or a remark plugin
-        injecting into frontmatter
--   [ ] Port `lib/topics.ts` (drop the stray `console.log(data)` on line 40)
+- [ ] **GFM: leave Astro's default ON** (decided — Phase 0 finding 3). Concretely:
+    - [ ] Do **not** pass `gfm: false` to `unified()` (note the 1B spike config sets
+          `markdown.gfm: false` — drop that line, and see Phase 2 finding 1: the option
+          moved onto the processor and no longer belongs at the `markdown` level)
+    - [ ] `archive/installing-virtual-hadoop-cluster.mdx:41` — wrap
+          `http://vm-cluster-node1:7180` in backticks so autolink leaves the local
+          hostname alone
+    - [ ] Port the `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/`caption` styling
+          (previously dead code) — `_kitchensink` now exercises it for the first time
+    - [ ] Style footnotes, task lists and `<del>` — all new elements on the page
+    - [ ] Expect a **large, intentional** Phase 8 diff on `/_kitchensink` only. Every
+          other page must still diff clean.
+- [ ] `remark-unwrap-images`, `rehype-autolink-headings` (drop `rehype-slug` — Astro
+      slugs headings natively)
+- [ ] **Images: move all 20 `![]()` targets to `src/assets/`** (decided). Deletes
+      `rehype-img-size`. Measured on the three worst cases: `butwhy.gif` 13 MB → 2.4 MB
+      (−81%), `img_20111025_152826.jpg` 1.4 MB → 468 KB (−67%), `aws-org-design.png`
+      356 KB → 52 KB (−85%), plus automatic `width`/`height`, `loading="lazy"` and
+      content-hashed filenames.
+    - [ ] `public/images/` → `src/assets/` — 6 refs in `writings/aws-multi-account.mdx`
+          and `special/_kitchensink.mdx`
+    - [ ] `public/archive-assets/images/` → `src/assets/` — 14 refs across 7 archive
+          posts. Heaviest wins are here: `burglar-s-doom` drops ~8.7 MB → ~2–3 MB.
+    - [ ] Rewrite refs to relative paths (`../../assets/foo.png` — verified working in
+          the spike)
+    - [ ] ⚠️ **Leave `public/archive-assets/files/` alone** — the 4 PDF/xlsx download
+          links are not images and their URLs must stay stable
+    - [ ] ✅ Animated GIF safety verified: the 791-frame `butwhy.gif` converts to
+          **animated** WebP (`ANIM`/`ANMF` chunks present), not a flattened first frame
+    - [ ] Accept that asset URLs become hashed `/_astro/*`; external hotlinks to the
+          old `/images/…` and `/archive-assets/images/…` URLs will break. Decided
+          against keeping duplicate `public/` copies.
+- [ ] Reading time + word count: `reading-time` still works, or a remark plugin
+      injecting into frontmatter
+- [ ] Port `lib/topics.ts` (drop the stray `console.log(data)` on line 40)
 
 **Exit criteria:** one post renders with correct typography and title-casing.
 
@@ -374,24 +446,24 @@ mechanical; retrofitting them later is miserable.
 All `.astro`. Zero React — the only real interactivity is the nav toggle and the
 theme toggle, both ~10 lines of vanilla JS in a `<script>`.
 
--   [ ] `Meta.astro` — `router.asPath` → `Astro.url.pathname` for canonical + `og:url`
--   [ ] `BaseLayout.astro`, `DefaultLayout.astro` (800px column)
--   [ ] `NavBar.astro` — sticky, backdrop-blur; `useState` toggle → vanilla JS;
-        `useColorMode` → theme toggle script
--   [ ] `Footer.astro`
--   [ ] `CustomLink.astro` / `StylishLink`
--   [ ] `TopicBadge.astro`
--   [ ] `SeriesOverview.astro`
--   [ ] `SideNote.astro` — 4 variants
--   [ ] `typography.astro` (`Small`), `Asterisk.astro`
--   [ ] Icons: 6 total (sun, moon, hamburger, close, rss, + 4 SideNote Material icons).
-        Inline the SVGs; don't add `astro-icon` for this.
--   [ ] Chakra `Avatar` on article pages → `<img>` + `rounded-full`
--   [ ] MDX prose styling → **plain CSS in one `article.css`**, descendant selectors on the
-        article container. Do not use `@tailwindcss/typography` (opinionated, you'd fight
-        its defaults) and do not use `@apply`. This deletes `MDXComponents.tsx` (123 lines)
-        down to just the three custom components MDX actually needs.
--   [ ] Preserve the heading-anchor behaviour (`scroll-margin-top: 5.5rem`, `#` on hover)
+- [ ] `Meta.astro` — `router.asPath` → `Astro.url.pathname` for canonical + `og:url`
+- [ ] `BaseLayout.astro`, `DefaultLayout.astro` (800px column)
+- [ ] `NavBar.astro` — sticky, backdrop-blur; `useState` toggle → vanilla JS;
+      `useColorMode` → theme toggle script
+- [ ] `Footer.astro`
+- [ ] `CustomLink.astro` / `StylishLink`
+- [ ] `TopicBadge.astro`
+- [ ] `SeriesOverview.astro`
+- [ ] `SideNote.astro` — 4 variants
+- [ ] `typography.astro` (`Small`), `Asterisk.astro`
+- [ ] Icons: 6 total (sun, moon, hamburger, close, rss, + 4 SideNote Material icons).
+      Inline the SVGs; don't add `astro-icon` for this.
+- [ ] Chakra `Avatar` on article pages → `<img>` + `rounded-full`
+- [ ] MDX prose styling → **plain CSS in one `article.css`**, descendant selectors on the
+      article container. Do not use `@tailwindcss/typography` (opinionated, you'd fight
+      its defaults) and do not use `@apply`. This deletes `MDXComponents.tsx` (123 lines)
+      down to just the three custom components MDX actually needs.
+- [ ] Preserve the heading-anchor behaviour (`scroll-margin-top: 5.5rem`, `#` on hover)
 
 ---
 
@@ -399,18 +471,18 @@ theme toggle, both ~10 lines of vanilla JS in a `<script>`.
 
 Port in this order — each is a superset of the last.
 
--   [ ] `/about` (static, no content deps — proves the layout chain)
--   [ ] `/` — home. **Feed generation moves out of here** into a real endpoint.
--   [ ] `/writings` index
--   [ ] `/writings/[slug]` — full article: topics, series, reading time
--   [ ] `/archive` index
--   [ ] `/archive/[slug]` — simpler article (no topics, no series)
--   [ ] `/_kitchensink` — reuses the archive article page
--   [ ] `/topics` index
--   [ ] `/[topic]` — **root-level catch-all**. Astro prioritises static routes over
-        dynamic, same as Next, so the shadowing rule holds: a topic named `about`,
-        `topics`, `writings`, `archive`, or `_kitchensink` would be swallowed. Preserve
-        that constraint; don't "fix" it.
+- [ ] `/about` (static, no content deps — proves the layout chain)
+- [ ] `/` — home. **Feed generation moves out of here** into a real endpoint.
+- [ ] `/writings` index
+- [ ] `/writings/[slug]` — full article: topics, series, reading time
+- [ ] `/archive` index
+- [ ] `/archive/[slug]` — simpler article (no topics, no series)
+- [ ] `/_kitchensink` — reuses the archive article page
+- [ ] `/topics` index
+- [ ] `/[topic]` — **root-level catch-all**. Astro prioritises static routes over
+      dynamic, same as Next, so the shadowing rule holds: a topic named `about`,
+      `topics`, `writings`, `archive`, or `_kitchensink` would be swallowed. Preserve
+      that constraint; don't "fix" it.
 
 > Cleanup while you're here: `[topic].tsx` sets `date={new Date().toISOString()}`, which
 > makes `article:published_time` change on every build and renders builds
@@ -420,18 +492,24 @@ Port in this order — each is a superset of the last.
 
 ## Phase 7 — Feeds, sitemap, redirects
 
--   [ ] `src/pages/feeds/feed.xml.ts` + `atom.xml.ts` + `feed.json.ts` — real endpoints,
-        not a `getStaticProps` side effect. **Keep the `feed` package**; `@astrojs/rss` is
-        RSS-2.0-only and you'd hand-roll Atom and JSON Feed otherwise.
--   [ ] Apply the Phase 1A decision for rendering MDX → HTML
--   [ ] Preserve the URL rewriting: `href="/#` → absolute, `href="/"` → absolute, `src="/"` → absolute
--   [ ] Preserve `string-strip-html` stripping of `script`/`style`
--   [ ] `@astrojs/sitemap` replacing `next-sitemap`; port the non-production
-        `Disallow: /` robots policy
--   [ ] Feed `<link rel="alternate">` tags in `<head>` — all three (from `_document.tsx`)
--   [ ] Favicons + `site.webmanifest` links
--   [ ] **`vercel.json`** for the `/blog/:slug` → `/writings/:slug` 301. Astro's config
-        `redirects` emits meta-refresh HTML in a static build, not a real 301.
+- [ ] `src/pages/feeds/feed.xml.ts` + `atom.xml.ts` + `feed.json.ts` — real endpoints,
+      not a `getStaticProps` side effect. **Keep the `feed` package**; `@astrojs/rss` is
+      RSS-2.0-only and you'd hand-roll Atom and JSON Feed otherwise.
+- [ ] Apply the Phase 1A decision for rendering MDX → HTML
+- [ ] Preserve the URL rewriting: `href="/#` → absolute, `href="/"` → absolute, `src="/"` → absolute
+- [ ] Preserve `string-strip-html` stripping of `script`/`style`
+- [ ] `@astrojs/sitemap` replacing `next-sitemap`; port the non-production
+      `Disallow: /` robots policy. ⚠️ Default output is **`sitemap-index.xml`** +
+      `sitemap-0.xml`, but the baseline serves **`sitemap.xml`** (an index) +
+      `sitemap-0.xml`, so `/sitemap.xml` would 404. `filenameBase` renames both files
+      together, so it cannot reproduce the pair exactly — decide between matching the
+      old URLs some other way and accepting the new ones (open decision 4).
+- [ ] `robots.txt` is no longer generated at all — `next-sitemap` produced it and is
+      gone. It must be written or generated in this phase, or the site ships without one
+- [ ] Feed `<link rel="alternate">` tags in `<head>` — all three (from `_document.tsx`)
+- [ ] Favicons + `site.webmanifest` links
+- [ ] **`vercel.json`** for the `/blog/:slug` → `/writings/:slug` 301. Astro's config
+      `redirects` emits meta-refresh HTML in a static build, not a real 301.
 
 ---
 
@@ -439,30 +517,30 @@ Port in this order — each is a superset of the last.
 
 Against `../baseline/` from Phase 0. This is the phase that justifies Phase 0 existing.
 
--   [ ] `npm run build`, then mirror the new site to `../candidate/`
--   [ ] `diff -rq ../baseline ../candidate` — triage every difference deliberately
--   [ ] All 65 URLs return 200; no new URLs, no missing URLs
--   [ ] `curl -I /blog/rss` returns 301 to the right place
--   [ ] Feed diff: item count, titles, dates, and `<content>` containing rendered `SideNote`
--   [ ] Screenshot diff, light **and** dark, against the Phase 0 set
--   [ ] Verify all 20 migrated images render, and that the 4 `archive-assets/files/`
-        download links still resolve at their original URLs
--   [ ] Verify typographic output byte-identical (curly quotes, em/en dashes, arrows)
--   [ ] Verify heading title-casing incl. acronyms: `AWS`, `IAM`, `RSS`, `NextJS`, `OCJP`,
-        `VirtPHP`, `TypeVar`, `SSO`, `VPS`, `PS`
--   [ ] Lighthouse: should be strictly better (React + Emotion + Chakra runtime all gone)
+- [ ] `npm run build`, then mirror the new site to `../candidate/`
+- [ ] `diff -rq ../baseline ../candidate` — triage every difference deliberately
+- [ ] All 65 URLs return 200; no new URLs, no missing URLs
+- [ ] `curl -I /blog/rss` returns 301 to the right place
+- [ ] Feed diff: item count, titles, dates, and `<content>` containing rendered `SideNote`
+- [ ] Screenshot diff, light **and** dark, against the Phase 0 set
+- [ ] Verify all 20 migrated images render, and that the 4 `archive-assets/files/`
+      download links still resolve at their original URLs
+- [ ] Verify typographic output byte-identical (curly quotes, em/en dashes, arrows)
+- [ ] Verify heading title-casing incl. acronyms: `AWS`, `IAM`, `RSS`, `NextJS`, `OCJP`,
+      `VirtPHP`, `TypeVar`, `SSO`, `VPS`, `PS`
+- [ ] Lighthouse: should be strictly better (React + Emotion + Chakra runtime all gone)
 
 ---
 
 ## Phase 9 — Cutover
 
--   [ ] Delete `next.config.js`, `next-sitemap.config.js`, `pages/`, `patches/`,
-        `next-env.d.ts`
--   [ ] Prune `package.json` (~55 deps → ~12)
--   [ ] Rename the package from `with-typescript` (leftover from the Next starter)
--   [ ] Update `CLAUDE.md` — most of it describes the old pipeline
--   [ ] Deploy to a Vercel preview; verify against production with real DNS
--   [ ] Merge, then watch for 404s in Vercel analytics for a week
+- [ ] Delete `next.config.js`, `next-sitemap.config.js`, `pages/`, `patches/`,
+      `next-env.d.ts`
+- [ ] Prune `package.json` (~55 deps → ~12)
+- [ ] Rename the package from `with-typescript` (leftover from the Next starter)
+- [ ] Update `CLAUDE.md` — most of it describes the old pipeline
+- [ ] Deploy to a Vercel preview; verify against production with real DNS
+- [ ] Merge, then watch for 404s in Vercel analytics for a week
 
 ---
 

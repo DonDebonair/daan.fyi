@@ -40,13 +40,20 @@ taxonomy mismatch — expect a few more like it and check against `../../baselin
 
 **`astro.config.mjs`** — the settings that are easy to miss:
 
--   `gfm: false` and `smartypants: false`. Astro defaults **both** on. GFM would start
-    rendering tables/footnotes/task-lists that are literal text today; smartypants
-    conflicts with the `remark-textr` stack (en dash vs em dash).
--   `langAlias: { apacheconf: 'apache' }`. Prism accepted `apacheconf`; Shiki does not, and
-    fails silently to plaintext.
--   `defaultColor: false` — emits `--shiki-light` / `--shiki-dark` per span so the whole
-    light/dark mechanism is six lines of CSS instead of ~150 lines of paired `mode()`.
+⚠️ **This file is written against the pre-Astro-7 config shape.** `gfm` and `smartypants`
+(and `remarkPlugins` / `rehypePlugins`) are deprecated at the `markdown` level and now
+belong on `markdown.processor: unified({...})` from `@astrojs/markdown-remark`. See
+MIGRATION.md Phase 2, finding 1. **`shikiConfig` is unaffected** and still drops in
+verbatim — which is the part of this file that was expensive to derive.
+
+- `gfm: false` and `smartypants: false`. Astro defaults **both** on. GFM would start
+  rendering tables/footnotes/task-lists that are literal text today; smartypants
+  conflicts with the `remark-textr` stack (en dash vs em dash).
+  (`gfm: false` was later reversed — GFM ships **on**. See MIGRATION.md Phase 0.)
+- `langAlias: { apacheconf: 'apache' }`. Prism accepted `apacheconf`; Shiki does not, and
+  fails silently to plaintext.
+- `defaultColor: false` — emits `--shiki-light` / `--shiki-dark` per span so the whole
+  light/dark mechanism is six lines of CSS instead of ~150 lines of paired `mode()`.
 
 **`plugins/transformer-code-title.mjs`** — replaces `rehype-code-titles`, emitting the
 same `.rehype-code-title` div. Reads `title="…"` from the fence meta, which is why the
