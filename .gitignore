@@ -8,7 +8,11 @@
 # testing
 /coverage
 
-# next.js
+# astro
+dist/
+.astro/
+
+# next.js — remove with pages/ in Phase 9
 /.next/
 /out/
 

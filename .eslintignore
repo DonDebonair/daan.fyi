@@ -1,4 +1,8 @@
+.astro/
 .next/
 build/
 coverage/
+dist/
 node_modules/
+patches/
+spike/

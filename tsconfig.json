@@ -1,42 +1,32 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "baseUrl": ".",
-    "paths": {
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ],
-      "@/layouts/*": [
-        "layouts/*"
-      ]
+    "extends": "astro/tsconfigs/strict",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/components/*": ["src/components/*"],
+            "@/layouts/*": ["src/layouts/*"],
+            "@/lib/*": ["src/lib/*"]
+        }
     },
-    "incremental": true
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "include": [".astro/types.d.ts", "**/*"],
+    "exclude": [
+        "dist",
+        "node_modules",
+        ".next",
+
+        // The Next.js app being replaced. It is React + Chakra under `strict: false`
+        // and cannot compile under Astro's strict config; it stays readable on disk as
+        // the reference for Phases 3–7 and is deleted in Phase 9.
+        "pages",
+        "components",
+        "layouts",
+        "lib",
+        "styles",
+        "next-env.d.ts",
+        "next.config.js",
+        "next-sitemap.config.js",
+
+        // Phase 1 spike fragments — pieces of a throwaway project, not a compilable unit.
+        "spike"
+    ]
 }
