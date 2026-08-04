@@ -22,8 +22,13 @@ These are the things that must not change. Check them at every phase boundary.
 | `/blog/:slug` → `/writings/:slug` returns **308** (not 301)                     | legacy inbound links                             |
 | `/feeds/feed.xml`, `/atom.xml`, `/feed.json` exist and contain **rendered** MDX | subscribers                                      |
 | `public/archive-assets/files/**` URLs unchanged                                 | 4 download links (PDF/xlsx) in archive posts     |
-| Heading title-casing + typographic substitutions byte-identical                 | content rendering                                |
+| Heading title-casing + typographic substitutions byte-identical†                | content rendering                                |
 | **GFM is ON** — `_kitchensink` is expected to change; nothing else may          | decided, see Phase 0 finding 3                   |
+
+† Two recorded exceptions, both deliberate and both isolated to a single page:
+`_kitchensink` changes wholesale because GFM is now on (Phase 0 finding 3), and one
+heading on `archive/experimenting-with-arduino` is corrected by the trim fix (Phase 4
+finding 2). Every other page must still compare clean.
 
 ### URL inventory — 61 pages + 6 generated files
 
@@ -439,72 +444,136 @@ rendering every token in both modes; Phase 6 replaces it.
 
 ---
 
-## Phase 4 — Content layer
+## Phase 4 — Content layer ✅ DONE
 
-- [ ] Content collections with the `glob()` loader: `writings`, `archive`, `topics`, `special`
-- [ ] Zod schemas — `title`, `publishedAt`, `summary?`, `topics?`, `series?`. This
-      replaces the hand-rolled types in `lib/posts.ts` and gives real validation
-      (current tsconfig is `strict: false`)
-- [ ] **Write `remark-title-case.ts` in-repo** (~15 lines: visit `heading` nodes, run the
-      `title` package with `TITLE_OPTIONS`). Deletes `remark-capitalize`, the patch,
-      `patch-package`, and the `postinstall` hook.
-- [ ] Port `lib/titleCase.ts` unchanged — note titles are ALSO title-cased in JS, separately
-      from headings in MDX. Both mechanisms must survive.
-- [ ] **Keep `remark-textr` + the 12 `typographic-*` packages as-is.** Do not swap to
-      `remark-smartypants` in this migration — it has no arrows or math symbols, and
-      `.tsx` prose contains pre-typographied characters matched to current output.
-      Consolidate later, separately, if at all.
-- [ ] **Fence edits — 5 fences, 3 files.** Shiki needs a space before the line range,
-      and `title="…"` instead of `:filename`. Verified in the 1B spike to produce
-      byte-identical output to the plugin-based alternative. ⚠️ These edits **break the
-      current Next build** (`mdx-prism` / `rehype-code-titles` expect the old form), so
-      they must land in the migration commit, not on `main` beforehand.
+**Verified against the baseline: 31 of 33 documents have byte-identical heading ids and
+identical typographic-character counts.** Both exceptions are intended: `_kitchensink`
+changes because GFM is now on (finding 1), and one heading on
+`archive/experimenting-with-arduino` is corrected by the trim fix (finding 2).
 
-    | File                            | Line | From                                  | To                                             |
-    | ------------------------------- | ---- | ------------------------------------- | ---------------------------------------------- |
-    | `writings/python-protocols.mdx` | 77   | ` ```python{4,5,8} `                  | ` ```python {4,5,8} `                          |
-    | `writings/rss.mdx`              | 104  | ` ```typescript:pages/index.tsx `     | ` ```typescript title="pages/index.tsx" `      |
-    | `writings/rss.mdx`              | 135  | ` ```typescript:lib/feeds.tsx `       | ` ```typescript title="lib/feeds.tsx" `        |
-    | `writings/rss.mdx`              | 164  | ` ```typescript:lib/feeds.tsx `       | ` ```typescript title="lib/feeds.tsx" `        |
-    | `special/_kitchensink.mdx`      | 119  | ` ```js{5,6,9-13}:components/foo.js ` | ` ```js {5,6,9-13} title="components/foo.js" ` |
+- [x] Content collections with the `glob()` loader — `writings`, `archive`, `special` in
+      `src/content.config.ts`. **`topics` is not defined**: `content/topics/` has never
+      existed, so an empty collection would be dead weight. Add it the day a preamble is
+      written.
+- [x] Zod schemas replacing the hand-rolled types in `lib/posts.ts`. `publishedAt` stays a
+      **string**, deliberately — the frontmatter holds `'2022-03-21'`, which is what
+      `article:published_time` and the feeds emit verbatim; `z.coerce.date()` would
+      re-serialise it as `2022-03-21T00:00:00.000Z` and change every page.
+- [x] `src/plugins/remark-title-case.ts` written in-repo. `remark-capitalize`,
+      `patch-package` and the `postinstall` hook are gone (they went in Phase 2).
+- [x] `lib/titleCase.ts` ported unchanged; `postTitle()` in `src/lib/posts.ts` keeps the
+      separate JS title-casing of frontmatter titles alive
+- [x] `remark-textr` + the 12 `typographic-*` packages kept as-is
+- [x] **Fence edits — 5 fences, 3 files**, all applied
+- [x] GFM left ON; `http://vm-cluster-node1:7180` wrapped in backticks
+- [x] `remark-unwrap-images` (verified: no `<p>`-wrapped images) and
+      `rehype-autolink-headings`
+- [x] **Images moved to `src/assets/` — 21 files**, all optimised to WebP
+- [x] Reading time + word count — `postStats()` in `src/lib/posts.ts`, both derived from
+      `entry.body`, the same raw MDX source the old code used
+- [x] `lib/topics.ts` ported, minus the stray `console.log(data)`
+- [ ] Styling for tables, footnotes, task lists and `<del>` — **moved to Phase 5**, where
+      the rest of the prose CSS lives
 
-- [ ] **GFM: leave Astro's default ON** (decided — Phase 0 finding 3). Concretely:
-    - [ ] Do **not** pass `gfm: false` to `unified()` (note the 1B spike config sets
-          `markdown.gfm: false` — drop that line, and see Phase 2 finding 1: the option
-          moved onto the processor and no longer belongs at the `markdown` level)
-    - [ ] `archive/installing-virtual-hadoop-cluster.mdx:41` — wrap
-          `http://vm-cluster-node1:7180` in backticks so autolink leaves the local
-          hostname alone
-    - [ ] Port the `table`/`thead`/`tbody`/`tfoot`/`tr`/`th`/`td`/`caption` styling
-          (previously dead code) — `_kitchensink` now exercises it for the first time
-    - [ ] Style footnotes, task lists and `<del>` — all new elements on the page
-    - [ ] Expect a **large, intentional** Phase 8 diff on `/_kitchensink` only. Every
-          other page must still diff clean.
-- [ ] `remark-unwrap-images`, `rehype-autolink-headings` (drop `rehype-slug` — Astro
-      slugs headings natively)
-- [ ] **Images: move all 20 `![]()` targets to `src/assets/`** (decided). Deletes
-      `rehype-img-size`. Measured on the three worst cases: `butwhy.gif` 13 MB → 2.4 MB
-      (−81%), `img_20111025_152826.jpg` 1.4 MB → 468 KB (−67%), `aws-org-design.png`
-      356 KB → 52 KB (−85%), plus automatic `width`/`height`, `loading="lazy"` and
-      content-hashed filenames.
-    - [ ] `public/images/` → `src/assets/` — 6 refs in `writings/aws-multi-account.mdx`
-          and `special/_kitchensink.mdx`
-    - [ ] `public/archive-assets/images/` → `src/assets/` — 14 refs across 7 archive
-          posts. Heaviest wins are here: `burglar-s-doom` drops ~8.7 MB → ~2–3 MB.
-    - [ ] Rewrite refs to relative paths (`../../assets/foo.png` — verified working in
-          the spike)
-    - [ ] ⚠️ **Leave `public/archive-assets/files/` alone** — the 4 PDF/xlsx download
-          links are not images and their URLs must stay stable
-    - [ ] ✅ Animated GIF safety verified: the 791-frame `butwhy.gif` converts to
-          **animated** WebP (`ANIM`/`ANMF` chunks present), not a flattened first frame
-    - [ ] Accept that asset URLs become hashed `/_astro/*`; external hotlinks to the
-          old `/images/…` and `/archive-assets/images/…` URLs will break. Decided
-          against keeping duplicate `public/` copies.
-- [ ] Reading time + word count: `reading-time` still works, or a remark plugin
-      injecting into frontmatter
-- [ ] Port `lib/topics.ts` (drop the stray `console.log(data)` on line 40)
+### The `rehypeHeadingIds` gotcha
 
-**Exit criteria:** one post renders with correct typography and title-casing.
+`rehype-slug` is replaced by Astro's own slugger, but it has to be listed **explicitly**
+as the first rehype plugin:
+
+```js
+rehypePlugins: [rehypeHeadingIds, rehypeAutolinkHeadings];
+```
+
+Astro otherwise injects it _after_ user plugins, so `rehype-autolink-headings` finds no
+ids to link to and silently does nothing — no error, just missing anchors. Verified: the
+emitted anchor markup is structurally identical to the baseline, down to the
+`<span class="icon icon-link">` that the `a span:after { content: "#" }` rule targets.
+
+The one difference is the href form: the baseline emits `href="/writings/iam#accounts-…"`
+because Next's `<Link>` resolved the hash against the current route; Astro emits plain
+`href="#accounts-…"`. Behaviourally identical — kept as the simpler standard form.
+
+### Verification results
+
+| Check                                            | Result                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------- |
+| Heading ids across 33 docs                       | 32 identical, 1 intended difference                             |
+| Typographic characters (14 kinds) across 33 docs | 32 identical, 1 intended difference                             |
+| Shiki dual-theme var pairs                       | 1792, **0 hard-coded colours**                                  |
+| Code titles                                      | 4 (3 in `rss.mdx`, 1 in `_kitchensink`)                         |
+| Highlighted lines                                | 10 (3 from `{4,5,8}`, 7 from `{5,6,9-13}`)                      |
+| Plaintext fallbacks                              | 0 — `apacheconf` resolves via `langAlias`                       |
+| `<img>` tags                                     | 21, all with `width`/`height` + `loading="lazy"`, 0 unoptimised |
+
+### Findings
+
+1. **The `_kitchensink` diff is exactly the GFM change, and it is self-explaining.**
+   Two new things appear: a `footnote-label` heading id, and the em-dash count collapses
+   from **79 to 2**. That second number is the interesting one — with GFM off, table
+   separator rows like `|---------|` were plain text, so `typographic-em-dashes` turned
+   every run of hyphens into em dashes. With GFM on the table parser consumes those rows
+   and they never reach textr. Confirmed rendering: 2 tables, 1 `<del>`, 3 task
+   checkboxes, 23 footnote references — all zero in the baseline.
+
+2. **🐞 The `remark-capitalize` trim quirk — found, and ✅ fixed.**
+   The original trims _every_ text node inside a heading, including nested ones, which
+   deletes the spaces separating them. `archive/experimenting-with-arduino.mdx:11` reads
+   `## Help! [My girlfriend](…) can't choose between twitter and the television!` and the
+   **live site renders `Help!My GirlfriendCan't Choose between Twitter and the
+Television!`**, with the matching id `helpmy-girlfriendcant-choose-…`.
+
+    The trim compensated for nothing: `title()` preserves leading and trailing whitespace,
+    so simply dropping it produces exactly what title-casing the heading as a whole would
+    produce. Verified all three ways — current, no-trim, and whole-heading-then-
+    redistribute — with no-trim and whole-heading giving byte-identical results. Dropping
+    the trim is therefore the principled fix, not a workaround, and it avoids
+    whole-heading redistribution's fragile assumption that `title()` preserves length.
+
+    |        | Output                                                                 |
+    | ------ | ---------------------------------------------------------------------- |
+    | before | `Help!My GirlfriendCan't Choose between Twitter and the Television!`   |
+    | after  | `Help! My Girlfriend Can't Choose between Twitter and the Television!` |
+
+    **This is a deliberate, recorded exception to the "heading title-casing byte-identical"
+    ground rule** — that rule exists to catch accidental regressions in a mechanical port,
+    not to enshrine a bug. Blast radius is one heading in 33 documents (only two headings
+    anywhere contain inline markup, and `_kitchensink`'s is a single text node). The anchor
+    id changes to `help-my-girlfriend-cant-choose-…`; nothing in `src/content/` or
+    `public/` links to the old one, and a stale external fragment still loads the page.
+
+    ⚠️ **Phase 8 will show this as a diff on `archive/experimenting-with-arduino` — one
+    heading and one id. That is expected.**
+
+3. **The image move needed more care than "move all 20 `![]()` targets".** Three files
+   that look like images are not, and moving them would have broken things silently:
+
+    | File                                                    | Why it must stay in `public/`                                                                        |
+    | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+    | `images/banner.png`                                     | the default OG/Twitter image (`Meta.tsx`, `lib/feeds.tsx`) — an absolute URL, never a markdown image |
+    | `archive-assets/images/hadoop-bigdata-applications.png` | the **link target** of `[![small](…)](full)` — only the inner `-small` image moves                   |
+    | `archive-assets/images/blockchain.jpg`                  | used as a plain link href, not an image                                                              |
+
+    Also `images/daan.png` stays for now — it is the article-page avatar and belongs to
+    Phase 5, which can import it from `src/assets/` if that is wanted.
+
+4. **Astro does resolve reference-style image definitions.** `_kitchensink` uses
+   `![Alt text][id]` with `[id]: /images/dojocat.jpeg` further down. That was the one
+   image form at risk of silently 404-ing; it optimises correctly and keeps its title
+   attribute.
+
+5. **The animated GIF survives frame-for-frame.** `butwhy.gif` is **87** frames (not 791
+   — that figure in the Phase 1 notes was wrong); the WebP has 87 `ANMF` chunks.
+   13.1 MB → 2.4 MB, −81%.
+
+6. **`minion.png` got 18% _bigger_ as WebP** (27 kB → 32 kB). Harmless at this size, but
+   it shows the conversion is not a free win on already-small PNGs.
+
+**Exit criteria:** exceeded — all 33 documents render, not just one, and the heading and
+typography comparison against `../baseline/` is clean apart from the intended GFM diff.
+
+> ⚠️ **`src/pages/check/[collection]/[slug].astro` is temporary.** It renders every entry
+> as bare content so the pipeline can be diffed before page chrome exists. **Phase 6 must
+> delete it** — these are real URLs that would otherwise ship.
 
 ---
 
@@ -629,11 +698,30 @@ Decide intent for each; don't port a bug by accident.
 6. ~~**Dead code**~~ — resolved by the GFM decision: `MDXComponents.tsx`'s eight table
    mappings and `styles/components.ts`'s `Table` baseStyle stop being dead and get
    ported and tested against `_kitchensink`.
-7. **48.3 MB of unreferenced files in `public/archive-assets/files/`** — `sf2hadoop.jar`
-   (44.7 MB), `dino.swf` (3.6 MB), 3 zips and `coursera-ml-2014.pdf`. Nothing in
-   `content/` links to any of them, but they are live URLs so something external might.
-   Shipped in every deploy and carried in git history. **Not part of the migration** —
-   decide separately whether to keep, and do not delete blind.
+7. **Two broken links in archive content**, found while classifying image references
+   in Phase 4. Neither is caused by the migration and neither is fixed by it:
+    - `archive/statserver-…mdx:93` links to `/archive-assetssetting-up-sentry-using-vagrant-and-puppet.md`
+      — a missing slash _and_ a stale `.md` extension. Probably meant
+      `/archive/setting-up-sentry-using-vagrant-and-puppet`.
+    - `archive/my-new-website-is-finally-live.mdx` links to `/contact`, which is not in
+      the URL inventory and 404s.
+
+8. **🐞 The JSON feed advertises a favicon that does not exist.** `lib/feeds.tsx:23` sets
+   `favicon: ${baseUrl}/favicons/banner.png`, but `public/favicons/` contains no
+   `banner.png` (the banner lives at `public/images/banner.png`). Decide in Phase 7
+   whether to point it at the real banner or at an actual favicon.
+
+9. ~~**Heading title-casing deletes spaces around inline markup**~~ — ✅ **fixed in
+   Phase 4.** `remark-capitalize` trimmed every text node inside a heading, so
+   `## Help! [My girlfriend](…) can't choose…` rendered as
+   `Help!My GirlfriendCan't Choose…`. The trim is gone; see Phase 4 finding 2 for why
+   that is the correct fix rather than a workaround.
+
+10. **48.3 MB of unreferenced files in `public/archive-assets/files/`** — `sf2hadoop.jar`
+    (44.7 MB), `dino.swf` (3.6 MB), 3 zips and `coursera-ml-2014.pdf`. Nothing in
+    `content/` links to any of them, but they are live URLs so something external might.
+    Shipped in every deploy and carried in git history. **Not part of the migration** —
+    decide separately whether to keep, and do not delete blind.
 
 ---
 

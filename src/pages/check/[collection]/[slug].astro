@@ -1,0 +1,43 @@
+---
+/**
+ * TEMPORARY verification route. Renders every entry in every collection as bare content,
+ * so the Phase 4 pipeline can be diffed against ../baseline/html/ before any page chrome
+ * exists to confuse the comparison.
+ *
+ * ⚠️ DELETE IN PHASE 6. These are real URLs and would otherwise ship. Phase 8's URL
+ * inventory check would catch them, but do not rely on that.
+ */
+import { getCollection, render, type CollectionKey } from 'astro:content';
+import ColorModeScript from '@/components/ColorModeScript.astro';
+import { mdxComponents } from '@/components/mdx/components';
+
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+    const collections: CollectionKey[] = ['writings', 'archive', 'special'];
+    const paths = [];
+    for (const collection of collections) {
+        for (const entry of await getCollection(collection)) {
+            paths.push({ params: { collection, slug: entry.id }, props: { entry } });
+        }
+    }
+    return paths;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{entry.data.title}</title>
+        <ColorModeScript />
+    </head>
+    <body>
+        <main class="mx-auto max-w-[800px] p-8">
+            <Content components={mdxComponents} />
+        </main>
+    </body>
+</html>

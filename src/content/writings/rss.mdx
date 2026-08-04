@@ -101,7 +101,7 @@ I decided to follow the route that Ashlee Boyer suggests in her blog post and sn
 function to generate my feeds as a "stowaway" in the `getStaticProps` function of my index
 page. This works beautifully!
 
-```typescript:pages/index.tsx
+```typescript title="pages/index.tsx"
 export const getStaticProps: GetStaticProps = () => {
     generateMainFeeds();
     const lastPosts = getAllPostsFrontMatter('blog', 3);
@@ -132,7 +132,7 @@ The way I solved this is by doing some regex-based replacements on the generated
 
 The complete content generation part looks like this:
 
-```typescript:lib/feeds.tsx
+```typescript title="lib/feeds.tsx"
 const url = `${baseUrl}/blog/${post.frontMatter.slug}`;
 const htmlContent = ReactDOMServer.renderToStaticMarkup(
     <ChakraProvider resetCSS theme={theme}>
@@ -161,7 +161,7 @@ Rather than summoning
 by trying to use regex here, I found [this library](https://www.npmjs.com/package/string-strip-html)
 to help me with this task:
 
-```typescript:lib/feeds.tsx
+```typescript title="lib/feeds.tsx"
 const cleanHtmlContent = stripHtml(htmlContent, {
     onlyStripTags: ['script', 'style'],
     stripTogetherWithTheirContents: ['script', 'style'],

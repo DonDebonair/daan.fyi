@@ -1,0 +1,11 @@
+---
+// Phase 4 placeholder — Phase 5 adds the tooltip. The Chakra original used
+// <Tooltip label={content}>, so the content prop has to survive.
+interface Props {
+    content: string;
+}
+
+const { content } = Astro.props;
+---
+
+<span data-asterisk title={content}><strong>*</strong></span>

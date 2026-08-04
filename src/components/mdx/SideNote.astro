@@ -1,0 +1,15 @@
+---
+// Phase 4 placeholder — structure only, no styling yet. Phase 5 ports the four variants,
+// the Material icons and the token-driven colours (--ui-note-*).
+interface Props {
+    title: string;
+    type: 'info' | 'success' | 'warning' | 'danger';
+}
+
+const { title, type } = Astro.props;
+---
+
+<aside data-sidenote={type}>
+    <h3>{title}</h3>
+    <slot />
+</aside>

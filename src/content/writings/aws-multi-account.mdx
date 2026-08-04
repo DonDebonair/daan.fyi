@@ -18,7 +18,7 @@ and data scientists writing and deploying code. In December, we finished migrati
 infrastructure to a **multi-account setup** in AWS. In this blog post I want to explain why we
 did this and what our multi-account setup looks like.
 
-![Buy why?!](/images/butwhy.gif)
+![Buy why?!](../../assets/butwhy.gif)
 
 ## When the Cracks Start Showing
 
@@ -33,7 +33,7 @@ created 2 VPCs in the same account and deployed an identical setup in both, each
 
 It looked something like this:
 
-![All AWS resources in 1 account](/images/aws-single-account.png)
+![All AWS resources in 1 account](../../assets/aws-single-account.png)
 
 I deployed our applications and services (except for our frontend, which is deployed on Vercel) in
 two identical VPCs -- still living in the same AWS account -- and called it a day.
@@ -103,7 +103,7 @@ According to AWS:
 > An organization is an entity that you create to consolidate a collection of accounts so that you
 > can administer them as a single unit.
 
-![What does that even mean?!](/images/whatdoesthatevenmean.gif)
+![What does that even mean?!](../../assets/whatdoesthatevenmean.gif)
 
 AWS Organizations lets you organize a bunch of related AWS accounts in a hierarchical, tree-like
 structure. It will let you manage all those accounts from one central _management account_. With
@@ -159,7 +159,7 @@ This was aside from solving the aforementioned problems we had with our single-a
 
 This led me to create the following accounts, organized by Organizational Unit:
 
-![AWS Organization design](/images/aws-org-design.png)
+![AWS Organization design](../../assets/aws-org-design.png)
 
 Some notes and highlights:
 
