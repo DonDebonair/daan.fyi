@@ -657,26 +657,61 @@ pages verified against the baseline in both colour modes.
 
 ---
 
-## Phase 6 — Routes
+## Phase 6 — Routes ✅ DONE
 
-Port in this order — each is a superset of the last.
+**All 61 URLs emit, with none missing and none extra** — verified against
+`../baseline/meta/urls.txt` by set comparison, not by counting.
 
-- [ ] `/about` (static, no content deps — proves the layout chain)
-- [ ] `/` — home. **Feed generation moves out of here** into a real endpoint.
-- [ ] `/writings` index
-- [ ] `/writings/[slug]` — full article: topics, series, reading time
-- [ ] `/archive` index
-- [ ] `/archive/[slug]` — simpler article (no topics, no series)
-- [ ] `/_kitchensink` — reuses the archive article page
-- [ ] `/topics` index
-- [ ] `/[topic]` — **root-level catch-all**. Astro prioritises static routes over
-      dynamic, same as Next, so the shadowing rule holds: a topic named `about`,
-      `topics`, `writings`, `archive`, or `_kitchensink` would be swallowed. Preserve
-      that constraint; don't "fix" it.
+- [x] `/about` — static, proves the layout chain
+- [x] `/` — home. **Feed generation is gone from here**; it becomes real endpoints in
+      Phase 7, so the home page no longer has to be built for subscribers to get anything
+- [x] `/writings` index (its `<title>` really is `Blog | Daan Debie`, kept as-is)
+- [x] `/writings/[slug]` — topics, series, reading time
+- [x] `/archive` index and `/archive/[slug]` — no topics, no series
+- [x] `/_kitchensink` — reuses the archive article presentation
+- [x] `/topics` index
+- [x] `/[topic]` — root-level catch-all. Astro prioritises static routes over dynamic ones
+      exactly as Next did, so the shadowing constraint is preserved rather than "fixed"
+- [x] `src/pages/check/` deleted
+- [x] `date={new Date().toISOString()}` dropped from `/topics` and `/[topic]` — builds are
+      reproducible again
 
-> Cleanup while you're here: `[topic].tsx` sets `date={new Date().toISOString()}`, which
-> makes `article:published_time` change on every build and renders builds
-> non-reproducible. Drop it.
+### Findings
+
+1. **🐞 `build.format: 'file'` silently corrupted every canonical URL.**
+   `Astro.url.pathname` is the _emitted file_ path, so at build time it reads
+   `/about.html`, not `/about`. Every page was publishing
+   `<link rel="canonical" href="https://www.daan.fyi/about.html">` and a matching
+   `og:url` — URLs that are not the ones served. Caught by diffing the full meta block
+   against the baseline rather than eyeballing pages. `Meta.astro` now strips the
+   extension and collapses `/index.html` to `/`. **After the fix, every page's metadata
+   matches the baseline exactly**, apart from the two intended date removals.
+
+2. **⚠️ `/_kitchensink` cannot be a page file.** Astro excludes anything under
+   `src/pages` whose filename starts with `_` from routing, so `_kitchensink.astro`
+   would never build — silently, with no error and no page. The exclusion applies to
+   filenames, not to param values, so the URL is emitted from the root-level
+   `[topic].astro` catch-all instead, which is the only root-level dynamic route.
+   Documented in that file.
+
+3. **The two article pages use different title sizes, and that is not a typo.**
+   `/writings/[slug]` uses Chakra `size="xl"`, `/archive/[slug]` uses `size="2xl"` — the
+   archive title really is bigger. Carried across as an explicit prop on
+   `ArticleLayout.astro`. Verified by computed style: 40.5px/48.6px versus 54px/54px at
+   the 18px root.
+
+4. **Astro emits no 404 page unless you write one.** Next generated one automatically and
+   wrapped it in the app layout — the Phase 0 capture has it, with NavBar and Footer.
+   Without `src/pages/404.astro` Vercel would have served its own generic page. Added,
+   with the baseline's title and wording.
+
+5. **`@astrojs/sitemap` emits extensionless URLs** despite `build.format: 'file'`, so it
+   needs no equivalent fix. The remaining sitemap question is still the filename one from
+   Phase 2 (`sitemap-index.xml` vs `sitemap.xml`), which Phase 7 settles.
+
+**Exit criteria:** met — 61 pages plus a 404, URL-for-URL identical to the baseline, all
+metadata matching, and the content comparison still showing only the two intended
+differences.
 
 ---
 

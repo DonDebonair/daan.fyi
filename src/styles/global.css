@@ -239,3 +239,40 @@
         font-family: var(--font-mono);
     }
 }
+
+@layer components {
+    /*
+     * Chakra's <Heading size="…"> as reusable classes. Page headings outside `.article`
+     * used these sizes in six different files; defining the mapping once means the
+     * responsive font-size/line-height pairs cannot drift apart between pages.
+     *
+     * Sizes are responsive [base, md]; the md stop is 48em.
+     */
+    .heading {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .heading-xl {
+        font-size: var(--text-3xl);
+        line-height: 1.33;
+    }
+
+    .heading-2xl {
+        font-size: var(--text-4xl);
+        line-height: 1.2;
+    }
+
+    @media (min-width: 48em) {
+        .heading-xl {
+            font-size: var(--text-4xl);
+            line-height: 1.2;
+        }
+        .heading-2xl {
+            font-size: var(--text-5xl);
+            line-height: 1;
+        }
+    }
+}

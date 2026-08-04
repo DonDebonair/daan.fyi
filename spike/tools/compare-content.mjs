@@ -8,7 +8,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const BASE = '/Users/daan/code/baseline/html';
-const CAND = '/Users/daan/code/daan.fyi/dist/check';
+// Phase 6 deleted the temporary `check/` route, so this now points at the real pages.
+// Heading ids still compare cleanly because ids come only from Markdown headings — page
+// chrome (the title, the series box, SideNote headings) carries none.
+const CAND = '/Users/daan/code/daan.fyi/dist';
 
 const clean = (h) =>
     h.replace(/<style[\s\S]*?<\/style>/g, '').replace(/<script[\s\S]*?<\/script>/g, '');
@@ -36,9 +39,9 @@ for (const [coll, baseDir] of [
     }
 }
 cases.push({
-    name: 'special/_kitchensink',
+    name: '_kitchensink',
     base: path.join(BASE, '_kitchensink.html'),
-    cand: path.join(CAND, 'special', '_kitchensink.html'),
+    cand: path.join(CAND, '_kitchensink.html'),
 });
 
 let idFails = 0,

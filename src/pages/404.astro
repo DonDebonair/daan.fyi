@@ -1,0 +1,53 @@
+---
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+
+/**
+ * Next shipped a default 404 automatically, wrapped in the app layout — the Phase 0
+ * baseline captured it with the NavBar and Footer around it. Astro emits nothing unless
+ * this file exists, which would have left Vercel serving its own generic page.
+ *
+ * Title and wording are taken from the captured baseline.
+ */
+---
+
+<DefaultLayout title="404: This page could not be found">
+    <div class="not-found">
+        <h1 class="code">404</h1>
+        <div class="message">
+            <h2>This page could not be found.</h2>
+        </div>
+    </div>
+</DefaultLayout>
+
+<style>
+    .not-found {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 4rem 0;
+    }
+
+    .code {
+        font-family: var(--font-heading);
+        font-size: var(--text-2xl);
+        font-weight: 500;
+        padding-right: 1.5rem;
+        margin: 0;
+        border-right: 1px solid var(--ui-divider);
+        line-height: 3rem;
+    }
+
+    .message {
+        display: inline-block;
+        padding-left: 1.5rem;
+    }
+
+    .message h2 {
+        font-family: var(--font-heading);
+        font-size: var(--text-md);
+        font-weight: 400;
+        margin: 0;
+        line-height: 3rem;
+    }
+</style>

@@ -1,55 +1,62 @@
 ---
-/**
- * TEMPORARY verification route. Renders every entry through the real layout and prose CSS
- * so Phase 5 can be checked against ../baseline/ before the real routes exist.
- *
- * ⚠️ DELETE IN PHASE 6. These are real URLs and would otherwise ship.
- */
-import { getCollection, render, type CollectionKey } from 'astro:content';
 import DefaultLayout from '@/layouts/DefaultLayout.astro';
 import SeriesOverview from '@/components/SeriesOverview.astro';
 import TopicBadge from '@/components/TopicBadge.astro';
 import { mdxComponents } from '@/components/mdx/components';
-import { getSeriesData, postStats, postTitle } from '@/lib/posts';
+import { postStats, postTitle, type Post, type SeriesData } from '@/lib/posts';
 import { format, parseISO } from 'date-fns';
+import { render } from 'astro:content';
 
-import '../../../styles/article.css';
+import '../styles/article.css';
 
-export async function getStaticPaths() {
-    const collections: CollectionKey[] = ['writings', 'archive', 'special'];
-    const paths = [];
-    for (const collection of collections) {
-        for (const entry of await getCollection(collection)) {
-            paths.push({ params: { collection, slug: entry.id }, props: { entry } });
-        }
-    }
-    return paths;
+/**
+ * Shared by `/writings/[slug]`, `/archive/[slug]` and `/_kitchensink`.
+ *
+ * The two variants differ in more than which blocks they render: the writings page uses
+ * Chakra's Heading `size="xl"` for the title and the archive page uses `size="2xl"`.
+ * That is not a typo in the original — the archive title really is larger — so it is
+ * carried across as an explicit prop rather than normalised away.
+ */
+interface Props {
+    entry: Post;
+    series?: SeriesData | null;
+    showTopics?: boolean;
+    titleSize?: 'xl' | '2xl';
 }
 
-const { entry } = Astro.props;
+const { entry, series = null, showTopics = false, titleSize = 'xl' } = Astro.props;
+
 const { Content } = await render(entry);
+const title = postTitle(entry);
 const stats = postStats(entry);
-const series = entry.data.series
-    ? await getSeriesData(entry.collection as 'writings', entry.data.series)
-    : null;
+
+// `new Date(...).toISOString()` matches the original exactly: the meta tag carries
+// `2022-03-21T00:00:00.000Z`, not the raw `2022-03-21` from the frontmatter.
+const publishedISO = new Date(entry.data.publishedAt).toISOString();
 ---
 
-<DefaultLayout as="article" title={`${postTitle(entry)} | Daan Debie`} type="article">
-    <h1 class="post-heading">{postTitle(entry)}</h1>
+<DefaultLayout as="article" title={`${title} | Daan Debie`} type="article" date={publishedISO}>
+    <h1 class:list={['heading', `heading-${titleSize}`]}>{title}</h1>
 
     <div class="byline">
         <div class="byline-author">
             <img src="/images/daan.png" alt="Daan Debie" width="24" height="24" class="avatar" />
-            <span class="text-sm"
-                >Daan Debie / {format(parseISO(entry.data.publishedAt), 'MMMM dd, yyyy')}</span
-            >
+            <span class="byline-text">
+                Daan Debie / {format(parseISO(entry.data.publishedAt), 'MMMM dd, yyyy')}
+            </span>
         </div>
         <span class="reading-time">{stats.readingTime}</span>
     </div>
 
-    <div class="topics">
-        {entry.data.topics?.map((topic) => <TopicBadge topic={topic} />)}
-    </div>
+    {
+        showTopics && (
+            <div class="topics">
+                {entry.data.topics?.map((topic) => (
+                    <TopicBadge topic={topic} />
+                ))}
+            </div>
+        )
+    }
 
     {series && <SeriesOverview series={series} currentSlug={entry.id} />}
 
@@ -59,22 +66,6 @@ const series = entry.data.series
 </DefaultLayout>
 
 <style>
-    .post-heading {
-        font-family: var(--font-heading);
-        font-weight: 700;
-        font-size: var(--text-4xl);
-        line-height: 1.2;
-        margin-top: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    @media (min-width: 48em) {
-        .post-heading {
-            font-size: var(--text-5xl);
-            line-height: 1;
-        }
-    }
-
     .byline {
         display: flex;
         flex-direction: column;
@@ -88,6 +79,10 @@ const series = entry.data.series
         display: flex;
         flex-direction: row;
         align-items: center;
+    }
+
+    .byline-text {
+        font-size: var(--text-sm);
     }
 
     .avatar {
@@ -117,7 +112,7 @@ const series = entry.data.series
     .topics {
         display: flex;
         flex-direction: row;
-        margin-bottom: 0.25rem;
+        margin-bottom: 1rem; /* mb={4} */
     }
 
     .article {

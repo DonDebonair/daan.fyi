@@ -23,7 +23,14 @@ const {
     date,
 } = Astro.props as MetaProps;
 
-const canonical = `${baseUrl}${Astro.url.pathname}`;
+/**
+ * ⚠️ `Astro.url.pathname` is NOT the canonical path here. `build.format: 'file'` emits
+ * `about.html`, so at build time the pathname is `/about.html` — which would publish a
+ * canonical URL and an `og:url` that differ from the URL actually served (`/about`), on
+ * every single page. Strip the extension, and collapse `/index.html` to `/`.
+ */
+const canonicalPath = Astro.url.pathname.replace(/index\.html$/, '').replace(/\.html$/, '');
+const canonical = `${baseUrl}${canonicalPath}`;
 ---
 
 <title>{title}</title>
