@@ -1,24 +1,112 @@
 ---
-// Phase 2 placeholder. Replaced by the real home page in Phase 6.
+// Phase 3 token preview. Replaced by the real home page in Phase 6.
 //
-// It exists to prove three things build end to end: the `@/lib/*` path alias, the
-// Tailwind 4 pipeline, and `build.format: 'file'` emitting slashless URLs.
-import { baseUrl, copyright } from '@/lib/config';
+// This is how the token layer gets checked: every semantic role rendered as a swatch
+// in both modes, so a wrong or missing flip is visible rather than theoretical.
+import ColorModeScript from '@/components/ColorModeScript.astro';
 
 import '../styles/global.css';
+
+const groups = [
+    {
+        name: 'Surface & text',
+        tokens: ['surface', 'text', 'rule', 'divider'],
+    },
+    {
+        name: 'Accent',
+        tokens: ['accent', 'badge-fg', 'badge-hover-bg', 'badge-hover-fg'],
+    },
+    {
+        name: 'Series overview',
+        tokens: [
+            'series-border',
+            'series-separator',
+            'series-circle-bg',
+            'series-circle-fg',
+            'series-circle-current-bg',
+            'series-circle-current-fg',
+        ],
+    },
+    {
+        name: 'SideNote',
+        tokens: [
+            'note-success-bg',
+            'note-success-border',
+            'note-warning-bg',
+            'note-warning-border',
+            'note-info-bg',
+            'note-info-border',
+            'note-danger-bg',
+            'note-danger-border',
+        ],
+    },
+    {
+        name: 'Code',
+        tokens: [
+            'code-bg',
+            'code-fg',
+            'code-border',
+            'code-title-bg',
+            'code-title-fg',
+            'code-highlight-bg',
+            'code-highlight-bar',
+            'inline-code-bg',
+            'inline-code-fg',
+            'heading-anchor',
+        ],
+    },
+];
 ---
 
 <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>daan.fyi — scaffold</title>
+        <title>daan.fyi — design tokens</title>
+        <ColorModeScript />
     </head>
     <body>
         <main class="mx-auto max-w-[800px] p-8">
-            <h1 class="text-2xl font-bold">Astro scaffold</h1>
-            <p class="mt-4">Site URL resolved from <code>@/lib/config</code>: {baseUrl}</p>
-            <p class="mt-2 text-sm">{copyright}</p>
+            <div class="flex items-baseline justify-between">
+                <h1 class="text-2xl">Design tokens</h1>
+                <button
+                    id="toggle"
+                    class="border border-rule px-3 py-1 text-sm"
+                    aria-label="Toggle colour mode">toggle mode</button
+                >
+            </div>
+
+            <p class="mt-4 text-sm">
+                Body text at <code>--text-sm</code> (0.89rem), root font size 18px, body font Quicksand,
+                headings Raleway.
+            </p>
+
+            {
+                groups.map((group) => (
+                    <section class="mt-8">
+                        <h2 class="text-lg">{group.name}</h2>
+                        <ul class="mt-2 grid grid-cols-2 gap-2">
+                            {group.tokens.map((token) => (
+                                <li class="flex items-center gap-3 text-xs">
+                                    <span
+                                        class="inline-block h-8 w-8 shrink-0 border border-rule"
+                                        style={`background: var(--ui-${token})`}
+                                    />
+                                    <code>--ui-{token}</code>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                ))
+            }
         </main>
+
+        <script is:inline>
+            document.getElementById('toggle').addEventListener('click', function () {
+                var next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('color-mode', next);
+                document.documentElement.classList.toggle('dark', next === 'dark');
+            });
+        </script>
     </body>
 </html>

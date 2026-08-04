@@ -1,0 +1,41 @@
+---
+/**
+ * Blocking colour-mode script. Render as early as possible in <head> — this is the job
+ * Chakra's <ColorModeScript> did, and without it the page paints in the wrong theme for
+ * a frame before correcting itself.
+ *
+ * Behaviour, decided in Phase 3: the OS preference is the default; a manual toggle
+ * overrides it and persists; OS changes are followed live only while no manual override
+ * is stored.
+ *
+ * `is:inline` stops Astro bundling this into a deferred module — it has to run
+ * synchronously, before first paint. That also means it cannot import COLOR_MODE_KEY,
+ * so the literal below is duplicated on purpose; the export exists for the Phase 5
+ * toggle, which must write the same key.
+ *
+ * Kept free of comments and slack because it ships inline on every page.
+ */
+export const COLOR_MODE_KEY = 'color-mode';
+---
+
+<script is:inline>
+    (function () {
+        var KEY = 'color-mode';
+        var LEGACY = 'chakra-ui-color-mode'; // so existing visitors keep their choice
+        var query = window.matchMedia('(prefers-color-scheme: dark)');
+        function stored() {
+            try {
+                return localStorage.getItem(KEY) || localStorage.getItem(LEGACY);
+            } catch (e) {
+                return null;
+            }
+        }
+        function apply(isDark) {
+            document.documentElement.classList.toggle('dark', isDark);
+        }
+        apply(stored() ? stored() === 'dark' : query.matches);
+        query.addEventListener('change', function (event) {
+            if (!stored()) apply(event.matches);
+        });
+    })();
+</script>
