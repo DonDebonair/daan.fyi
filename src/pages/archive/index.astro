@@ -1,0 +1,24 @@
+---
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import PostsList from '@/components/PostsList.astro';
+import { getSortedPosts } from '@/lib/posts';
+
+const allPosts = await getSortedPosts('archive');
+---
+
+<DefaultLayout title="Archive | Daan Debie">
+    <h1 class="heading heading-xl">Archive</h1>
+    <p class="intro">
+        These are older articles that I wrote for previous incarnations of my blog that used to live
+        at DandyDev.net. These articles do not represent my current interests, skills and who I am
+        anymore, but I leave them here for historical context.
+    </p>
+    <PostsList prefix="/archive" posts={allPosts} />
+</DefaultLayout>
+
+<style>
+    .intro {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>

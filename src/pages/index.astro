@@ -1,30 +1,36 @@
 ---
-// Phase 4 verification page. Replaced by the real home page in Phase 6.
-//
-// Renders whole posts so the content pipeline can be diffed against ../baseline/html/:
-// title-casing, typographic substitutions, heading anchors, Shiki output.
-import { getEntry, render } from 'astro:content';
-import ColorModeScript from '@/components/ColorModeScript.astro';
-import { mdxComponents } from '@/components/mdx/components';
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import CustomLink from '@/components/CustomLink.astro';
+import PostsList from '@/components/PostsList.astro';
+import { getSortedPosts } from '@/lib/posts';
 
-import '../styles/global.css';
-
-const slug = Astro.url.searchParams.get('post') ?? 'iam';
-const entry = await getEntry('writings', slug);
-const { Content } = await render(entry!);
+/**
+ * Feed generation used to happen here, as a side effect of `getStaticProps`. It moves to
+ * real endpoints under `src/pages/feeds/` in Phase 7 — the home page no longer has to be
+ * built for subscribers to get anything.
+ */
+const lastPosts = await getSortedPosts('writings', 3);
 ---
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{entry!.data.title}</title>
-        <ColorModeScript />
-    </head>
-    <body>
-        <main class="mx-auto max-w-[800px] p-8">
-            <h1>{entry!.data.title}</h1>
-            <Content components={mdxComponents} />
-        </main>
-    </body>
-</html>
+<DefaultLayout title="Home | Daan Debie">
+    <h1 class="heading heading-2xl">Howdy! I‘m Daan.</h1>
+
+    <p class="lead">
+        I‘m a social code grower, firestarter, software smith, music maniac and general nice guy. I
+        work as VP of Engineering at <CustomLink href="https://source.ag" variant="stylish"
+            >Source.ag</CustomLink
+        > where I help accelerate the global transition to sustainable agriculture with A.I. powered greenhouses.
+    </p>
+    <p class="lead">This is my little oasis from where I shout into the digital desert.</p>
+
+    <h2 class="heading heading-xl">Recent posts</h2>
+    <PostsList posts={lastPosts} />
+</DefaultLayout>
+
+<style>
+    .lead {
+        font-size: var(--text-lg);
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>

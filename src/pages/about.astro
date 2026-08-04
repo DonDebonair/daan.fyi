@@ -1,0 +1,68 @@
+---
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import CustomLink from '@/components/CustomLink.astro';
+
+/**
+ * Prose is copied verbatim, including the U+2018 characters used as apostrophes
+ * (`I‘m`). Those are deliberate in the original — see CLAUDE.md: `.tsx` prose carries
+ * pre-typographied characters so it matches what `remark-textr` produces in MDX.
+ */
+---
+
+<DefaultLayout title="About | Daan Debie">
+    <h1 class="heading heading-2xl">About Me</h1>
+
+    <p class="lead">
+        Hi there! I‘m Daan Debie. I‘m a social firestarter and technology leader with a strong and
+        long background in Software and Data Engineering. It is working with people and working on
+        things that matter, that I love the most.
+    </p>
+    <p class="lead">
+        I found an amazing challenge at the exciting startup <CustomLink
+            href="https://source.ag"
+            variant="stylish">Source.ag</CustomLink
+        > where I currently work as VP of Engineering, helping to accelerate the global transition to
+        sustainable agriculture with A.I. powered greenhouses.
+    </p>
+    <p class="lead">
+        I live in a small coastal town in The Netherlands with my lovely wife, our beautiful <CustomLink
+            href="https://twitter.com/DaanDebie/status/1396426887312904200/photo/2"
+            variant="stylish">Maine Coon</CustomLink
+        > and our <CustomLink
+            href="https://twitter.com/DaanDebie/status/1420453059130531854/photo/1"
+            variant="stylish">adorable and slightly energetic Golden Retriever pup</CustomLink
+        >. I really do love long walks on the beach. But I‘m also very happy staying indoors reading
+        books, watching movies and tv-shows and playing games.
+    </p>
+
+    <h2 class="heading heading-xl">Background</h2>
+    <p class="lead">
+        I followed a somewhat peculiar career path, getting a Bachelors degree in Music &amp;
+        Performance and working as a pianist, composer, arranger and band leader first, before
+        changing focus and getting a Computer Engineering degree.
+    </p>
+    <p class="lead">
+        Since then, I have accumulated extensive experience developing complex systems and
+        interesting products. I helped teams and organisations achieve <em
+            >technological excellence</em
+        > through a balance of cutting edge tech and pragmatism.
+    </p>
+    <p class="lead">
+        On top of my experience as a Software craftsman, I‘ve also developed an interest in data
+        engineering & distributed computing, containerization (Docker, Kubernetes et al.) and
+        programmable infrastructure.
+    </p>
+    <p class="lead">
+        My languages of choice are Scala, Python and Typescript and I‘m fluent in Java and Clojure
+        as well. But I believe in using the right tool for the job and encourage my teams to keep
+        exploring new languages and tools to bring their products to the next level.
+    </p>
+</DefaultLayout>
+
+<style>
+    .lead {
+        font-size: var(--text-lg);
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>

@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleLayout from '@/layouts/ArticleLayout.astro';
+import { getSeriesData } from '@/lib/posts';
+
+export async function getStaticPaths() {
+    const posts = await getCollection('writings');
+    return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const series = entry.data.series ? await getSeriesData('writings', entry.data.series) : null;
+---
+
+<ArticleLayout entry={entry} series={series} showTopics titleSize="xl" />

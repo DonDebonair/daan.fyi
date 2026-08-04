@@ -1,0 +1,45 @@
+---
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import CustomLink from '@/components/CustomLink.astro';
+import PostSummaryList from '@/components/PostSummaryList.astro';
+import { getAllTopics } from '@/lib/topics';
+
+const topics = Array.from(await getAllTopics(3));
+---
+
+{
+    /* `type="article"` is what the original set on this index page. `date` is deliberately
+    gone: it was `new Date().toISOString()`, i.e. the build timestamp. */
+}
+<DefaultLayout title="Topics | Daan Debie" type="article">
+    {
+        topics.map(([topic, posts]) => (
+            <section class="topic-group">
+                <CustomLink href={`/${topic}`}>
+                    <h2 class="topic-title">{topic}</h2>
+                </CustomLink>
+                <PostSummaryList posts={posts} />
+            </section>
+        ))
+    }
+</DefaultLayout>
+
+<style>
+    .topic-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding-bottom: 1rem;
+    }
+
+    .topic-title {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: var(--text-lg);
+        line-height: 1.2;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem; /* mb={3} */
+    }
+</style>

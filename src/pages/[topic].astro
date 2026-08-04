@@ -1,0 +1,65 @@
+---
+import { getEntry } from 'astro:content';
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import ArticleLayout from '@/layouts/ArticleLayout.astro';
+import PostsList from '@/components/PostsList.astro';
+import { getAllTopics } from '@/lib/topics';
+
+/**
+ * Root-level catch-all. Astro prioritises static routes over dynamic ones exactly as Next
+ * did, so the shadowing rule still holds: a topic named `about`, `topics`, `writings` or
+ * `archive` would be swallowed by the page of that name. That constraint is preserved
+ * deliberately — see MIGRATION.md.
+ *
+ * ⚠️ `/_kitchensink` is emitted from here too, and it has to be. Astro excludes any file
+ * under `src/pages` whose name starts with `_` from routing, so `_kitchensink.astro`
+ * would simply never build. The exclusion applies to *filenames*, not to param values, so
+ * a dynamic route can still produce the URL. This is the only root-level dynamic route,
+ * so this is where it belongs.
+ */
+export async function getStaticPaths() {
+    const topics = await getAllTopics();
+
+    const paths: Array<Record<string, unknown>> = Array.from(topics).map(([topic, posts]) => ({
+        params: { topic },
+        props: { kind: 'topic' as const, topic, posts },
+    }));
+
+    const kitchensink = await getEntry('special', '_kitchensink');
+    if (kitchensink) {
+        paths.push({
+            params: { topic: '_kitchensink' },
+            props: { kind: 'article' as const, entry: kitchensink },
+        });
+    }
+
+    return paths;
+}
+
+const props = Astro.props as
+    { kind: 'topic'; topic: string; posts: any[] } | { kind: 'article'; entry: any };
+---
+
+{
+    props.kind === 'article' ? (
+        // The styling test page reuses the archive article presentation.
+        <ArticleLayout entry={props.entry} titleSize="2xl" />
+    ) : (
+        <DefaultLayout as="article" title={`${props.topic} | Daan Debie`} type="article">
+            <h1 class="heading heading-xl">
+                Posts on topic: <span class="topic-name">{props.topic}</span>
+            </h1>
+            <PostsList posts={props.posts} />
+        </DefaultLayout>
+    )
+}
+
+<style>
+    .topic-name {
+        text-decoration: underline;
+        text-decoration-style: dashed;
+        text-decoration-color: #319795; /* teal.500 */
+        text-decoration-thickness: 0.05em;
+        text-underline-offset: 0.05em;
+    }
+</style>
