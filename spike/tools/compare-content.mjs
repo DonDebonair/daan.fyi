@@ -41,30 +41,46 @@ cases.push({
     cand: path.join(CAND, 'special', '_kitchensink.html'),
 });
 
-let idFails = 0, typoFails = 0, missing = 0;
+let idFails = 0,
+    typoFails = 0,
+    missing = 0;
 const detail = [];
 
 for (const c of cases) {
-    if (!fs.existsSync(c.base)) { console.log(`?? no baseline for ${c.name}`); missing++; continue; }
-    const b = fs.readFileSync(c.base, 'utf8'), n = fs.readFileSync(c.cand, 'utf8');
+    if (!fs.existsSync(c.base)) {
+        console.log(`?? no baseline for ${c.name}`);
+        missing++;
+        continue;
+    }
+    const b = fs.readFileSync(c.base, 'utf8'),
+        n = fs.readFileSync(c.cand, 'utf8');
 
-    const ib = headingIds(b), ic = headingIds(n);
+    const ib = headingIds(b),
+        ic = headingIds(n);
     const onlyBase = ib.filter((x) => !ic.includes(x));
     const onlyCand = ic.filter((x) => !ib.includes(x));
     if (onlyBase.length || onlyCand.length) {
         idFails++;
-        detail.push(`  ${c.name}\n      only in baseline:  ${onlyBase.join(', ') || '-'}\n      only in candidate: ${onlyCand.join(', ') || '-'}`);
+        detail.push(
+            `  ${c.name}\n      only in baseline:  ${onlyBase.join(', ') || '-'}\n      only in candidate: ${onlyCand.join(', ') || '-'}`
+        );
     }
 
-    const tb = typo(b), tn = typo(n);
+    const tb = typo(b),
+        tn = typo(n);
     const bad = TYPO.filter((ch) => tb[ch] !== tn[ch]);
     if (bad.length) {
         typoFails++;
-        detail.push(`  ${c.name} TYPO\n      ${bad.map((ch) => `${ch} base=${tb[ch]} cand=${tn[ch]}`).join('  ')}`);
+        detail.push(
+            `  ${c.name} TYPO\n      ${bad.map((ch) => `${ch} base=${tb[ch]} cand=${tn[ch]}`).join('  ')}`
+        );
     }
 }
 
 console.log(`\n${cases.length} documents compared (${missing} without a baseline)`);
 console.log(`heading-id mismatches: ${idFails}`);
 console.log(`typography mismatches: ${typoFails}`);
-if (detail.length) { console.log('\n--- detail ---'); console.log(detail.join('\n')); }
+if (detail.length) {
+    console.log('\n--- detail ---');
+    console.log(detail.join('\n'));
+}

@@ -1,0 +1,184 @@
+---
+/**
+ * Replaces `components/NavBar.tsx`. The two pieces of state Chakra/React managed — the
+ * mobile menu and the colour mode — are ~15 lines of vanilla JS between them.
+ *
+ * The `opacity: 0.75` on the whole bar is deliberate and comes from the original: it
+ * dims the text as well as the background, which is what makes the sticky bar read as
+ * translucent over scrolling content.
+ */
+import CustomLink from '@/components/CustomLink.astro';
+import Icon from '@/components/Icon.astro';
+
+const links = [
+    { href: '/', label: 'Home' },
+    { href: '/writings', label: 'Writings' },
+    { href: '/about', label: 'About' },
+];
+---
+
+<nav class="navbar">
+    <div class="flex items-center">
+        <button id="color-mode-toggle" class="icon-button mx-4" aria-label="Toggle dark mode">
+            <Icon name="moon" class="icon-moon" />
+            <Icon name="sun" class="icon-sun" />
+        </button>
+        <span class="text-lg">Daan Debie</span>
+    </div>
+
+    <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <Icon name="hamburger" class="icon-open" />
+        <Icon name="close" class="icon-close" />
+    </button>
+
+    <div id="menu" class="menu">
+        <div class="menu-inner">
+            {
+                links.map((link) => (
+                    <CustomLink href={link.href} class="menu-item">
+                        {link.label}
+                    </CustomLink>
+                ))
+            }
+            <CustomLink href="/feeds/feed.xml" class="icon-button" aria-label="RSS feed">
+                <Icon name="rss" />
+            </CustomLink>
+        </div>
+    </div>
+</nav>
+
+<script>
+    import { COLOR_MODE_KEY } from '@/lib/colorMode';
+
+    const root = document.documentElement;
+
+    document.getElementById('color-mode-toggle')?.addEventListener('click', () => {
+        const next = root.classList.contains('dark') ? 'light' : 'dark';
+        // Writing the key is also what stops ColorModeScript following the OS from here on.
+        localStorage.setItem(COLOR_MODE_KEY, next);
+        root.classList.toggle('dark', next === 'dark');
+    });
+
+    const menuToggle = document.getElementById('menu-toggle');
+    menuToggle?.addEventListener('click', () => {
+        const open = document.getElementById('menu')?.classList.toggle('is-open');
+        menuToggle.setAttribute('aria-expanded', String(Boolean(open)));
+    });
+</script>
+
+<style>
+    .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 800px;
+        min-width: 356px;
+        margin: 0 auto 2rem auto; /* mb={8} */
+        padding: 1.5rem 2rem; /* py={6} px={8} */
+        background: var(--ui-surface);
+        opacity: 0.75;
+        backdrop-filter: blur(8px) saturate(180%);
+    }
+
+    .icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        color: inherit;
+        font-size: 1rem;
+        line-height: 1;
+        padding: 0.25rem;
+    }
+
+    /* These are `:global` on purpose. The classes land on the <svg> rendered *inside*
+     * Icon.astro, so a scoped selector here would not reach them. */
+    :global(.icon-sun) {
+        display: none;
+    }
+    :global(.dark .icon-sun) {
+        display: inline-block;
+    }
+    :global(.dark .icon-moon) {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: block;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        color: inherit;
+        font-size: 1rem;
+        padding: 0;
+    }
+
+    /* Driven off aria-expanded rather than a second class: the accessible state and the
+     * visual state cannot drift apart if they are the same attribute. */
+    :global(.icon-close) {
+        display: none;
+    }
+    .menu-toggle[aria-expanded='true'] :global(.icon-close) {
+        display: inline-block;
+    }
+    .menu-toggle[aria-expanded='true'] :global(.icon-open) {
+        display: none;
+    }
+
+    .menu {
+        display: none;
+        flex-basis: 100%;
+    }
+    .menu.is-open {
+        display: block;
+    }
+
+    .menu-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: 1rem; /* pt={4} below md */
+    }
+
+    .menu-item {
+        display: block;
+        font-size: var(--text-sm);
+        margin-bottom: 2rem; /* mb={8} while stacked */
+    }
+
+    @media (min-width: 30em) {
+        /* Chakra `sm` — the row switch */
+        .menu-inner {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        .menu-item {
+            margin-bottom: 0;
+            margin-right: 2rem; /* mr={8} once inline */
+        }
+    }
+
+    @media (min-width: 48em) {
+        /* Chakra `md` — menu always visible, burger gone */
+        .menu-toggle {
+            display: none;
+        }
+        .menu,
+        .menu.is-open {
+            display: block;
+            flex-basis: auto;
+        }
+        .menu-inner {
+            justify-content: flex-end;
+            padding-top: 0;
+        }
+    }
+</style>

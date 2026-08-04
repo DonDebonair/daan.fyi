@@ -22,12 +22,11 @@ ORIGIN=http://localhost:3000 OUT=/Users/daan/code/baseline/screenshots node capt
 
 Three things it handles that a naive screenshot script gets wrong:
 
-1. **Dark mode** is set by seeding `localStorage` before load (`chakra-ui-color-mode` for
-   the Next site) _and_ `colorScheme` on the browser context. ⚠️ **The Astro port uses
-   `color-mode`** (decided in Phase 3) — update `addInitScript` before the Phase 8
-   capture, or every "dark" screenshot will silently come out light. The port still
-   _reads_ the old key as a fallback, so seeding it would appear to work; seed the new
-   one.
+1. **Dark mode** is set by seeding `localStorage` before load _and_ `colorScheme` on the
+   browser context. ✅ Both keys are now seeded: the Next baseline reads Chakra's
+   `chakra-ui-color-mode`, the Astro port writes `color-mode`. Seeding only the old key
+   would appear to work against the port too — it still reads that key as a fallback —
+   which is why this was worth fixing before Phase 8 rather than after a confusing diff.
 2. **Lazy images.** `next/image` lazy-loads below the fold, and a `fullPage` screenshot
    does not trigger it. Scrolling alone is also insufficient: at 60 fps the
    `IntersectionObserver` never fires for intermediate positions. The script forces every

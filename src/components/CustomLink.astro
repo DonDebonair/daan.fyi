@@ -1,0 +1,60 @@
+---
+/**
+ * Replaces `components/CustomLink.tsx`. The Chakra version existed mostly to pick between
+ * next/link and a plain anchor; Astro needs no such split, so what is left is the external
+ * -link handling and the two visual variants.
+ *
+ * `stylish` is the underlined-on-hover prose link: a 2px background gradient sitting on
+ * the baseline that grows to 4px×50px on hover. Reproduced as a real gradient rather than
+ * text-decoration because the animation is on background-size.
+ */
+interface Props {
+    href: string;
+    variant?: 'plain' | 'stylish';
+    class?: string;
+    [key: string]: unknown;
+}
+
+const { href, variant = 'plain', class: className, ...rest } = Astro.props;
+
+const isInternal = href.startsWith('/') || href.startsWith('#');
+const external = isInternal ? {} : { target: '_blank', rel: 'noopener noreferrer' };
+---
+
+<a
+    href={href}
+    class:list={[variant === 'stylish' ? 'stylish-link' : 'plain-link', className]}
+    {...external}
+    {...rest}
+>
+    <slot />
+</a>
+
+<style>
+    .plain-link,
+    .stylish-link {
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .plain-link:hover {
+        text-decoration: none;
+    }
+
+    /* The prose link underline. Chakra drew this with bgGradient + backgroundSize and
+     * animated the size, which is what makes the hover fill upward rather than just
+     * thicken. Ported literally. */
+    .stylish-link {
+        background-image: linear-gradient(to bottom, var(--ui-accent) 0%, var(--ui-accent) 100%);
+        background-position: 0 100%;
+        background-repeat: repeat-x;
+        background-size: 2px 2px;
+        transition: background-size 0.2s;
+    }
+
+    .stylish-link:hover {
+        background-size: 4px 50px;
+        text-decoration: none;
+    }
+</style>

@@ -1,5 +1,11 @@
 ---
-// Phase 4 placeholder — Phase 5 adds the text-xs styling.
+// Replaces `Small` from `components/typography.tsx` — a <Text as="span" fontSize="xs">.
 ---
 
-<span data-small><slot /></span>
+<span class="small"><slot /></span>
+
+<style>
+    .small {
+        font-size: var(--text-xs);
+    }
+</style>

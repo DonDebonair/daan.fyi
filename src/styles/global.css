@@ -66,6 +66,11 @@
 
     /* Heading anchor — hardcoded gray.700 in both modes in MDXComponents.tsx */
     --ui-heading-anchor: #2d3748;
+
+    /* Tables. From Chakra's `simple` Table variant — the only values here with no
+     * baseline to check against, because GFM was off and no table has ever rendered. */
+    --ui-table-border: #edf2f7; /* gray.100 */
+    --ui-table-header-fg: #4a5568; /* gray.600 */
 }
 
 .dark {
@@ -104,6 +109,9 @@
     --ui-code-highlight-bg: #2d3748; /* gray.700 */
     --ui-inline-code-bg: rgba(251, 182, 206, 0.16); /* pink.200 @ 16% */
     --ui-inline-code-fg: #fbb6ce; /* pink.200 */
+
+    --ui-table-border: #2d3748; /* gray.700 */
+    --ui-table-header-fg: #a0aec0; /* gray.400 */
 }
 
 /* ---------------------------------------------------------------------------
@@ -155,6 +163,18 @@
 }
 
 @theme {
+    /* Chakra's breakpoints, which are NOT Tailwind's. The one that matters is `sm`:
+     * Chakra switches at 30em (480px), Tailwind at 40rem (640px). The NavBar collapses
+     * at `sm`, so leaving Tailwind's defaults in place would move the layout switch by
+     * 160px on every phone. `md` happens to agree at 48em/48rem — in media queries both
+     * units resolve against the initial 16px font size, not the 18px root. */
+    --breakpoint-*: initial;
+    --breakpoint-sm: 30em;
+    --breakpoint-md: 48em;
+    --breakpoint-lg: 62em;
+    --breakpoint-xl: 80em;
+    --breakpoint-2xl: 96em;
+
     /* Chakra's font stacks, verbatim. `heading` and `body` carry no generic
      * fallback in the original theme — reproduced as-is rather than "improved",
      * since the fonts are self-hosted and always resolve. */

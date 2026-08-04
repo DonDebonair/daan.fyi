@@ -1,15 +1,100 @@
 ---
-// Phase 4 placeholder — structure only, no styling yet. Phase 5 ports the four variants,
-// the Material icons and the token-driven colours (--ui-note-*).
+import Icon from '@/components/Icon.astro';
+import type { IconName } from '@/components/Icon.astro';
+
+/**
+ * Replaces `components/SideNote.tsx`. Four variants, each a background plus a 6px left
+ * border in a matching colour, with a Material icon tinted to the border colour.
+ *
+ * All eight colours come from tokens, so the variant here only picks a name.
+ */
+export type SideNoteType = 'info' | 'success' | 'warning' | 'danger';
+
 interface Props {
     title: string;
-    type: 'info' | 'success' | 'warning' | 'danger';
+    type: SideNoteType;
 }
 
 const { title, type } = Astro.props;
+const icon: Record<SideNoteType, IconName> = {
+    info: 'info',
+    success: 'success',
+    warning: 'warning',
+    danger: 'danger',
+};
 ---
 
-<aside data-sidenote={type}>
-    <h3>{title}</h3>
+<aside class={`sidenote sidenote-${type}`}>
+    <div class="sidenote-header">
+        <!-- The icon is wrapped rather than classed directly: the class would land on the
+             <svg> inside Icon.astro, out of reach of this component's scoped styles. The
+             svg picks the colour up through currentColor. -->
+        <span class="sidenote-icon"><Icon name={icon[type]} /></span>
+        <!-- <h2> matches the original: Chakra's <Heading> defaults to h2, and changing the
+             level would silently alter the document outline. -->
+        <h2 class="sidenote-title">{title}</h2>
+    </div>
     <slot />
 </aside>
+
+<style>
+    .sidenote {
+        width: 100%;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0.375rem; /* radii.md */
+        border-left: 6px solid;
+    }
+
+    .sidenote-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem; /* HStack default spacing */
+    }
+
+    .sidenote-title {
+        margin: 0;
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: var(--text-md);
+        line-height: 1.2;
+    }
+
+    /* The icon takes the border colour, which is what visually ties the two together. */
+    .sidenote-icon {
+        display: inline-flex;
+        flex: 0 0 auto;
+    }
+
+    .sidenote-info {
+        background: var(--ui-note-info-bg);
+        border-left-color: var(--ui-note-info-border);
+    }
+    .sidenote-info .sidenote-icon {
+        color: var(--ui-note-info-border);
+    }
+
+    .sidenote-success {
+        background: var(--ui-note-success-bg);
+        border-left-color: var(--ui-note-success-border);
+    }
+    .sidenote-success .sidenote-icon {
+        color: var(--ui-note-success-border);
+    }
+
+    .sidenote-warning {
+        background: var(--ui-note-warning-bg);
+        border-left-color: var(--ui-note-warning-border);
+    }
+    .sidenote-warning .sidenote-icon {
+        color: var(--ui-note-warning-border);
+    }
+
+    .sidenote-danger {
+        background: var(--ui-note-danger-bg);
+        border-left-color: var(--ui-note-danger-border);
+    }
+    .sidenote-danger .sidenote-icon {
+        color: var(--ui-note-danger-border);
+    }
+</style>

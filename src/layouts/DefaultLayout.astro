@@ -1,0 +1,33 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { MetaProps } from '@/components/Meta.astro';
+
+/**
+ * The 800px content column. Replaces `layouts/DefaultLayout.tsx`.
+ *
+ * `as` exists because article pages render this as <article> rather than <div>, which
+ * the OG `article` type and the outline both depend on.
+ */
+type Props = MetaProps & { as?: 'div' | 'article' | 'section' };
+
+const { as: Tag = 'div', ...meta } = Astro.props;
+---
+
+<BaseLayout {...meta}>
+    <Tag class="content-column">
+        <slot />
+    </Tag>
+</BaseLayout>
+
+<style>
+    .content-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto 4rem auto;
+        padding-inline: 0.5rem; /* px={2} */
+    }
+</style>

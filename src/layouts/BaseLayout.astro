@@ -1,0 +1,85 @@
+---
+import ColorModeScript from '@/components/ColorModeScript.astro';
+import Meta, { type MetaProps } from '@/components/Meta.astro';
+import NavBar from '@/components/NavBar.astro';
+import Footer from '@/components/Footer.astro';
+
+import '../styles/global.css';
+
+/**
+ * The whole document. Replaces `pages/_app.tsx` + `pages/_document.tsx` +
+ * `layouts/BaseLayout.tsx`, which between them held the ChakraProvider, the head links
+ * and the flex column that keeps the footer at the bottom.
+ */
+type Props = MetaProps;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <ColorModeScript />
+        <Meta {...Astro.props} />
+
+        <link href="/favicons/favicon.ico" rel="shortcut icon" />
+        <link href="/favicons/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" />
+        <link href="/favicons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png" />
+        <link href="/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png" />
+        <!-- Note: `public/site.webmanifest` exists but has never been linked — verified
+             absent from the baseline HTML. Not added here; that is a change to make
+             deliberately, not as a side effect of the port. -->
+
+        <link
+            rel="alternate"
+            type="application/rss+xml"
+            title="Daan Debie RSS feed"
+            href="/feeds/feed.xml"
+        />
+        <link
+            rel="alternate"
+            type="application/atom+xml"
+            title="Daan Debie Atom feed"
+            href="/feeds/atom.xml"
+        />
+        <link
+            rel="alternate"
+            type="application/feed+json"
+            title="Daan Debie JSON feed"
+            href="/feeds/feed.json"
+        />
+    </head>
+
+    <body>
+        <div class="page">
+            <NavBar />
+            <main class="page-main">
+                <slot />
+            </main>
+            <!-- Chakra's <Spacer/>: pushes the footer down on short pages. -->
+            <div class="page-spacer"></div>
+            <Footer />
+        </div>
+    </body>
+</html>
+
+<style>
+    .page {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .page-main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .page-spacer {
+        flex: 1 1 0%;
+        justify-self: stretch;
+        align-self: stretch;
+    }
+</style>

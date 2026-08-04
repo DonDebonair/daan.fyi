@@ -1,0 +1,45 @@
+---
+import { baseUrl } from '@/lib/config';
+
+/**
+ * Replaces `components/Meta.tsx`. `router.asPath` becomes `Astro.url.pathname`.
+ *
+ * The default OG image is an absolute URL into `public/images/`, which is exactly why
+ * `banner.png` did not move to `src/assets/` in Phase 4.
+ */
+export interface MetaProps {
+    title?: string;
+    description?: string;
+    image?: string;
+    type?: 'website' | 'article' | 'profile' | 'book';
+    date?: string;
+}
+
+const {
+    title = 'Daan Debie - Nice person',
+    description = 'Social Code Grower, Firestarter, Music Maniac & General Nice Guy',
+    image = `${baseUrl}/images/banner.png`,
+    type = 'website',
+    date,
+} = Astro.props as MetaProps;
+
+const canonical = `${baseUrl}${Astro.url.pathname}`;
+---
+
+<title>{title}</title>
+<meta name="robots" content="follow, index" />
+<meta name="author" content="Daan Debie" />
+<meta name="description" content={description} />
+<meta property="og:url" content={canonical} />
+<link rel="canonical" href={canonical} />
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content="Daan Debie" />
+<meta property="og:description" content={description} />
+<meta property="og:title" content={title} />
+<meta property="og:image" content={image} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@DaanDebie" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+{date && <meta property="article:published_time" content={date} />}
