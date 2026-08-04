@@ -327,7 +327,7 @@ is clean.
 
 ---
 
-## Phase 3 — Design system (do this before any component)
+## Phase 3 — Design system ✅ DONE
 
 The single highest-leverage step. Getting tokens right first means components are
 mechanical; retrofitting them later is miserable.
@@ -352,23 +352,90 @@ mechanical; retrofitting them later is miserable.
     | `yellow.700`     | `#975A16`                | `whiteAlpha.800` | `rgba(255,255,255,0.80)`                         |
     | `whiteAlpha.900` | `rgba(255,255,255,0.92)` | `green.333`      | ⚠️ **does not exist** — see pre-existing issue 1 |
 
-- [ ] Define **semantic** tokens as CSS custom properties in `:root`, flipped in `.dark`
-      (`--color-surface`, `--color-accent`, `--color-rule`, …). Do _not_ translate each
-      `useColorModeValue` to `bg-white dark:bg-gray-900` at the call site — that
-      duplicates one decision 15 times.
-- [ ] Expose them to Tailwind via `@theme inline`
-- [ ] `@custom-variant dark (&:where(.dark, .dark *))`
-- [ ] Port `fontSizes.ts` (note: `sm` is a non-default `0.89rem`)
-- [ ] `html { font-size: 18px; scroll-behavior: smooth }` — easy to miss, changes everything
-- [ ] `@fontsource/raleway/400.css`, `@fontsource/quicksand/{400,700}.css`; Raleway =
-      headings, Quicksand = body
-- [ ] Inline blocking dark-mode script (Chakra's `ColorModeScript` did this for you —
-      without it you get a flash of the wrong theme)
-- [ ] Reconcile the Preflight/Chakra-reset delta against Phase 0 screenshots
+- [x] **Semantic tokens** as CSS custom properties in `:root`, flipped in `.dark` —
+      `src/styles/global.css`. 40 roles covering every colour decision in the old code
+      (surface/text/rule/divider, accent, series overview, the four SideNote variants,
+      code blocks, inline code, heading anchor). Components name a role, never a colour.
+- [x] Exposed to Tailwind via `@theme inline` — `inline` is what makes utilities compile
+      to `var(--ui-*)` instead of a frozen value, so one `.dark` block flips everything
+- [x] `@custom-variant dark (&:where(.dark, .dark *))`
+- [x] `fontSizes.ts` ported, including the non-default `sm: 0.89rem`
+- [x] `html { font-size: 18px; scroll-behavior: smooth }`
+- [x] `@fontsource/raleway/400.css`, `@fontsource/quicksand/{400,700}.css` — imported from
+      `global.css`; 9 `.woff2` files emitted and referenced correctly
+- [x] Inline blocking dark-mode script — `src/components/ColorModeScript.astro`. Verified
+      to emit as a synchronous inline `<script>` in `<head>` **before** the stylesheet
+      link, so `.dark` is set before first paint
+- [ ] Reconcile the Preflight/Chakra-reset delta against Phase 0 screenshots — **carried
+      to Phase 5**, it cannot be judged before real components exist
 
-> **Resolve first:** `styles/config.ts` says `useSystemColorMode: false` but
-> `_document.tsx` renders `<ColorModeScript initialColorMode="system" />`. These
-> disagree. Decide the intended behaviour rather than porting the ambiguity.
+### ✅ Colour mode: follow the system preference (decided)
+
+Resolves pre-existing issue 2. Concretely: OS preference is the default, a manual toggle
+overrides it and persists, and OS changes are followed live only while no override is
+stored. The toggle has to keep working — the NavBar's sun/moon button is part of the
+styling the migration is preserving — so "follow the system" can only mean _default to_,
+not _always obey_.
+
+The script reads Chakra's old `chakra-ui-color-mode` key as a fallback, so visitors who
+already chose a mode keep it across the cutover. New writes go to `color-mode`.
+⚠️ `spike/tools/capture-screenshots.mjs` seeds the **old** key — update its
+`addInitScript` before the Phase 8 dark-mode capture, or every dark screenshot will
+silently come out light.
+
+### Decisions taken while building the token layer
+
+1. **Tailwind's default colour palette is removed** (`--color-*: initial`, keeping only
+   `transparent`/`current`/`white`/`black`). Tailwind's `gray-800` is **not** Chakra's
+   `gray.800`, so leaving the palette in place invites a silently-wrong one-off during
+   the component port. Anything a component needs must be given a named role first.
+2. **The font-size namespace is cleared, not patched** (`--text-*: initial`). Tailwind
+   pairs every size with a line-height; Chakra's `fontSize` sets font-size only and lets
+   line-height come from the cascade. Clearing the namespace reproduces Chakra's
+   semantics exactly. Body line-height is set once (`1.5` = Chakra `lineHeights.base`).
+3. **Raleway is loaded at 400 only**, so bold headings are browser-synthesised. That is
+   what the Chakra build did (`_app.tsx` imports exactly three faces) — reproduced
+   deliberately.
+4. **`color-scheme` is deliberately not set.** Verified absent from the baseline HTML;
+   setting it would change native scrollbar and form-control rendering in dark mode and
+   show up as an unexplained Phase 8 screenshot diff.
+5. **The `:focus:not(:focus-visible)` reset in `styles.ts` is dropped.** It existed to
+   suppress Chakra's focus box-shadow. Nothing in the new stack draws one.
+6. **`green.333` resolved to `green.200`** (`#9AE6B4`) — see below.
+
+### Findings
+
+1. **🐞 The dark-mode success SideNote currently has no left border colour at all.**
+   `green.333` is not a Chakra step, so it passes through as the literal CSS value
+   `green.333`, which is invalid, so the declaration is dropped and the border falls back
+   to `currentColor`. Ported as **`green.200` `#9AE6B4`**, following the pattern of the
+   other three variants, whose dark border equals their light background
+   (`info` blue.100/blue.100, `danger` red.200/red.200). **This is an intentional visual
+   change in dark mode** — expect it in the Phase 8 diff, and it is a one-line revert if
+   the border should stay invisible.
+
+2. **⚠️ The baseline HTML understates dark mode, and cannot be used as the colour source
+   of truth.** Every `useColorModeValue` is resolved _at render time_, so the statically
+   emitted HTML bakes in the **light** branch; the dark rules Emotion emits alongside it
+   are Chakra's own computed variants, not the author's dark choice. Caught on inline
+   code: `MDXComponents.tsx` asks for `colorScheme` `gray`/`pink`, but the baseline HTML
+   contains gray for _both_ modes — the pink only appears after hydration.
+
+    Consequence: colour values were taken from the **source**, not the baseline HTML.
+    The Phase 0 **screenshots** are still authoritative, because they were captured from
+    a live, hydrated browser.
+
+3. **Two different divider colours exist and had to be kept apart.** The MDX `<hr>` uses
+   `gray.200`/`gray.600` (explicit, in `MDXComponents.tsx`); the footer `<Divider/>` uses
+   Chakra's default border colour, `gray.200`/`whiteAlpha.300`. Identical in light mode,
+   different in dark. Hence both `--ui-rule` and `--ui-divider`.
+
+4. **The dark body background is `gray.900`, not Chakra's `gray.800` default** —
+   `styles.ts` overrode it. Easy to get wrong by reading Chakra's semantic tokens alone.
+
+**Exit criteria:** met — build clean, `astro check` clean, tokens emit under `:root` and
+flip under `.dark`, fonts resolve. `src/pages/index.astro` is a temporary swatch page
+rendering every token in both modes; Phase 6 replaces it.
 
 ---
 
@@ -548,11 +615,11 @@ Against `../baseline/` from Phase 0. This is the phase that justifies Phase 0 ex
 
 Decide intent for each; don't port a bug by accident.
 
-1. **`components/SideNote.tsx:67`** — `borderColor: 'green.333'`. Chakra has no `333`
-   step, so the dark-mode success variant's border colour is silently invalid. Check what
-   it _should_ be before porting.
-2. **Colour-mode config mismatch** — `useSystemColorMode: false` vs
-   `initialColorMode="system"` (Phase 3).
+1. ~~**`components/SideNote.tsx:67`**~~ — ✅ **resolved in Phase 3.** `green.333` is not a
+   Chakra step, so the declaration is invalid and dark-mode success notes currently fall
+   back to `currentColor`. Ported as `green.200`; intentional dark-mode diff.
+2. ~~**Colour-mode config mismatch**~~ — ✅ **resolved in Phase 3: follow the system
+   preference**, with a manual toggle that overrides and persists.
 3. **`lib/topics.ts:40`** — stray `console.log(data)`.
 4. **`pages/[topic].tsx`** — `new Date().toISOString()` as the article date.
 5. **`lib/feeds.tsx:54`** — feed titles are **double-title-cased**. `makeTitle()` is

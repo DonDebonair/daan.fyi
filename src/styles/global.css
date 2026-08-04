@@ -1,9 +1,221 @@
-/*
- * Tailwind 4 is configured in CSS, not in a JS config file.
- *
- * Phase 3 fills this in: the semantic colour tokens as custom properties on :root,
- * flipped in .dark, exposed to Tailwind via `@theme inline`, plus the dark variant,
- * the font stacks and the 18px root font size. Right now this only proves the
- * @tailwindcss/vite pipeline is wired up.
- */
 @import 'tailwindcss';
+
+/* Self-hosted, exactly the three faces the Chakra build loaded. Raleway ships 400 only,
+ * so bold headings are synthesised by the browser — that is the current behaviour and is
+ * reproduced deliberately, not overlooked. */
+@import '@fontsource/raleway/400.css';
+@import '@fontsource/quicksand/400.css';
+@import '@fontsource/quicksand/700.css';
+
+/* Dark mode is class-based: ColorModeScript.astro puts `.dark` on <html> before paint. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+ * Semantic tokens
+ *
+ * One decision per role, declared once and flipped once. The Chakra original
+ * spread the same choice across 46 `useColorModeValue` call sites; the point of
+ * this layer is that components never name a colour, only a role.
+ *
+ * Values are the resolved Chakra palette (see MIGRATION.md Phase 3 for the
+ * token → hex table). Comments give the Chakra token they came from so the port
+ * stays auditable against the old source.
+ * ------------------------------------------------------------------------ */
+:root {
+    /* Surface and text */
+    --ui-surface: #ffffff; /* white */
+    --ui-text: #1a202c; /* gray.800 */
+    --ui-rule: #e2e8f0; /* gray.200 — MDX <hr> */
+    --ui-divider: #e2e8f0; /* gray.200 — Chakra's default border colour */
+
+    /* Accent (teal) */
+    --ui-accent: #4fd1c5; /* teal.300 — StylishLink underline */
+    --ui-badge-fg: #319795; /* teal.500 */
+    --ui-badge-hover-bg: #319795; /* teal.500 */
+    --ui-badge-hover-fg: rgba(255, 255, 255, 0.8); /* whiteAlpha.800 */
+
+    /* Series overview */
+    --ui-series-border: #319795; /* teal.500 */
+    --ui-series-separator: #38b2ac; /* teal.400 */
+    --ui-series-circle-bg: #38b2ac; /* teal.400 */
+    --ui-series-circle-fg: #1a202c; /* gray.800 */
+    --ui-series-circle-current-bg: #81e6d9; /* teal.200 — same in both modes */
+    --ui-series-circle-current-fg: #1a202c; /* gray.800 — same in both modes */
+
+    /* SideNote, four variants */
+    --ui-note-success-bg: #9ae6b4; /* green.200 */
+    --ui-note-success-border: #276749; /* green.700 */
+    --ui-note-warning-bg: #faf089; /* yellow.200 */
+    --ui-note-warning-border: #975a16; /* yellow.700 */
+    --ui-note-info-bg: #bee3f8; /* blue.100 */
+    --ui-note-info-border: #2b6cb0; /* blue.600 */
+    --ui-note-danger-bg: #feb2b2; /* red.200 */
+    --ui-note-danger-border: #9b2c2c; /* red.700 */
+
+    /* Code blocks. The two background values are also the backgrounds baked into
+     * the Shiki themes in spike/shiki/, so they must stay in sync. */
+    --ui-code-bg: #f7fafc; /* gray.50 */
+    --ui-code-fg: #1a202c; /* gray.800 */
+    --ui-code-border: #e2e8f0; /* gray.200 */
+    --ui-code-title-bg: #e2e8f0; /* gray.200 */
+    --ui-code-title-fg: #1a202c; /* gray.800 */
+    --ui-code-highlight-bg: hsla(204, 45%, 96%, 1); /* literal in styles.ts */
+    --ui-code-highlight-bar: #2b6cb0; /* blue.600 — same in both modes */
+    --ui-inline-code-bg: #edf2f7; /* gray.100 */
+    --ui-inline-code-fg: #1a202c; /* gray.800 */
+
+    /* Heading anchor — hardcoded gray.700 in both modes in MDXComponents.tsx */
+    --ui-heading-anchor: #2d3748;
+}
+
+.dark {
+    --ui-surface: #171923; /* gray.900 — note: NOT Chakra's gray.800 default,
+                              * styles.ts overrode the body background */
+    --ui-text: rgba(255, 255, 255, 0.92); /* whiteAlpha.900 */
+    --ui-rule: #4a5568; /* gray.600 */
+    --ui-divider: rgba(255, 255, 255, 0.16); /* whiteAlpha.300 */
+
+    --ui-accent: #319795; /* teal.500 */
+    --ui-badge-fg: rgba(129, 230, 217, 0.8); /* teal.200 @ 80% */
+    --ui-badge-hover-bg: #234e52; /* teal.800 */
+    --ui-badge-hover-fg: #81e6d9; /* teal.200 */
+
+    --ui-series-border: #234e52; /* teal.800 */
+    --ui-series-separator: #1d4044; /* teal.900 */
+    --ui-series-circle-bg: #319795; /* teal.500 */
+    --ui-series-circle-fg: rgba(255, 255, 255, 0.92); /* whiteAlpha.900 */
+
+    --ui-note-success-bg: #276749; /* green.700 */
+    --ui-note-success-border: #9ae6b4; /* green.200 — see MIGRATION.md: the source
+                                        * says `green.333`, which is not a Chakra
+                                        * step and renders as no colour at all */
+    --ui-note-warning-bg: #975a16; /* yellow.700 */
+    --ui-note-warning-border: #f6e05e; /* yellow.300 */
+    --ui-note-info-bg: #2b6cb0; /* blue.600 */
+    --ui-note-info-border: #bee3f8; /* blue.100 */
+    --ui-note-danger-bg: #9b2c2c; /* red.700 */
+    --ui-note-danger-border: #feb2b2; /* red.200 */
+
+    --ui-code-bg: #1a202c; /* gray.800 */
+    --ui-code-fg: #f7fafc; /* gray.50 */
+    --ui-code-border: #4a5568; /* gray.600 */
+    --ui-code-title-bg: #2d3748; /* gray.700 */
+    --ui-code-title-fg: #edf2f7; /* gray.100 */
+    --ui-code-highlight-bg: #2d3748; /* gray.700 */
+    --ui-inline-code-bg: rgba(251, 182, 206, 0.16); /* pink.200 @ 16% */
+    --ui-inline-code-fg: #fbb6ce; /* pink.200 */
+}
+
+/* ---------------------------------------------------------------------------
+ * Tailwind theme
+ *
+ * `inline` matters: it makes utilities compile to `var(--ui-*)` rather than to a
+ * frozen value, which is what lets a single `.dark` block flip the whole site.
+ * ------------------------------------------------------------------------ */
+@theme inline {
+    /* Drop Tailwind's default palette entirely. Its `gray-800` is not Chakra's
+     * gray.800, so leaving it in place invites silently-wrong one-offs during the
+     * component port. Anything a component needs gets a named role above. */
+    --color-*: initial;
+    --color-transparent: transparent;
+    --color-current: currentColor;
+    --color-white: #ffffff;
+    --color-black: #000000;
+
+    --color-surface: var(--ui-surface);
+    --color-text: var(--ui-text);
+    --color-rule: var(--ui-rule);
+    --color-divider: var(--ui-divider);
+
+    --color-accent: var(--ui-accent);
+    --color-badge-fg: var(--ui-badge-fg);
+    --color-badge-hover-bg: var(--ui-badge-hover-bg);
+    --color-badge-hover-fg: var(--ui-badge-hover-fg);
+
+    --color-series-border: var(--ui-series-border);
+    --color-series-separator: var(--ui-series-separator);
+    --color-series-circle-bg: var(--ui-series-circle-bg);
+    --color-series-circle-fg: var(--ui-series-circle-fg);
+    --color-series-circle-current-bg: var(--ui-series-circle-current-bg);
+    --color-series-circle-current-fg: var(--ui-series-circle-current-fg);
+
+    --color-note-success-bg: var(--ui-note-success-bg);
+    --color-note-success-border: var(--ui-note-success-border);
+    --color-note-warning-bg: var(--ui-note-warning-bg);
+    --color-note-warning-border: var(--ui-note-warning-border);
+    --color-note-info-bg: var(--ui-note-info-bg);
+    --color-note-info-border: var(--ui-note-info-border);
+    --color-note-danger-bg: var(--ui-note-danger-bg);
+    --color-note-danger-border: var(--ui-note-danger-border);
+
+    --color-code-bg: var(--ui-code-bg);
+    --color-code-fg: var(--ui-code-fg);
+    --color-code-border: var(--ui-code-border);
+    --color-heading-anchor: var(--ui-heading-anchor);
+}
+
+@theme {
+    /* Chakra's font stacks, verbatim. `heading` and `body` carry no generic
+     * fallback in the original theme — reproduced as-is rather than "improved",
+     * since the fonts are self-hosted and always resolve. */
+    --font-*: initial;
+    --font-heading: Raleway;
+    --font-body: Quicksand;
+    --font-mono:
+        SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --default-font-family: var(--font-body);
+    --default-mono-font-family: var(--font-mono);
+
+    /* Chakra's font scale. Cleared wholesale rather than patched, because
+     * Tailwind's defaults pair every size with a line-height and Chakra's
+     * `fontSize` sets font-size only — line-height comes from the cascade.
+     * Note `sm`, which is a deliberate 0.89rem rather than the usual 0.875rem. */
+    --text-*: initial;
+    --text-xs: 0.75rem;
+    --text-sm: 0.89rem;
+    --text-md: 1rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+    --text-6xl: 3.75rem;
+    --text-7xl: 4.5rem;
+    --text-8xl: 6rem;
+    --text-9xl: 8rem;
+}
+
+@layer base {
+    html {
+        /* 18px, not 16px — every rem in the design, including Tailwind's spacing
+         * scale, is measured against this. Easy to miss and it changes everything. */
+        font-size: 18px;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--ui-surface);
+        color: var(--ui-text);
+        font-family: var(--font-body);
+        line-height: 1.5; /* Chakra lineHeights.base */
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-heading);
+        font-weight: 700;
+    }
+
+    code,
+    kbd,
+    samp,
+    pre {
+        font-family: var(--font-mono);
+    }
+}
