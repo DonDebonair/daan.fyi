@@ -11,7 +11,12 @@
             "settings": { "foreground": "#708090" }
         },
         {
-            "scope": ["punctuation", "meta.brace", "punctuation.separator", "punctuation.terminator"],
+            "scope": [
+                "punctuation",
+                "meta.brace",
+                "punctuation.separator",
+                "punctuation.terminator"
+            ],
             "settings": { "foreground": "#999999" }
         },
         {

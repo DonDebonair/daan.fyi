@@ -42,7 +42,9 @@ for (const n of newItems) {
     const nw = nt.split(' ').length;
 
     console.log(`=== ${slug} ===`);
-    console.log(`  title match:  ${o.title === n.title ? 'YES' : `NO\n    old: ${o.title}\n    new: ${n.title}`}`);
+    console.log(
+        `  title match:  ${o.title === n.title ? 'YES' : `NO\n    old: ${o.title}\n    new: ${n.title}`}`
+    );
     console.log(`  text words:   baseline ${ow}  spike ${nw}  (delta ${nw - ow})`);
 
     // Where does the text first diverge?

@@ -577,29 +577,83 @@ typography comparison against `../baseline/` is clean apart from the intended GF
 
 ---
 
-## Phase 5 — Components
+## Phase 5 — Components ✅ DONE
 
-All `.astro`. Zero React — the only real interactivity is the nav toggle and the
-theme toggle, both ~10 lines of vanilla JS in a `<script>`.
+All `.astro`, zero React. The two pieces of state Chakra managed — the mobile menu and the
+colour mode — are about fifteen lines of vanilla JS between them.
 
-- [ ] `Meta.astro` — `router.asPath` → `Astro.url.pathname` for canonical + `og:url`
-- [ ] `BaseLayout.astro`, `DefaultLayout.astro` (800px column)
-- [ ] `NavBar.astro` — sticky, backdrop-blur; `useState` toggle → vanilla JS;
-      `useColorMode` → theme toggle script
-- [ ] `Footer.astro`
-- [ ] `CustomLink.astro` / `StylishLink`
-- [ ] `TopicBadge.astro`
-- [ ] `SeriesOverview.astro`
-- [ ] `SideNote.astro` — 4 variants
-- [ ] `typography.astro` (`Small`), `Asterisk.astro`
-- [ ] Icons: 6 total (sun, moon, hamburger, close, rss, + 4 SideNote Material icons).
-      Inline the SVGs; don't add `astro-icon` for this.
-- [ ] Chakra `Avatar` on article pages → `<img>` + `rounded-full`
-- [ ] MDX prose styling → **plain CSS in one `article.css`**, descendant selectors on the
-      article container. Do not use `@tailwindcss/typography` (opinionated, you'd fight
-      its defaults) and do not use `@apply`. This deletes `MDXComponents.tsx` (123 lines)
-      down to just the three custom components MDX actually needs.
-- [ ] Preserve the heading-anchor behaviour (`scroll-margin-top: 5.5rem`, `#` on hover)
+- [x] `Meta.astro` — `router.asPath` → `Astro.url.pathname`
+- [x] `BaseLayout.astro` (whole document, replacing `_app.tsx` + `_document.tsx` +
+      `BaseLayout.tsx`), `DefaultLayout.astro` (the 800px column)
+- [x] `NavBar.astro` — sticky, backdrop-blur, `opacity: 0.75`; menu toggle and theme
+      toggle in vanilla JS
+- [x] `Footer.astro`
+- [x] `CustomLink.astro` with the `stylish` prose-link variant
+- [x] `TopicBadge.astro`, `SeriesOverview.astro`
+- [x] `SideNote.astro` — four variants, all eight colours from tokens
+- [x] `Small.astro`, `Asterisk.astro`
+- [x] `PostsList.astro` + `PostSummaryList.astro`
+- [x] **`Icon.astro` — thirteen icons, not six.** The plan undercounted: it missed the
+      four social icons in the footer. Path data was extracted verbatim from
+      `@chakra-ui/icons` and `react-icons`, so these are the same shapes rather than
+      lookalikes.
+- [x] Chakra `Avatar` → `<img>` + `border-radius: 9999px`
+- [x] Prose styling → `src/styles/article.css`, plain descendant selectors on `.article`.
+      No `@tailwindcss/typography`, no `@apply`. Replaces `MDXComponents.tsx` (123 lines)
+      and the syntax-highlighting half of `styles/styles.ts`
+- [x] Heading anchors preserved — `scroll-margin-top: 5.5rem` and the `#` on hover
+- [x] Tables, footnotes, task lists and `<del>` styled (carried over from Phase 4)
+- [x] Preflight/Chakra-reset delta reconciled (carried over from Phase 3) — verified by
+      screenshot against `../baseline/`, not by reading the two resets side by side
+
+### Verification
+
+Captured at 1280px — the width the Phase 0 baseline used, so line wrapping is comparable
+rather than merely similar — in both colour modes, and compared against
+`../baseline/screenshots/`. Column width, wrapping, badges, the series box, the danger
+SideNote, tables, task lists, code titles and line highlighting all line up.
+
+Backgrounds confirmed programmatically: `rgb(255,255,255)` light, `rgb(23,25,35)` dark —
+`gray.900`, the `styles.ts` override, not Chakra's `gray.800` default.
+
+### Findings
+
+1. **🐞 Fixed a real bug in the spike's Shiki CSS.** The 1B spike's "six lines of CSS"
+   snippet set `background-color` on `.astro-code span` as well as on `.astro-code`.
+   `--shiki-*-bg` is set on the `<pre>` and **inherits**, so every token span painted its
+   own opaque rectangle on top of the highlighted-line band — turning it into a row of
+   dark boxes. Nearly invisible in light mode, obvious in dark, which is why it survived
+   the spike. Spans take the colour; the block takes the background. Corrected in
+   `article.css` and in `spike/README.md`.
+
+2. **⚠️ Chakra's breakpoints are not Tailwind's, and `sm` is the one that matters.**
+   Chakra switches at **30em (480px)**, Tailwind at **40rem (640px)**. The NavBar
+   collapses at `sm`, so Tailwind's defaults would have moved the layout switch by 160px
+   on every phone. All breakpoints are now overridden to Chakra's values in `global.css`.
+   (`md` happens to agree at 48em/48rem: in media queries both units resolve against the
+   initial 16px font size, not the 18px root.)
+
+3. **GFM emits alignment as inline `style="text-align:right"`, not an `align` attribute.**
+   The old `MDXComponents.tsx` branched on `props.align`, so a faithful port of that logic
+   would have been dead code. Verified in the build output and dropped.
+
+4. **`public/site.webmanifest` has never been linked.** The plan listed adding the link as
+   Phase 7 work, but the baseline HTML has no `rel="manifest"` — so adding it would be a
+   change, not a port. Left out, with a comment in `BaseLayout.astro`.
+
+5. **Indented code blocks render as paragraphs — in both stacks.** MDX disables indented
+   code, so `_kitchensink`'s "Indented code" example has never been a `<pre>`. Confirmed
+   identical in baseline and candidate before assuming a regression.
+
+6. **SideNote titles are `<h2>`**, because Chakra's `<Heading>` defaults to `h2`. Matched
+   rather than "improved" to `h3` — the level is part of the document outline.
+
+7. **`Asterisk` loses its Chakra tooltip** and uses a native `title` instead. Same
+   content, browser-native presentation and delay. Adding a tooltip library for one
+   component was not worth it; revisit if the styling matters.
+
+**Exit criteria:** met — every component ported, prose CSS complete, and the rendered
+pages verified against the baseline in both colour modes.
 
 ---
 

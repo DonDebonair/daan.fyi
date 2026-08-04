@@ -58,7 +58,14 @@ verbatim — which is the part of this file that was expensive to derive.
 - `langAlias: { apacheconf: 'apache' }`. Prism accepted `apacheconf`; Shiki does not, and
   fails silently to plaintext.
 - `defaultColor: false` — emits `--shiki-light` / `--shiki-dark` per span so the whole
-  light/dark mechanism is six lines of CSS instead of ~150 lines of paired `mode()`.
+  light/dark mechanism is a handful of CSS rules instead of ~150 lines of paired `mode()`.
+
+    ⚠️ **Correction to the six-line snippet this spike produced:** it set `background-color`
+    on `.astro-code span` as well as on `.astro-code`. Do not. `--shiki-*-bg` is set on the
+    `<pre>` and inherits, so every token span paints its own opaque rectangle, covering the
+    highlighted-line band and rendering it as a row of dark boxes. Nearly invisible in light
+    mode, obvious in dark. Spans take the colour, the block takes the background — see
+    `src/styles/article.css`.
 
 **`plugins/transformer-code-title.mjs`** — replaces `rehype-code-titles`, emitting the
 same `.rehype-code-title` div. Reads `title="…"` from the fence meta, which is why the

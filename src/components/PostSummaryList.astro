@@ -1,0 +1,63 @@
+---
+import { format, parseISO } from 'date-fns';
+import CustomLink from '@/components/CustomLink.astro';
+import { postTitle, type Post } from '@/lib/posts';
+
+/**
+ * The compact listing — title and date on one row above Chakra's `sm` breakpoint,
+ * stacked below it. Replaces `PostSummaryList` from `components/PostsList.tsx`.
+ */
+interface Props {
+    posts: Post[];
+    prefix?: string;
+}
+
+const { posts, prefix = '/writings' } = Astro.props;
+---
+
+{
+    posts.map((post) => (
+        <div class="summary">
+            <CustomLink href={`${prefix}/${post.id}`}>
+                <h3 class="summary-title">{postTitle(post)}</h3>
+            </CustomLink>
+            <span class="summary-date">
+                {format(parseISO(post.data.publishedAt), 'MMMM dd, yyyy')}
+            </span>
+        </div>
+    ))
+}
+
+<style>
+    .summary {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .summary-title {
+        font-size: var(--text-sm);
+        font-weight: inherit;
+        font-family: inherit;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-date {
+        font-size: var(--text-xs);
+        margin-bottom: 0.5rem;
+    }
+
+    @media (min-width: 30em) {
+        .summary {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding-right: 2.5rem; /* pr={10} */
+        }
+        .summary-title,
+        .summary-date {
+            margin-bottom: 0;
+        }
+    }
+</style>

@@ -1,6 +1,10 @@
 ---
-// Phase 4 placeholder — Phase 5 adds the tooltip. The Chakra original used
-// <Tooltip label={content}>, so the content prop has to survive.
+/**
+ * Replaces `components/Asterisk.tsx`. The original wrapped the marker in a Chakra
+ * <Tooltip>; here the note is a native `title`, which needs no JS and no positioning
+ * library. The trade-off is the browser's tooltip styling and delay rather than Chakra's
+ * 150ms arrow tooltip — the content is identical, the presentation is the browser's.
+ */
 interface Props {
     content: string;
 }
@@ -8,4 +12,13 @@ interface Props {
 const { content } = Astro.props;
 ---
 
-<span data-asterisk title={content}><strong>*</strong></span>
+<span class="asterisk" title={content}><strong>*</strong></span>
+
+<style>
+    .asterisk {
+        margin-left: 0.125rem; /* ml={0.5} */
+        color: #e53e3e; /* red.500 — the one colour the original hardcoded in both modes */
+        font-size: var(--text-lg);
+        cursor: pointer;
+    }
+</style>

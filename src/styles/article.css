@@ -1,0 +1,386 @@
+/*
+ * Prose styling for rendered MDX.
+ *
+ * Replaces `components/MDXComponents.tsx` (123 lines of element→Chakra mappings) and the
+ * syntax-highlighting half of `styles/styles.ts`. Plain descendant selectors on `.article`
+ * rather than @tailwindcss/typography, whose opinions would have to be fought, and rather
+ * than @apply, which would just be CSS with extra steps.
+ *
+ * Values are the resolved Chakra output read out of ../../../baseline/html, not guesses.
+ * Chakra's spacing scale is 0.25rem per step, so space-2 = 0.5rem, space-4 = 1rem,
+ * space-6 = 1.5rem.
+ */
+
+/* ---------------------------------------------------------------- headings */
+
+.article h1,
+.article h2,
+.article h3,
+.article h4,
+.article h5,
+.article h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    scroll-margin-top: 5.5rem;
+}
+
+/* Chakra Heading sizes are responsive: [base, null, md]. The md stop is 48em. */
+.article h1 {
+    font-size: var(--text-3xl);
+    line-height: 1.33;
+}
+.article h2 {
+    font-size: var(--text-2xl);
+    line-height: 1.33;
+}
+.article h3 {
+    font-size: var(--text-xl);
+    line-height: 1.2;
+}
+.article h4,
+.article h5,
+.article h6 {
+    font-size: var(--text-md);
+    line-height: 1.2;
+}
+
+@media (min-width: 48em) {
+    .article h1 {
+        font-size: var(--text-4xl);
+        line-height: 1.2;
+    }
+    .article h2 {
+        font-size: var(--text-3xl);
+        line-height: 1.2;
+    }
+}
+
+/*
+ * Heading anchors from rehype-autolink-headings. The link is invisible until the heading
+ * is hovered, sits in the left margin, and renders a `#` via a pseudo-element — the same
+ * mechanism the Chakra version used, so the markup it targets is unchanged.
+ */
+.article :is(h1, h2, h3, h4, h5, h6) > a {
+    position: absolute;
+    margin-left: -1em;
+    padding-right: 0.5em;
+    width: 80%;
+    max-width: 800px;
+    cursor: pointer;
+    visibility: hidden;
+    color: var(--ui-heading-anchor);
+    text-decoration: none;
+}
+
+.article :is(h1, h2, h3, h4, h5, h6):hover > a,
+.article :is(h1, h2, h3, h4, h5, h6) > a:hover {
+    visibility: visible;
+    text-decoration: none;
+}
+
+.article :is(h1, h2, h3, h4, h5, h6) > a span::after {
+    content: '#';
+}
+
+/* ------------------------------------------------------------------- text */
+
+.article p {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.article a {
+    color: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background-image: linear-gradient(to bottom, var(--ui-accent) 0%, var(--ui-accent) 100%);
+    background-position: 0 100%;
+    background-repeat: repeat-x;
+    background-size: 2px 2px;
+    transition: background-size 0.2s;
+}
+
+.article a:hover {
+    background-size: 4px 50px;
+    text-decoration: none;
+}
+
+/* The heading anchor is an <a> too, but must not get the prose underline. */
+.article :is(h1, h2, h3, h4, h5, h6) > a[aria-hidden='true'] {
+    background-image: none;
+}
+
+.article strong,
+.article b {
+    font-weight: 700;
+}
+
+.article em,
+.article i {
+    font-style: italic;
+}
+
+.article del {
+    text-decoration: line-through;
+}
+
+.article small {
+    font-size: var(--text-xs);
+}
+
+/* ------------------------------------------------------------------ lists */
+
+.article ul,
+.article ol {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-inline-start: 1em;
+    padding-left: 1rem;
+}
+
+.article ul {
+    list-style-type: disc;
+}
+
+.article ol {
+    list-style-type: decimal;
+}
+
+.article li > ul,
+.article li > ol {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* GFM task lists. New in this port — GFM was off before, so these never rendered. */
+.article li:has(> input[type='checkbox']) {
+    list-style: none;
+    margin-left: -1em;
+}
+
+.article input[type='checkbox'] {
+    margin-right: 0.5rem;
+    accent-color: var(--ui-accent);
+}
+
+/* ------------------------------------------------------------- blockquote */
+
+.article blockquote {
+    position: relative;
+    padding: 1.5rem;
+    margin-inline: 0.5rem;
+}
+
+.article blockquote::before {
+    content: '“';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.75rem;
+    font-size: var(--text-4xl);
+}
+
+.article blockquote::after {
+    content: '”';
+    position: absolute;
+    right: 0.25rem;
+    bottom: 0.75rem;
+    font-size: var(--text-4xl);
+}
+
+/* -------------------------------------------------------------------- hr */
+
+.article hr {
+    opacity: 0.6;
+    border: 0;
+    border-bottom: 1px solid var(--ui-rule);
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* ----------------------------------------------------------------- images */
+
+.article img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ----------------------------------------------------------------- tables */
+
+/*
+ * Ported from Chakra's `simple` Table variant. This is the one block with no baseline to
+ * compare against: GFM was off, so no <table> has ever rendered on this site. The mapping
+ * existed in MDXComponents.tsx as dead code.
+ */
+.article table {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-collapse: collapse;
+    font-variant-numeric: lining-nums tabular-nums;
+    display: block;
+    overflow-x: auto;
+}
+
+.article th {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: start;
+    font-size: var(--text-xs);
+    line-height: 1rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--ui-table-header-fg);
+    border-bottom: 1px solid var(--ui-table-border);
+}
+
+.article td {
+    text-align: start;
+    line-height: 1.25rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--ui-table-border);
+}
+
+/* Column alignment needs no rules here: GFM emits `style="text-align:right"` inline on
+ * each cell, not the `align` attribute the old MDXComponents.tsx expected. Verified in
+ * the build output. */
+
+.article caption {
+    margin-top: 1rem;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-align: center;
+    color: var(--ui-table-header-fg);
+    padding: 0.5rem 1.5rem;
+    font-size: var(--text-sm);
+}
+
+/* -------------------------------------------------------------- footnotes */
+
+/* Also new with GFM. */
+.article .footnotes {
+    font-size: var(--text-sm);
+    border-top: 1px solid var(--ui-rule);
+    margin-top: 2rem;
+}
+
+.article .footnotes h2 {
+    font-size: var(--text-xl);
+}
+
+.article [data-footnote-ref] {
+    font-size: 0.75em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+/* ------------------------------------------------------------ inline code */
+
+.article code:not(pre code) {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    padding-inline: 0.2em;
+    border-radius: 0.125rem; /* radii.sm */
+    background: var(--ui-inline-code-bg);
+    color: var(--ui-inline-code-fg);
+    white-space: normal;
+}
+
+/* ------------------------------------------------------------ code blocks */
+
+/*
+ * Shiki emits `--shiki-light` / `--shiki-dark` on every span because the config sets
+ * `defaultColor: false`. Selecting between them is the whole light/dark mechanism —
+ * six lines, replacing ~150 lines of paired `mode()` calls in styles/styles.ts.
+ */
+/*
+ * ⚠️ The background belongs on the block only, never on the token spans. Shiki sets
+ * `--shiki-*-bg` on the <pre>, and it inherits, so `.astro-code span { background }`
+ * makes every token paint its own opaque rectangle — which then covers the highlighted
+ * -line band and renders it as a row of dark boxes. Barely visible in light mode, obvious
+ * in dark. Spans get the colour; the block gets the background.
+ */
+.article .astro-code {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+}
+
+.article .astro-code span {
+    color: var(--shiki-light);
+}
+
+:root.dark .article .astro-code {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+}
+
+:root.dark .article .astro-code span {
+    color: var(--shiki-dark);
+}
+
+.article pre {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    overflow-x: auto;
+    width: 100%;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    tab-size: 4;
+    hyphens: none;
+    border: 1px solid var(--ui-code-border);
+    border-radius: 0.5rem; /* radii.lg */
+}
+
+.article pre code {
+    font-family: var(--font-mono);
+    text-align: left;
+    word-spacing: normal;
+    word-break: normal;
+    display: block;
+    min-width: fit-content;
+}
+
+/* Indented/fenced blocks with no language never reach Shiki, so they need the same box. */
+.article pre:not([class*='astro-code']) {
+    background: var(--ui-code-bg);
+    color: var(--ui-code-fg);
+}
+
+/* Line highlighting: `transformerMetaHighlight` emits `.line.highlighted`, which replaces
+ * the old `.mdx-marker`. The negative margins let the highlight bleed to the padding edge
+ * so it reads as a full-width band. */
+.article .astro-code .line.highlighted {
+    display: inline-block;
+    width: calc(100% + 2rem);
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    background-color: var(--ui-code-highlight-bg) !important;
+    box-shadow: inset 4px 0 0 0 var(--ui-code-highlight-bar);
+}
+
+/* --------------------------------------------------------- code block title */
+
+/* Emitted by src/plugins/transformer-code-title.mjs, matching the class the old
+ * rehype-code-titles produced. */
+.article .rehype-code-title {
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    background: var(--ui-code-title-bg);
+    color: var(--ui-code-title-fg);
+    border: 1px solid var(--ui-code-border);
+    border-bottom: 0;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.article .rehype-code-title + pre {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: 0;
+}

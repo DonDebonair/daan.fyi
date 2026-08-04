@@ -33,8 +33,17 @@ for (const mode of MODES) {
         deviceScaleFactor: 2,
         colorScheme: mode,
     });
-    // Chakra reads this key on boot via ColorModeScript
-    await ctx.addInitScript(`try { localStorage.setItem('chakra-ui-color-mode', '${mode}'); } catch (e) {}`);
+    // Seed BOTH keys. The Next baseline reads Chakra's `chakra-ui-color-mode`; the Astro
+    // port writes `color-mode` and only falls back to the Chakra key. Seeding just the old
+    // one would still "work" against the port — which is exactly the trap, because it
+    // would keep working right up until the fallback is removed, then silently produce
+    // light screenshots labelled dark.
+    await ctx.addInitScript(
+        `try {
+            localStorage.setItem('color-mode', '${mode}');
+            localStorage.setItem('chakra-ui-color-mode', '${mode}');
+        } catch (e) {}`
+    );
 
     for (const [name, path] of PAGES) {
         const page = await ctx.newPage();
@@ -70,7 +79,8 @@ for (const mode of MODES) {
 
         const applied = await page.evaluate(() => ({
             bodyClass: document.body.className,
-            dataTheme: document.body.dataset.theme || document.documentElement.dataset.theme || null,
+            dataTheme:
+                document.body.dataset.theme || document.documentElement.dataset.theme || null,
             bg: getComputedStyle(document.body).backgroundColor,
             images: document.images.length,
             imagesLoaded: Array.from(document.images).filter((i) => i.naturalWidth > 0).length,

@@ -1,17 +1,19 @@
 ---
 /**
- * TEMPORARY verification route. Renders every entry in every collection as bare content,
- * so the Phase 4 pipeline can be diffed against ../baseline/html/ before any page chrome
- * exists to confuse the comparison.
+ * TEMPORARY verification route. Renders every entry through the real layout and prose CSS
+ * so Phase 5 can be checked against ../baseline/ before the real routes exist.
  *
- * ⚠️ DELETE IN PHASE 6. These are real URLs and would otherwise ship. Phase 8's URL
- * inventory check would catch them, but do not rely on that.
+ * ⚠️ DELETE IN PHASE 6. These are real URLs and would otherwise ship.
  */
 import { getCollection, render, type CollectionKey } from 'astro:content';
-import ColorModeScript from '@/components/ColorModeScript.astro';
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import SeriesOverview from '@/components/SeriesOverview.astro';
+import TopicBadge from '@/components/TopicBadge.astro';
 import { mdxComponents } from '@/components/mdx/components';
+import { getSeriesData, postStats, postTitle } from '@/lib/posts';
+import { format, parseISO } from 'date-fns';
 
-import '../../../styles/global.css';
+import '../../../styles/article.css';
 
 export async function getStaticPaths() {
     const collections: CollectionKey[] = ['writings', 'archive', 'special'];
@@ -26,18 +28,99 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+const stats = postStats(entry);
+const series = entry.data.series
+    ? await getSeriesData(entry.collection as 'writings', entry.data.series)
+    : null;
 ---
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{entry.data.title}</title>
-        <ColorModeScript />
-    </head>
-    <body>
-        <main class="mx-auto max-w-[800px] p-8">
-            <Content components={mdxComponents} />
-        </main>
-    </body>
-</html>
+<DefaultLayout as="article" title={`${postTitle(entry)} | Daan Debie`} type="article">
+    <h1 class="post-heading">{postTitle(entry)}</h1>
+
+    <div class="byline">
+        <div class="byline-author">
+            <img src="/images/daan.png" alt="Daan Debie" width="24" height="24" class="avatar" />
+            <span class="text-sm"
+                >Daan Debie / {format(parseISO(entry.data.publishedAt), 'MMMM dd, yyyy')}</span
+            >
+        </div>
+        <span class="reading-time">{stats.readingTime}</span>
+    </div>
+
+    <div class="topics">
+        {entry.data.topics?.map((topic) => <TopicBadge topic={topic} />)}
+    </div>
+
+    {series && <SeriesOverview series={series} currentSlug={entry.id} />}
+
+    <div class="article">
+        <Content components={mdxComponents} />
+    </div>
+</DefaultLayout>
+
+<style>
+    .post-heading {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: var(--text-4xl);
+        line-height: 1.2;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (min-width: 48em) {
+        .post-heading {
+            font-size: var(--text-5xl);
+            line-height: 1;
+        }
+    }
+
+    .byline {
+        display: flex;
+        flex-direction: column;
+        align-items: initial;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .byline-author {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 9999px;
+        margin-right: 0.5rem;
+    }
+
+    .reading-time {
+        font-size: var(--text-sm);
+        min-width: 100px;
+        margin-top: 0.5rem;
+        color: #718096; /* gray.500 — hardcoded in both modes in the original */
+    }
+
+    @media (min-width: 30em) {
+        .byline {
+            flex-direction: row;
+            align-items: center;
+        }
+        .reading-time {
+            margin-top: 0;
+        }
+    }
+
+    .topics {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 0.25rem;
+    }
+
+    .article {
+        width: 100%;
+    }
+</style>
