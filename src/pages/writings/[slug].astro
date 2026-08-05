@@ -12,4 +12,4 @@ const { entry } = Astro.props;
 const series = entry.data.series ? await getSeriesData('writings', entry.data.series) : null;
 ---
 
-<ArticleLayout entry={entry} series={series} showTopics titleSize="xl" />
+<ArticleLayout entry={entry} series={series} showTopics />

@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import ArticleLayout from '@/layouts/ArticleLayout.astro';
 
-/** The simpler article page: no topics, no series, and a larger title than /writings. */
+/** The simpler article page: no topics, no series. */
 export async function getStaticPaths() {
     const posts = await getCollection('archive');
     return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
@@ -11,4 +11,4 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 ---
 
-<ArticleLayout entry={entry} titleSize="2xl" />
+<ArticleLayout entry={entry} />

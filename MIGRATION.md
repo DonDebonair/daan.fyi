@@ -25,10 +25,17 @@ These are the things that must not change. Check them at every phase boundary.
 | Heading title-casing + typographic substitutions byte-identical†                | content rendering                                |
 | **GFM is ON** — `_kitchensink` is expected to change; nothing else may          | decided, see Phase 0 finding 3                   |
 
-† Two recorded exceptions, both deliberate and both isolated to a single page:
-`_kitchensink` changes wholesale because GFM is now on (Phase 0 finding 3), and one
-heading on `archive/experimenting-with-arduino` is corrected by the trim fix (Phase 4
-finding 2). Every other page must still compare clean.
+† Three recorded exceptions, all deliberate:
+
+1. `_kitchensink` changes wholesale because GFM is now on (Phase 0 finding 3).
+2. One heading on `archive/experimenting-with-arduino` is corrected by the trim fix
+   (Phase 4 finding 2).
+3. Article titles on the 23 archive posts and `_kitchensink` shrink from Chakra
+   `size="2xl"` to `size="xl"`, normalising them onto the writings size (Phase 6
+   finding 3).
+
+Content and heading-id comparisons must still be clean everywhere; exception 3 is
+visual only and shows up in screenshots, not in the content diff.
 
 ### URL inventory — 61 pages + 6 generated files
 
@@ -694,11 +701,20 @@ pages verified against the baseline in both colour modes.
    `[topic].astro` catch-all instead, which is the only root-level dynamic route.
    Documented in that file.
 
-3. **The two article pages use different title sizes, and that is not a typo.**
-   `/writings/[slug]` uses Chakra `size="xl"`, `/archive/[slug]` uses `size="2xl"` — the
-   archive title really is bigger. Carried across as an explicit prop on
-   `ArticleLayout.astro`. Verified by computed style: 40.5px/48.6px versus 54px/54px at
-   the 18px root.
+3. **The two article pages used different title sizes — ✅ normalised, deliberately.**
+   `/writings/[slug]` used Chakra `size="xl"` and `/archive/[slug]` used `size="2xl"`, so
+   archive titles rendered larger. That was carried across faithfully at first, then
+   **normalised onto the writings size (`xl`) on request**. `ArticleLayout` no longer
+   takes a `titleSize` prop at all.
+
+    Verified by computed style at the 18px root: all three article routes now report
+    **40.5px / 48.6px**, where archive and `_kitchensink` previously reported 54px / 54px.
+
+    ⚠️ **This changes 24 pages** — 23 archive posts plus `_kitchensink` — and is the third
+    recorded exception to the byte-identical ground rule. Expect it in the Phase 8 diff.
+
+    Unchanged: `/` and `/about` keep `size="2xl"` for their page titles. They are not
+    article pages, and the request was specifically about writings versus archive.
 
 4. **Astro emits no 404 page unless you write one.** Next generated one automatically and
    wrapped it in the app layout — the Phase 0 capture has it, with NavBar and Footer.
