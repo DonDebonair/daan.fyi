@@ -89,7 +89,26 @@ export default defineConfig({
     trailingSlash: 'never',
     build: { format: 'file' },
 
-    integrations: [mdx(), sitemap()],
+    integrations: [
+        mdx(),
+        sitemap({
+            // `next-sitemap` skipped underscore-prefixed paths as internal, so
+            // `/_kitchensink` was never in the sitemap. It is a deliberately unlinked
+            // styling test page — publishing it to search engines would be a regression,
+            // not a bonus. Astro has no such rule, so the exclusion is explicit.
+            filter: (page) => !page.includes('/_kitchensink'),
+
+            // `changefreq: 'monthly'` was set in next-sitemap.config.js; `priority: 0.7`
+            // was its default and appeared on every URL in the baseline.
+            //
+            // `lastmod` is deliberately NOT set. next-sitemap stamped every URL with the
+            // build time, which is both meaningless (all 60 URLs shared one timestamp)
+            // and non-reproducible — the same reason the build-time `date` was dropped
+            // from /topics and /[topic] in Phase 6.
+            changefreq: 'monthly',
+            priority: 0.7,
+        }),
+    ],
 
     vite: { plugins: [tailwindcss()] },
 

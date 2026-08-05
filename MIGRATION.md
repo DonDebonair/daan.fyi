@@ -731,26 +731,96 @@ differences.
 
 ---
 
-## Phase 7 — Feeds, sitemap, redirects
+## Phase 7 — Feeds, sitemap, redirects ✅ DONE
 
-- [ ] `src/pages/feeds/feed.xml.ts` + `atom.xml.ts` + `feed.json.ts` — real endpoints,
-      not a `getStaticProps` side effect. **Keep the `feed` package**; `@astrojs/rss` is
-      RSS-2.0-only and you'd hand-roll Atom and JSON Feed otherwise.
-- [ ] Apply the Phase 1A decision for rendering MDX → HTML
-- [ ] Preserve the URL rewriting: `href="/#` → absolute, `href="/"` → absolute, `src="/"` → absolute
-- [ ] Preserve `string-strip-html` stripping of `script`/`style`
-- [ ] `@astrojs/sitemap` replacing `next-sitemap`; port the non-production
-      `Disallow: /` robots policy. ⚠️ Default output is **`sitemap-index.xml`** +
-      `sitemap-0.xml`, but the baseline serves **`sitemap.xml`** (an index) +
-      `sitemap-0.xml`, so `/sitemap.xml` would 404. `filenameBase` renames both files
-      together, so it cannot reproduce the pair exactly — decide between matching the
-      old URLs some other way and accepting the new ones (open decision 4).
-- [ ] `robots.txt` is no longer generated at all — `next-sitemap` produced it and is
-      gone. It must be written or generated in this phase, or the site ships without one
-- [ ] Feed `<link rel="alternate">` tags in `<head>` — all three (from `_document.tsx`)
-- [ ] Favicons + `site.webmanifest` links
-- [ ] **`vercel.json`** for the `/blog/:slug` → `/writings/:slug` 301. Astro's config
-      `redirects` emits meta-refresh HTML in a static build, not a real 301.
+- [x] `src/pages/feeds/{feed.xml,atom.xml,feed.json}.ts` — real endpoints over a shared,
+      memoised builder in `src/lib/feeds.ts`. All three formats emit 9 items.
+      **The `feed` package is kept**; `@astrojs/rss` is RSS-2.0-only
+- [x] Container API renders the MDX, per the Phase 1A decision. `SideNote` survives into
+      the feed (1 `<aside>` in `iam` and in `mental-health`, matching the baseline), zero
+      raw `<SideNote` leaks
+- [x] All three URL rewrites preserved — zero relative `href="/` or `src="/` remain
+- [x] `string-strip-html` still strips `script`/`style`, and moved to `dependencies`
+- [x] `@astrojs/sitemap` replaces `next-sitemap`; **60 URLs, exactly the baseline set**
+- [x] `robots.txt` regenerated, including the non-production `Disallow: /` policy
+- [x] Feed `<link rel="alternate">` tags — done in Phase 5's `BaseLayout`
+- [x] `vercel.json` for `/blog/:slug` → `/writings/:slug`. Vercel's `permanent: true`
+      emits **308**, matching Next's, so the Phase 0 finding is honoured
+
+### Fixed pre-existing bugs
+
+1. **Feed titles were double-title-cased.** `lib/feeds.tsx:54` called `makeTitle()` without
+   `TITLE_OPTIONS` on an already-cased string. Subscribers got `Aws Iam Demystified`;
+   they now get `AWS IAM Demystified`, matching the site.
+2. **The Atom `<icon>` pointed at a file that has never existed**
+   (`/favicons/banner.png`). Now `/favicons/favicon-32x32.png`. Note this field only ever
+   surfaces in Atom — RSS uses `<image>` and JSON Feed uses `icon`, both of which point at
+   the banner as before.
+
+### Findings
+
+1. **🐞 The sitemap was about to publish `/_kitchensink`.** `next-sitemap` skipped
+   underscore-prefixed paths as internal, so the styling test page was never listed.
+   Astro has no such rule, and its sitemap came out with 61 URLs against the baseline's 60. An explicit `filter` restores the exclusion — otherwise a deliberately unlinked
+   test page would have been handed to search engines.
+
+2. **⚠️ The build ran two different versions of `title` at once, and consolidating them
+   changed six headings.** `remark-capitalize` bundled its own `title@3.3.1` for
+   headings, while frontmatter titles used the root `title@3.5.3`. The port uses 3.5.3
+   for both.
+
+    | Heading                          | Baseline (3.3.1)               | Now (3.5.3)                    |             |
+    | -------------------------------- | ------------------------------ | ------------------------------ | ----------- |
+    | `writings/rss`                   | Running **Typescript** Modules | Running **TypeScript** Modules | ✅ better   |
+    | `archive/statserver-…`           | **Github**                     | **GitHub**                     | ✅ better   |
+    | `archive/virtphp-…`              | and **Php** Versions           | and **PHP** Versions           | ✅ better   |
+    | `archive/autoplaylistpoetry`     | Installation/**Usage**         | Installation/**usage**         | ↩︎ recovered |
+    | `archive/download-prohibition-…` | “**I**nternettax”              | “**i**nternettax”              | ↩︎ recovered |
+    | `writings/new`                   | Previously **on**…             | Previously **On**…             | ⚠️ accepted |
+
+    The two marked ↩︎ were recovered by adding `Usage` and `Internettax` to
+    `TITLE_OPTIONS.special`, which forces exact casing. **`Previously On…` is an accepted
+    change** — 3.5.3 capitalises the final word, which is standard title case, and it is
+    not reachable through `special`. Heading **ids are unchanged in all six cases**, so no
+    anchor breaks.
+
+3. **🔍 Heading ids were the wrong verification signal for this.** Slugs are lowercased,
+   so every one of the six casing changes above was invisible to the Phase 4 comparison,
+   which only compared ids. The comparison now checks heading **text** keyed by id.
+   Worth remembering for Phase 8: matching ids does not mean matching headings.
+
+4. **Feed dates move from local to UTC, deliberately.** `lib/feeds.tsx` used date-fns
+   `parseISO`, which resolves a date-only string to _local_ midnight — so `2023-07-23`
+   became `Sat, 22 Jul 2023 22:00:00 GMT` when built in CEST, and would differ again on
+   Vercel. `new Date()` on a date-only string is UTC by spec. Builds are now
+   timezone-independent, and match what production already emitted.
+   **Expect a few hours' difference against the local baseline in Phase 8.**
+
+5. **`robots.txt` locally now says allow, where the baseline said `Disallow: /`.**
+   `next-sitemap` ran as a separate postbuild process with `NODE_ENV` unset; Astro builds
+   with `NODE_ENV=production`. On Vercel the deciding variable is `VERCEL_ENV`, which is
+   correct in both cases: preview deploys get `Disallow: /`, production does not.
+   A local-only difference — do not chase it in Phase 8.
+
+6. **`/sitemap.xml` is emitted by hand.** `@astrojs/sitemap` names its index
+   `sitemap-index.xml` and `filenameBase` renames both files together, so it cannot
+   reproduce `sitemap.xml` + `sitemap-0.xml`. A small endpoint re-emits the index at the
+   original URL. `sitemap-index.xml` is still produced by the integration and left in
+   place — unreferenced, harmless, and not configurable away. **That is one extra
+   generated file versus the baseline.**
+
+7. **`lastmod` is deliberately dropped from the sitemap.** next-sitemap stamped every URL
+   with the build time — one identical, meaningless timestamp across all 60 URLs, and
+   non-reproducible. Same reasoning as the `/topics` date dropped in Phase 6.
+   `changefreq: monthly` and `priority: 0.7` are preserved.
+
+8. **Not fixed, and identical to the baseline:** in `writings/rss`, the inline code
+   examples `<script>` and `<style>` are mangled by `string-strip-html` — a post about
+   stripping those tags has them stripped out of its own feed entry. Verified byte-for-byte
+   identical in the baseline, so it is pre-existing and out of scope.
+
+**Exit criteria:** met — three feeds with 9 items each, sitemap matching the baseline URL
+set exactly, robots.txt restored, and the legacy redirect configured as a 308.
 
 ---
 
