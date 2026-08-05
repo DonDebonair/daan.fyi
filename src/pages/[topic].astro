@@ -43,7 +43,7 @@ const props = Astro.props as
 {
     props.kind === 'article' ? (
         // The styling test page reuses the archive article presentation.
-        <ArticleLayout entry={props.entry} titleSize="2xl" />
+        <ArticleLayout entry={props.entry} />
     ) : (
         <DefaultLayout as="article" title={`${props.topic} | Daan Debie`} type="article">
             <h1 class="heading heading-xl">

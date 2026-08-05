@@ -12,19 +12,18 @@ import '../styles/article.css';
 /**
  * Shared by `/writings/[slug]`, `/archive/[slug]` and `/_kitchensink`.
  *
- * The two variants differ in more than which blocks they render: the writings page uses
- * Chakra's Heading `size="xl"` for the title and the archive page uses `size="2xl"`.
- * That is not a typo in the original — the archive title really is larger — so it is
- * carried across as an explicit prop rather than normalised away.
+ * All three use the same title size. In the Chakra original they did not — writings used
+ * Heading `size="xl"` and archive `size="2xl"` — but that inconsistency was deliberately
+ * normalised onto the writings size during the port. See MIGRATION.md Phase 6, finding 3:
+ * it is an intentional change on 24 pages, not a porting slip.
  */
 interface Props {
     entry: Post;
     series?: SeriesData | null;
     showTopics?: boolean;
-    titleSize?: 'xl' | '2xl';
 }
 
-const { entry, series = null, showTopics = false, titleSize = 'xl' } = Astro.props;
+const { entry, series = null, showTopics = false } = Astro.props;
 
 const { Content } = await render(entry);
 const title = postTitle(entry);
@@ -36,7 +35,7 @@ const publishedISO = new Date(entry.data.publishedAt).toISOString();
 ---
 
 <DefaultLayout as="article" title={`${title} | Daan Debie`} type="article" date={publishedISO}>
-    <h1 class:list={['heading', `heading-${titleSize}`]}>{title}</h1>
+    <h1 class="heading heading-xl">{title}</h1>
 
     <div class="byline">
         <div class="byline-author">
