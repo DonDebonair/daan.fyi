@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 
 const OLD = '/Users/daan/code/baseline/feeds/feed.json';
-const NEW =
-    '/private/tmp/claude-501/-Users-daan-code-daan-fyi/8e4f4083-233f-4434-acf5-70a390b32a8b/scratchpad/spike/dist/feeds/feed.json';
+const NEW = '/Users/daan/code/daan.fyi/dist/feeds/feed.json';
 
 const oldItems = JSON.parse(fs.readFileSync(OLD, 'utf8')).items;
 const newItems = JSON.parse(fs.readFileSync(NEW, 'utf8')).items;
