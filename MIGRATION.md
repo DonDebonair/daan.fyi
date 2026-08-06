@@ -977,8 +977,41 @@ Prism's, even though the palettes were ported. That was accepted in Phase 1B.
       `.article` being a flex column, and `Astro.url.pathname` not being the canonical path
 - [x] `README.md` rewritten
 - [x] `tsconfig.json`, `.gitignore`, `.prettierignore` cleaned of Next-era entries
+- [x] Vercel deployment settings resolved — see below
 - [ ] **Deploy to a Vercel preview and verify against production** — needs you
 - [ ] **Merge, then watch Vercel analytics for 404s for a week** — needs you
+
+### Vercel: no adapter, but two routing settings were missing
+
+`@astrojs/vercel` is **not needed**. Astro's docs: _"you only need this adapter if you are
+using additional Vercel services (e.g. Vercel Web Analytics, Vercel Image Optimization).
+Otherwise, you do not need an adapter to deploy your static site."_ This site is fully
+static, and images are optimised at build time — routing them through Vercel's optimiser
+would re-process already-optimised WebP at request time and bill for it. Vercel's Astro
+framework preset builds and serves `dist/` unaided.
+
+Checking that, however, turned up a real gap in `vercel.json`:
+
+1. **🐞 `trailingSlash` was unset, which silently broke a ground rule.** Vercel's default
+   is `undefined`, and its docs are explicit: _"visiting a path with or without a trailing
+   slash will not redirect… both `/about` and `/about/` will serve the same content"_ —
+   and they call this _"not recommended because it could lead to search engines indexing
+   two different pages with duplicate content."_
+
+    Phase 0 recorded the opposite as an invariant: `/writings/rss/` **308s** to
+    `/writings/rss`. `trailingSlash: false` restores exactly that.
+
+2. **`cleanUrls` was unset, and it is what makes `build.format: 'file'` work.** The docs
+   attribute extensionless serving to this flag: _"a static file named `about.html` will
+   be served when visiting the `/about` path. Visiting `/about.html` will redirect to
+   `/about`"_ (308). Without it, every page would have had a second indexable URL at
+   `.html`, and possibly no extensionless URL at all.
+
+    It only touches `.html` — the 5 XML files, `robots.txt`, `feed.json`, fonts, images
+    and the four download files are unaffected.
+
+Neither can be tested locally: both are applied by Vercel's edge, not by a static file
+server. **The preview deploy must confirm all three redirects** (see below).
 
 ### ESLint is gone
 
