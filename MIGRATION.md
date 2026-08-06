@@ -378,8 +378,10 @@ mechanical; retrofitting them later is miserable.
 - [x] Inline blocking dark-mode script — `src/components/ColorModeScript.astro`. Verified
       to emit as a synchronous inline `<script>` in `<head>` **before** the stylesheet
       link, so `.dark` is set before first paint
-- [ ] Reconcile the Preflight/Chakra-reset delta against Phase 0 screenshots — **carried
-      to Phase 5**, it cannot be judged before real components exist
+- [x] Reconcile the Preflight/Chakra-reset delta — carried through Phase 5 and finally
+      done **properly in Phase 8**, by diffing the two resets declaration by declaration
+      rather than by eye. Nine properties were missing; the font-smoothing pair was
+      visibly changing dark-mode contrast. See Phase 8, fifth bug.
 
 ### ✅ Colour mode: follow the system preference (decided)
 
