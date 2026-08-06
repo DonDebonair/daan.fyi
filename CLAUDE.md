@@ -97,6 +97,13 @@ Prose styling is plain CSS in `src/styles/article.css`, using descendant selecto
 - `src/pages/robots.txt.ts` carries the non-production `Disallow: /` policy, keyed off `VERCEL_ENV || NODE_ENV`.
 - `vercel.json` holds the `/blog/:slug` → `/writings/:slug` redirect. Astro's config `redirects` would emit meta-refresh HTML in a static build, not a real 308.
 
+**No Vercel adapter.** `@astrojs/vercel` is only needed for SSR or for Vercel-specific services (Web Analytics, Vercel Image Optimization). This site is fully static and optimises images at build time, so the adapter would add nothing — and routing images through Vercel's optimiser would re-process already-optimised WebP at request time, at cost. Vercel's Astro framework preset builds and serves `dist/` on its own.
+
+`vercel.json` carries two routing settings that JSON comments can't explain in place:
+
+- **`trailingSlash: false`** — Vercel's default is `undefined`, which serves `/about` and `/about/` as **two 200s with no redirect**. The pre-migration site 308-redirected `/about/` → `/about`, and Vercel's own docs warn the default risks search engines indexing duplicate content. This restores the 308.
+- **`cleanUrls: true`** — `build.format: 'file'` emits `about.html`, and this is what serves it at `/about` while 308-redirecting `/about.html` → `/about`. Without it the extension form would be a second indexable URL for every page. It only affects `.html`; feeds, sitemaps and `robots.txt` keep their extensions.
+
 ## URLs
 
 `trailingSlash: 'never'` + `build.format: 'file'`. Canonical URLs carry **no trailing slash** and no extension.
