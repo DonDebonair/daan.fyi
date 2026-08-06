@@ -890,23 +890,56 @@ Every one was found by measuring where the two builds drifted apart.
    article byline were each 1rem short.
 
 After fixing all four, **six of the thirteen pages match the baseline height exactly**
-(home, writings-index, archive-index, topics-index, topic-page, about) at 0.5–2.8% pixel
-difference, and the article pages land within 12–108px on lengths of 5,000–16,000px.
+(home, writings-index, archive-index, topics-index, topic-page, about), and the article
+pages land within 12–108px on lengths of 5,000–16,000px.
+
+### 🐞 A fifth bug, found afterwards by looking at the site
+
+Those four fixes left a uniform 0.5–2.8% pixel difference on pages whose heights matched
+exactly. The diff table below originally wrote that off as "text antialiasing only". It
+**was** antialiasing — and it was a missing reset property, not noise.
+
+Chakra's CSSReset sets `-webkit-font-smoothing: antialiased` (plus
+`-moz-osx-font-smoothing: grayscale`) on `html`; Tailwind's Preflight does not. On macOS
+the browser default is _subpixel_ antialiasing, which renders light-on-dark text
+noticeably heavier — so dark mode came out visibly higher-contrast than the original.
+
+The full Preflight/Chakra delta was then reconciled declaration by declaration instead of
+by eye. `html` gained the two font-smoothing properties, `text-rendering: optimizeLegibility`,
+`-webkit-text-size-adjust: 100%` and `touch-action: manipulation`; `body` gained
+`position: relative`, `min-height: 100%`, `font-feature-settings: "kern"` and the 200ms
+`background-color` transition Chakra used to animate the colour-mode toggle.
+(`margin: 0` was already covered by Preflight's universal selector.)
+
+**Three pages became pixel-identical — 0.00%, not one differing pixel — in both modes**,
+and the rest collapsed to near-zero:
+
+| Page                                     | before   | after      |
+| ---------------------------------------- | -------- | ---------- |
+| `about`, `archive-index`, `topics-index` | 1.0–2.8% | **0.00%**  |
+| `topic-page`, `home`, `writings-index`   | 0.6–1.5% | 0.02–0.04% |
+| `post-sidenote`                          | 6.3%     | 4.3%       |
+| `post-sidenote-series`                   | 5.1%     | 3.4%       |
+| `post-code-titles`                       | 12.4%    | 10.8%      |
+
+The lesson worth keeping: a small but _uniform_ pixel difference across pages that
+otherwise match is a signal, not noise. Font smoothing does not change metrics, only
+rendering — so every layout and height check passed while the site still looked wrong.
 
 ### Screenshot diff — final state
 
 Every remaining difference is accounted for:
 
-| Page                   | Δheight  | diff%    | Why                                                                         |
-| ---------------------- | -------- | -------- | --------------------------------------------------------------------------- |
-| `kitchensink`          | **+680** | 17–22%   | GFM now renders tables, footnotes, task lists (decided in Phase 0)          |
-| `post-code-titles`     | −98      | 12–16%   | Shiki vs Prism token markup                                                 |
-| `post-images`          | −108     | 7–8%     | Shiki, plus WebP images at slightly different intrinsic sizes               |
-| `archive-post`         | −12      | 8.5%     | **the title-size normalisation** — verified visually as the only difference |
-| `post-sidenote`        | −72      | 6%       | Shiki                                                                       |
-| `post-line-highlight`  | +18      | 5–6%     | Shiki line-highlight bands                                                  |
-| `post-sidenote-series` | +6       | 5%       | Shiki                                                                       |
-| six index/topic pages  | **0**    | 0.5–2.8% | text antialiasing only                                                      |
+| Page                   | Δheight  | diff%          | Why                                                                         |
+| ---------------------- | -------- | -------------- | --------------------------------------------------------------------------- |
+| `kitchensink`          | **+680** | 17–22%         | GFM now renders tables, footnotes, task lists (decided in Phase 0)          |
+| `post-code-titles`     | −98      | 12–16%         | Shiki vs Prism token markup                                                 |
+| `post-images`          | −108     | 7–8%           | Shiki, plus WebP images at slightly different intrinsic sizes               |
+| `archive-post`         | −12      | 8.5%           | **the title-size normalisation** — verified visually as the only difference |
+| `post-sidenote`        | −72      | 6%             | Shiki                                                                       |
+| `post-line-highlight`  | +18      | 5–6%           | Shiki line-highlight bands                                                  |
+| `post-sidenote-series` | +6       | 5%             | Shiki                                                                       |
+| six index/topic pages  | **0**    | **0.00–0.04%** | three are pixel-identical after the font-smoothing fix below                |
 
 Article pages carry a 5–8% pixel difference because **syntax highlighting is a different
 engine**: Shiki's token boundaries and therefore its coloured spans do not line up with
