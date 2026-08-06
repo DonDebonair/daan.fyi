@@ -199,7 +199,7 @@ break in a minor release. Working spike at `astro@7.1.6`.
 
 **Decision:** Shiki with two custom themes. Keeping Prism is not needed.
 
-Working artifacts are committed at **[`spike/`](spike/)** — drop them straight into
+Working artifacts are committed at **[`tools/`](spike/)** — drop them straight into
 Phase 4. See [`spike/README.md`](spike/README.md) for where each file lands.
 
 - [x] `shiki/prism-default-light.json` — Prism default palette, ported scope by scope
@@ -393,7 +393,7 @@ not _always obey_.
 
 The script reads Chakra's old `chakra-ui-color-mode` key as a fallback, so visitors who
 already chose a mode keep it across the cutover. New writes go to `color-mode`.
-⚠️ `spike/tools/capture-screenshots.mjs` seeds the **old** key — update its
+⚠️ `tools/capture-screenshots.mjs` seeds the **old** key — update its
 `addInitScript` before the Phase 8 dark-mode capture, or every dark screenshot will
 silently come out light.
 
@@ -964,15 +964,54 @@ Prism's, even though the palettes were ported. That was accepted in Phase 1B.
 
 ---
 
-## Phase 9 — Cutover
+## Phase 9 — Cutover ✅ DONE (code complete; deploy is yours)
 
-- [ ] Delete `next.config.js`, `next-sitemap.config.js`, `pages/`, `patches/`,
-      `next-env.d.ts`
-- [ ] Prune `package.json` (~55 deps → ~12)
-- [ ] Rename the package from `with-typescript` (leftover from the Next starter)
-- [ ] Update `CLAUDE.md` — most of it describes the old pipeline
-- [ ] Deploy to a Vercel preview; verify against production with real DNS
-- [ ] Merge, then watch for 404s in Vercel analytics for a week
+- [x] Deleted `pages/`, `components/`, `layouts/`, `lib/`, `styles/`, `patches/`,
+      `next.config.js`, `next-sitemap.config.js`, `next-env.d.ts`
+- [x] Pruned `package.json`: **37 direct dependencies, down from 60**. 12 of the 29
+      runtime deps are the `typographic-*` plugins the plan explicitly kept, so the
+      non-typography footprint is 17
+- [x] Package already renamed from `with-typescript` in Phase 2
+- [x] `CLAUDE.md` rewritten for the new stack, front-loading the traps: the two
+      underscore rules, the `rehypeHeadingIds` ordering, the Shiki background rule,
+      `.article` being a flex column, and `Astro.url.pathname` not being the canonical path
+- [x] `README.md` rewritten
+- [x] `tsconfig.json`, `.gitignore`, `.prettierignore` cleaned of Next-era entries
+- [ ] **Deploy to a Vercel preview and verify against production** — needs you
+- [ ] **Merge, then watch Vercel analytics for 404s for a week** — needs you
+
+### ESLint is gone
+
+`eslint-config-next` was the entire configuration, and with no React, no JSX and no Next
+there was nothing left for it to check that `astro check` does not. Removed along with
+`@typescript-eslint/*`, `eslint-plugin-react` and `eslint-config-prettier` — six
+dependencies. `lint-staged` now runs Prettier only.
+
+If linting is wanted back, `eslint-plugin-astro` with a flat config is the modern route;
+it was not worth carrying a broken config forward to get there.
+
+### `spike/` is now `tools/`
+
+The spike directory had become a hazard: `spike/shiki/*.json` and
+`spike/plugins/transformer-code-title.mjs` were byte-identical duplicates of the live
+files in `src/`, so editing the wrong copy would have looked like it worked and changed
+nothing. The superseded artifacts (config, feed prototype, themes, transformer,
+screenshots) are deleted; the verification scripts are promoted to `tools/`, which is what
+they actually are.
+
+### Verification after the prune
+
+The pruned tree builds to **62 pages, byte-identical to the pre-prune build** once the
+hashed CSS filename is normalised — deleting the old app changed no output. `astro check`
+clean, content comparison unchanged, Prettier clean across the repo.
+
+### Known, accepted
+
+`npm audit` reports one high-severity advisory: `cross-spawn` via `clipboardy` via
+`title`. `clipboardy` is a dependency of the `title` package's **CLI**, which this site
+never invokes — `title` is used purely as a library. The same exposure existed in the
+Next tree. `npm audit fix --force` would downgrade `title` and re-break the heading
+casing, so it is deliberately not applied.
 
 ---
 

@@ -26,13 +26,13 @@ const tagsOf = (html) => {
     return counts;
 };
 
-console.log(`baseline items: ${oldItems.length}   spike items: ${newItems.length}\n`);
+console.log(`baseline items: ${oldItems.length}   candidate items: ${newItems.length}\n`);
 
 for (const n of newItems) {
     const slug = n.url.split('/').pop();
     const o = oldItems.find((x) => x.url.endsWith('/' + slug));
     if (!o) {
-        console.log(`${slug}: NOT IN BASELINE (spike subset)`);
+        console.log(`${slug}: NOT IN BASELINE (candidate subset)`);
         continue;
     }
     const ot = textOf(o.content_html);
@@ -44,7 +44,7 @@ for (const n of newItems) {
     console.log(
         `  title match:  ${o.title === n.title ? 'YES' : `NO\n    old: ${o.title}\n    new: ${n.title}`}`
     );
-    console.log(`  text words:   baseline ${ow}  spike ${nw}  (delta ${nw - ow})`);
+    console.log(`  text words:   baseline ${ow}  candidate ${nw}  (delta ${nw - ow})`);
 
     // Where does the text first diverge?
     if (ot !== nt) {
@@ -52,7 +52,7 @@ for (const n of newItems) {
         while (i < ot.length && i < nt.length && ot[i] === nt[i]) i++;
         console.log(`  first text divergence at char ${i} of ${ot.length}:`);
         console.log(`    baseline: ...${JSON.stringify(ot.slice(Math.max(0, i - 40), i + 60))}`);
-        console.log(`    spike:    ...${JSON.stringify(nt.slice(Math.max(0, i - 40), i + 60))}`);
+        console.log(`    candidate:...${JSON.stringify(nt.slice(Math.max(0, i - 40), i + 60))}`);
     } else {
         console.log('  text: IDENTICAL');
     }
@@ -62,6 +62,7 @@ for (const n of newItems) {
     const keys = [...new Set([...Object.keys(ot2), ...Object.keys(nt2)])].sort();
     const diffs = keys.filter((k) => (ot2[k] || 0) !== (nt2[k] || 0));
     console.log(`  tag count diffs: ${diffs.length ? '' : 'none'}`);
-    for (const k of diffs) console.log(`    <${k}>  baseline ${ot2[k] || 0}  spike ${nt2[k] || 0}`);
+    for (const k of diffs)
+        console.log(`    <${k}>  baseline ${ot2[k] || 0}  candidate ${nt2[k] || 0}`);
     console.log();
 }

@@ -33,8 +33,8 @@ import darkTheme from './src/shiki/night-owl-pink.json' with { type: 'json' };
  * is verified working in the build. `remark-unwrap-images`, `remark-textr` and
  * `rehype-autolink-headings` ship types built against a different unified/mdast release
  * than Astro's, so their `Transformer<Root, Root>` is nominally incompatible with
- * Astro's `RemarkPlugin`/`RehypePlugin`. The Chakra tree had the same problem and used
- * `@ts-ignore` in `lib/mdx.ts`.
+ * Astro's `RemarkPlugin`/`RehypePlugin`. The Chakra tree hit the same wall and used
+ * `@ts-ignore` for it.
  *
  * @type {any[]}
  */
@@ -120,28 +120,31 @@ export default defineConfig({
         processor: unified({
             // GFM stays at Astro's default (on) — decided in Phase 0, finding 3.
 
-            // SmartyPants is on by default and fights the remark-textr stack: the 1A
-            // spike produced en dashes where the baseline has em dashes, and curled
-            // quotes the baseline leaves straight. See MIGRATION.md, Phase 1A finding 2.
+            // SmartyPants is on by default and fights the remark-textr stack: it
+            // produces en dashes where the original has em dashes, and curls quotes the
+            // original leaves straight. See MIGRATION.md, Phase 1A finding 2.
             smartypants: false,
 
-            // Order matters and mirrors lib/mdx.ts exactly.
+            // Order is load-bearing and reproduces the original pipeline exactly:
+            // unwrap images, then title-case headings, then typographic substitutions.
             remarkPlugins,
             rehypePlugins,
         }),
 
         shikiConfig: {
-            // Hand-ported in the 1B spike: Prism's default palette and Night Owl with the
-            // three #FFA7C4 overrides. See spike/README.md for why `variable` is scoped
-            // narrowly.
+            // Hand-ported from Prism's default palette and Night Owl, with the three
+            // #FFA7C4 overrides. Each theme carries a `_comment` explaining why the
+            // `variable` scope is deliberately narrow; see MIGRATION.md, Phase 1B.
             themes: shikiThemes,
 
             // Prism accepted `apacheconf`; Shiki calls it `apache` and would otherwise
             // fall back to plaintext without warning.
             langAlias: { apacheconf: 'apache' },
 
-            // Emits --shiki-light / --shiki-dark per span instead of baking one theme in,
-            // which turns the whole light/dark mechanism into six lines of CSS.
+            // Emits --shiki-light / --shiki-dark per span instead of baking one theme
+            // in, which reduces the whole light/dark mechanism to a few CSS rules.
+            // ⚠️ Set the background on the block only, never on the spans — see
+            // src/styles/article.css.
             defaultColor: false,
 
             transformers: [transformerMetaHighlight(), transformerCodeTitle()],

@@ -5,19 +5,9 @@
 /.pnp
 .pnp.js
 
-# testing
-/coverage
-
 # astro
 dist/
 .astro/
-
-# next.js — remove with pages/ in Phase 9
-/.next/
-/out/
-
-# production
-/build
 
 # misc
 .DS_Store
@@ -29,6 +19,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -39,12 +30,3 @@ yarn-error.log*
 
 # Jetbrains stuff
 .idea/
-
-.eslintcache
-
-# Feeds
-public/feeds/*
-
-# Sitemap + robots
-public/sitemap*.xml
-public/robots.txt
