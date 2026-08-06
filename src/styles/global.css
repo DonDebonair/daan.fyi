@@ -208,18 +208,46 @@
 }
 
 @layer base {
+    /*
+     * The Chakra-reset / Tailwind-Preflight delta.
+     *
+     * Preflight is deliberately smaller than Chakra's CSSReset, and the gap is not just
+     * cosmetic. The font-smoothing pair is the one that shows: on macOS the browser
+     * default is subpixel antialiasing, which renders light-on-dark text noticeably
+     * heavier. Chakra switched it to grayscale antialiasing, which is why the old site
+     * reads as more subdued in dark mode. Preflight does not, so the text came out
+     * visibly higher-contrast.
+     *
+     * Worth noting the pixel-diff in Phase 8 *did* see this — as a uniform sub-3%
+     * difference on pages whose heights matched exactly — and it was written off as
+     * antialiasing noise. It was antialiasing, but not noise.
+     */
     html {
         /* 18px, not 16px — every rem in the design, including Tailwind's spacing
          * scale, is measured against this. Easy to miss and it changes everything. */
         font-size: 18px;
         scroll-behavior: smooth;
+
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        -webkit-text-size-adjust: 100%; /* stops iOS inflating text on rotate */
+        touch-action: manipulation; /* drops the 300ms tap delay */
     }
 
     body {
+        position: relative;
+        min-height: 100%;
         background-color: var(--ui-surface);
         color: var(--ui-text);
         font-family: var(--font-body);
         line-height: 1.5; /* Chakra lineHeights.base */
+        font-feature-settings: 'kern';
+
+        /* Chakra animated the background on colour-mode change
+         * (transition-duration-normal = 200ms). Without this the toggle snaps. */
+        transition-property: background-color;
+        transition-duration: 200ms;
     }
 
     h1,
