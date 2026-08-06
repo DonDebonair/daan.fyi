@@ -80,8 +80,11 @@ const publishedISO = new Date(entry.data.publishedAt).toISOString();
         align-items: center;
     }
 
+    /* Chakra <Text fontSize="sm" mb={0}> — mt from the baseStyle survives, mb is zeroed. */
     .byline-text {
         font-size: var(--text-sm);
+        margin-top: 0.5rem;
+        margin-bottom: 0;
     }
 
     .avatar {
@@ -114,7 +117,23 @@ const publishedISO = new Date(entry.data.publishedAt).toISOString();
         margin-bottom: 1rem; /* mb={4} */
     }
 
+    /*
+     * ⚠️ Flex column, not a plain block, and this is not cosmetic.
+     *
+     * In the Chakra version the rendered MDX elements were direct children of a
+     * `<Flex direction="column" align="flex-start">`, and **flex items do not collapse
+     * margins**. As a plain block container every adjacent pair of blocks collapses to
+     * max(mb, mt) instead of summing them, losing ~9px at every boundary — about 800px
+     * over a long article, which is exactly the height drift the screenshot diff showed.
+     *
+     * `align-items: flex-start` matches the original too; elements that must span the
+     * column (hr, pre, table, aside) set `width: 100%` themselves in article.css, which
+     * is precisely why the Chakra components did the same.
+     */
     .article {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         width: 100%;
     }
 </style>

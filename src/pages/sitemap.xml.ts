@@ -15,11 +15,12 @@ import { baseUrl } from '@/lib/config';
  * left in place: it is unreferenced and harmless, and suppressing it is not configurable.
  */
 export const GET: APIRoute = () => {
+    // No trailing newline: next-sitemap emitted none, and this way the file is
+    // byte-identical to the baseline.
     const body = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <sitemap><loc>${baseUrl}/sitemap-0.xml</loc></sitemap>
-</sitemapindex>
-`;
+</sitemapindex>`;
     return new Response(body, {
         headers: { 'Content-Type': 'application/xml; charset=utf-8' },
     });

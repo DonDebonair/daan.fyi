@@ -85,17 +85,22 @@ const links = [
         backdrop-filter: blur(8px) saturate(180%);
     }
 
+    /* Chakra IconButton size="sm": height and min-width of `sizes-8` (2rem), font-size
+     * `sm`, no padding. The box size sets the whole bar's height, so getting it wrong
+     * shifts every page down by a few pixels. */
     .icon-button {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        height: 2rem;
+        min-width: 2rem;
+        padding: 0;
         background: transparent;
         border: 0;
         cursor: pointer;
         color: inherit;
-        font-size: 1rem;
-        line-height: 1;
-        padding: 0.25rem;
+        font-size: var(--text-sm);
+        line-height: 1.2;
     }
 
     /* These are `:global` on purpose. The classes land on the <svg> rendered *inside*

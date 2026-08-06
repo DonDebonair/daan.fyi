@@ -16,7 +16,7 @@ const topics = Array.from(await getAllTopics(3));
         topics.map(([topic, posts]) => (
             <section class="topic-group">
                 <CustomLink href={`/${topic}`}>
-                    <h2 class="topic-title">{topic}</h2>
+                    <h2 class="heading topic-title">{topic}</h2>
                 </CustomLink>
                 <PostSummaryList posts={posts} />
             </section>
@@ -35,11 +35,7 @@ const topics = Array.from(await getAllTopics(3));
     }
 
     .topic-title {
-        font-family: var(--font-heading);
-        font-weight: 700;
         font-size: var(--text-lg);
-        line-height: 1.2;
-        margin-top: 0.5rem;
         margin-bottom: 0.75rem; /* mb={3} */
     }
 </style>
