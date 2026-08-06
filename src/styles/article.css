@@ -264,6 +264,7 @@
     font-size: var(--text-sm);
     border-top: 1px solid var(--ui-rule);
     margin-top: 2rem;
+    width: 100%; /* flex item — see the .article rule in ArticleLayout */
 }
 
 .article .footnotes h2 {
@@ -362,6 +363,12 @@
 }
 
 /* --------------------------------------------------------- code block title */
+
+/* The transformer wraps title + pre in this div so they stay adjacent siblings. It is
+ * the flex item, so it carries the full width rather than shrinking to the title's. */
+.article .code-title-wrapper {
+    width: 100%;
+}
 
 /* Emitted by src/plugins/transformer-code-title.mjs, matching the class the old
  * rehype-code-titles produced. */

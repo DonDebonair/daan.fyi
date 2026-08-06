@@ -1,8 +1,15 @@
 ---
 /**
  * Replaces `components/TopicBadge.tsx` — a Chakra <Badge variant="outline"
- * colorScheme="teal">. The outline variant is an inset box-shadow rather than a border,
- * so the badge does not shift by a pixel on hover when the background fills in.
+ * colorScheme="teal"> wrapped in a link. The outline variant is an inset box-shadow
+ * rather than a border, so the badge does not shift by a pixel on hover when the
+ * background fills in.
+ *
+ * ⚠️ The anchor wrapping the span is structural, not decoration. In the flex row of
+ * topics the **anchor** is the flex item, and it inherits the 18px/1.5 body line-height,
+ * so the row is 27px tall even though the badge itself is only 16px. Collapsing the two
+ * into a single element makes every post entry ~11px shorter — which is exactly what the
+ * screenshot diff caught across the home and writings listings.
  */
 interface Props {
     topic: string;
@@ -11,20 +18,25 @@ interface Props {
 const { topic } = Astro.props;
 ---
 
-<a href={`/${topic}`} class="topic-badge">#{topic}</a>
+<a href={`/${topic}`} class="topic-link"><span class="topic-badge">#{topic}</span></a>
 
 <style>
+    .topic-link {
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
     .topic-badge {
         display: inline-block;
+        vertical-align: middle;
+        white-space: nowrap;
         margin-right: 0.25rem; /* Chakra mr={1} */
         padding-inline: 0.25rem; /* Chakra px={1} */
         border-radius: 0.125rem; /* radii.sm */
         font-size: 0.6em;
         font-weight: 700;
         text-transform: uppercase;
-        white-space: nowrap;
-        vertical-align: middle;
-        text-decoration: none;
         color: var(--ui-badge-fg);
         box-shadow: inset 0 0 0 1px var(--ui-badge-fg);
     }

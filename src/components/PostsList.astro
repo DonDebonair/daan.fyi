@@ -20,7 +20,7 @@ const { posts, prefix = '/writings' } = Astro.props;
     posts.map((post) => (
         <div class="post">
             <CustomLink href={`${prefix}/${post.id}`}>
-                <h2 class="post-title">{postTitle(post)}</h2>
+                <h2 class="heading post-title">{postTitle(post)}</h2>
             </CustomLink>
             <div class="post-topics">
                 {post.data.topics?.map((topic) => (
@@ -40,12 +40,10 @@ const { posts, prefix = '/writings' } = Astro.props;
         flex-direction: column;
     }
 
+    /* `.heading` supplies family, weight and the 1.33/1.2 line-height; only the size and
+     * the mb={2} override belong here. */
     .post-title {
-        font-family: var(--font-heading);
-        font-weight: 700;
         font-size: var(--text-lg);
-        line-height: 1.2;
-        margin-top: 0.5rem;
         margin-bottom: 0.5rem;
     }
 

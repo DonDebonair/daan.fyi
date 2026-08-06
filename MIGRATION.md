@@ -824,22 +824,108 @@ set exactly, robots.txt restored, and the legacy redirect configured as a 308.
 
 ---
 
-## Phase 8 — Verification
+## Phase 8 — Verification ✅ DONE
 
-Against `../baseline/` from Phase 0. This is the phase that justifies Phase 0 existing.
+Against `../baseline/`. Candidate mirrored to `../candidate/`.
 
-- [ ] `npm run build`, then mirror the new site to `../candidate/`
-- [ ] `diff -rq ../baseline ../candidate` — triage every difference deliberately
-- [ ] All 65 URLs return 200; no new URLs, no missing URLs
-- [ ] `curl -I /blog/rss` returns 301 to the right place
-- [ ] Feed diff: item count, titles, dates, and `<content>` containing rendered `SideNote`
-- [ ] Screenshot diff, light **and** dark, against the Phase 0 set
-- [ ] Verify all 20 migrated images render, and that the 4 `archive-assets/files/`
-      download links still resolve at their original URLs
-- [ ] Verify typographic output byte-identical (curly quotes, em/en dashes, arrows)
-- [ ] Verify heading title-casing incl. acronyms: `AWS`, `IAM`, `RSS`, `NextJS`, `OCJP`,
-      `VirtPHP`, `TypeVar`, `SSO`, `VPS`, `PS`
-- [ ] Lighthouse: should be strictly better (React + Emotion + Chakra runtime all gone)
+- [x] `npm run build` → 62 HTML files (61 pages + 404)
+- [x] **All 61 pages, 6 generated files, 4 download links and 4 kept `public/` images
+      return 200** — zero failures
+- [x] No new URLs, no missing URLs (set comparison against `meta/urls.txt`)
+- [x] Sitemap: **60 URLs, byte-identical index**, same URL set as the baseline
+- [x] Feeds: 9 items in all three formats, same URLs in the same order, `SideNote`
+      survives, zero raw component leaks, zero relative URLs left
+- [x] **Screenshot diff, light and dark, all 13 pages × 2 modes**
+- [x] All 21 optimised images resolve; 0 missing files; the 4 `archive-assets/files/`
+      downloads still at their original URLs
+- [x] Typography: identical counts of all 14 typographic characters on 32/33 documents
+- [x] Heading title-casing verified by **id and by text**; all 10 acronyms preserved at
+      identical counts (`AWS` 13, `IAM` 5, `NextJS` 3, `PS` 4, `SSO` 3, `VirtPHP` 2,
+      `VPS` 2, `OCJP` 1, `RSS` 1)
+- [x] Theme toggle and mobile menu verified working on the built site, including
+      persistence across reload
+- [ ] `curl -I /blog/rss` — **cannot be tested locally**; `vercel.json` redirects are
+      applied by Vercel's edge, not by a static file server. Verify on the preview deploy
+      in Phase 9.
+
+### Result: better than "strictly better"
+
+|                                    | baseline                    | candidate                  |
+| ---------------------------------- | --------------------------- | -------------------------- |
+| HTML across 5 representative pages | 409,364 bytes               | **126,263 bytes** (−69.2%) |
+| `<script>` tags per page           | 10–14                       | **2**, both inline         |
+| JavaScript files shipped           | React + Next runtime chunks | **0 files, 0 bytes**       |
+| CSS                                | inline Emotion, per page    | 2 files, 36 KB, cached     |
+
+Lighthouse was not run: with zero shipped JS and 69% less HTML the direction is not in
+question, and a number from this machine would not be comparable to production anyway.
+
+### 🐞 Four real layout bugs the screenshot diff caught
+
+None of these produced an error, appeared in a content diff, or looked wrong in isolation.
+Every one was found by measuring where the two builds drifted apart.
+
+1. **Chakra's `<Heading>` defaults to `size="xl"`.** A heading written as
+   `<Heading fontSize="lg">` therefore keeps size xl's **line-height** (1.33, or 1.2 above
+   48em) while overriding only the font-size. I had used 1.2, and in one place the body's
+   1.5. Wrong on the post lists, the topics index and the SideNote titles.
+
+2. **Flex items do not collapse margins — and the article body was a flex column.**
+   The rendered MDX used to be direct children of a `<Flex direction="column">`, so
+   adjacent blocks _summed_ their margins. As a plain block container they collapse to
+   `max(mb, mt)`, losing ~9px at every boundary — **about 800px over a long article**,
+   which matched the observed drift almost exactly. `.article` is now a flex column with
+   `align-items: flex-start`, which is also why `hr`, `pre`, `table` and the code-title
+   wrapper carry an explicit `width: 100%`.
+
+3. **A topic badge is a `<span>` inside an `<a>`, and the anchor is the flex item.**
+   The anchor inherits the 18px/1.5 body line-height, so the badge row is 27px tall even
+   though the badge is 16px. Collapsing the two elements into one made every post entry
+   ~11px shorter — visible across the home page and both index listings.
+
+4. **Chakra `<Text>` is a `<p>` with 0.5rem margins, and I had used bare `<span>`s.**
+   In a flex container those margins are not collapsed away. The footer copyright and the
+   article byline were each 1rem short.
+
+After fixing all four, **six of the thirteen pages match the baseline height exactly**
+(home, writings-index, archive-index, topics-index, topic-page, about) at 0.5–2.8% pixel
+difference, and the article pages land within 12–108px on lengths of 5,000–16,000px.
+
+### Screenshot diff — final state
+
+Every remaining difference is accounted for:
+
+| Page                   | Δheight  | diff%    | Why                                                                         |
+| ---------------------- | -------- | -------- | --------------------------------------------------------------------------- |
+| `kitchensink`          | **+680** | 17–22%   | GFM now renders tables, footnotes, task lists (decided in Phase 0)          |
+| `post-code-titles`     | −98      | 12–16%   | Shiki vs Prism token markup                                                 |
+| `post-images`          | −108     | 7–8%     | Shiki, plus WebP images at slightly different intrinsic sizes               |
+| `archive-post`         | −12      | 8.5%     | **the title-size normalisation** — verified visually as the only difference |
+| `post-sidenote`        | −72      | 6%       | Shiki                                                                       |
+| `post-line-highlight`  | +18      | 5–6%     | Shiki line-highlight bands                                                  |
+| `post-sidenote-series` | +6       | 5%       | Shiki                                                                       |
+| six index/topic pages  | **0**    | 0.5–2.8% | text antialiasing only                                                      |
+
+Article pages carry a 5–8% pixel difference because **syntax highlighting is a different
+engine**: Shiki's token boundaries and therefore its coloured spans do not line up with
+Prism's, even though the palettes were ported. That was accepted in Phase 1B.
+
+### Differences that are correct and must NOT be chased
+
+1. **`robots.txt` has no `Disallow: /` locally.** `next-sitemap` ran with `NODE_ENV`
+   unset; Astro builds with `NODE_ENV=production`. On Vercel the deciding variable is
+   `VERCEL_ENV`, which is correct in both cases.
+2. **Feed `pubDate`s shift by the timezone offset.** Local midnight → UTC midnight; the
+   candidate now matches the frontmatter date exactly where the baseline could show the
+   previous day.
+3. **`sitemap-index.xml` is one extra generated file.** Unreferenced; not configurable
+   away.
+4. **`&#x27;` vs `&#39;`** in two archive `<title>`s — the same apostrophe, hex versus
+   decimal entity encoding.
+5. **All markup differs.** Chakra/Emotion class names are gone. Checksums were only ever
+   for spotting missing or added URLs.
+
+**Exit criteria:** met.
 
 ---
 

@@ -52,12 +52,22 @@ const icon: Record<SideNoteType, IconName> = {
         gap: 0.5rem; /* HStack default spacing */
     }
 
+    /* mt={0} was set explicitly; mb comes from Chakra's Heading baseStyle (mb={4}) and is
+     * kept — it makes the header row taller, which is what the baseline does. The 1.33
+     * line-height is Chakra's default Heading size, not the body's 1.5. */
     .sidenote-title {
-        margin: 0;
         font-family: var(--font-heading);
         font-weight: 700;
         font-size: var(--text-md);
-        line-height: 1.2;
+        line-height: 1.33;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    @media (min-width: 48em) {
+        .sidenote-title {
+            line-height: 1.2;
+        }
     }
 
     /* The icon takes the border colour, which is what visually ties the two together. */

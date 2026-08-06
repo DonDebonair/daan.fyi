@@ -36,15 +36,20 @@ const { posts, prefix = '/writings' } = Astro.props;
         justify-content: center;
     }
 
+    /* Both are Chakra <Text>, not <Heading> — body font, normal weight, inherited 1.5
+     * line-height — with mt={2}/mb={2} from the Text baseStyle and mb dropping to 0 at
+     * the `sm` breakpoint where the row goes horizontal. */
     .summary-title {
         font-size: var(--text-sm);
         font-weight: inherit;
         font-family: inherit;
+        margin-top: 0.5rem;
         margin-bottom: 0.5rem;
     }
 
     .summary-date {
         font-size: var(--text-xs);
+        margin-top: 0.5rem;
         margin-bottom: 0.5rem;
     }
 

@@ -248,16 +248,26 @@
      *
      * Sizes are responsive [base, md]; the md stop is 48em.
      */
+    /*
+     * ⚠️ The line-height lives on `.heading`, not on the size modifiers, and that is
+     * load-bearing. Chakra's <Heading> has `defaultProps: { size: 'xl' }`, so a heading
+     * written as `<Heading fontSize="lg">` still carries size xl's **line-height** while
+     * overriding only the font-size. Every such heading therefore renders at 1.33 (1.2
+     * above 48em) — not at 1.2, and not at the body's 1.5.
+     *
+     * Getting this wrong compressed every list and made whole pages several hundred
+     * pixels shorter than the baseline.
+     */
     .heading {
         font-family: var(--font-heading);
         font-weight: 700;
         margin-top: 0.5rem;
         margin-bottom: 1rem;
+        line-height: 1.33;
     }
 
     .heading-xl {
         font-size: var(--text-3xl);
-        line-height: 1.33;
     }
 
     .heading-2xl {
@@ -266,9 +276,11 @@
     }
 
     @media (min-width: 48em) {
+        .heading {
+            line-height: 1.2;
+        }
         .heading-xl {
             font-size: var(--text-4xl);
-            line-height: 1.2;
         }
         .heading-2xl {
             font-size: var(--text-5xl);
