@@ -12,21 +12,9 @@
     "exclude": [
         "dist",
         "node_modules",
-        ".next",
 
-        // The Next.js app being replaced. It is React + Chakra under `strict: false`
-        // and cannot compile under Astro's strict config; it stays readable on disk as
-        // the reference for Phases 3–7 and is deleted in Phase 9.
-        "pages",
-        "components",
-        "layouts",
-        "lib",
-        "styles",
-        "next-env.d.ts",
-        "next.config.js",
-        "next-sitemap.config.js",
-
-        // Phase 1 spike fragments — pieces of a throwaway project, not a compilable unit.
+        // Verification scripts, not part of the site build. They are plain Node scripts
+        // that run against a built site and a captured baseline.
         "spike"
     ]
 }

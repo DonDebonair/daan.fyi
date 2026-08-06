@@ -1,13 +1,12 @@
 .astro/
-.next/
-build/
-coverage/
 dist/
 node_modules/
-patches/
 
-# Content is deliberately not formatted. 30 of the 33 MDX files already fail
-# `prettier --check` on the pre-migration tree, so formatting has never really been
-# applied here — and "rendered output stays byte-identical" is a migration invariant, so
-# a stray `npm run prettier` must not rewrite prose mid-port. Revisit after Phase 8.
+# Content stays unformatted — decided, not deferred.
+#
+# 30 of the 33 MDX files already failed `prettier --check` before the migration, so
+# formatting was never actually applied here. Running it now would rewrite prose in ways
+# that can change rendered output (list indentation, hard breaks, table padding), against
+# no benefit. The Phase 8 comparison is the reason to leave it alone, not a reason to
+# revisit.
 src/content/
